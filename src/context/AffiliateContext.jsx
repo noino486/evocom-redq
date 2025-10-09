@@ -130,46 +130,110 @@ export const AffiliateProvider = ({ children }) => {
   // Mettre à jour la configuration (pour l'interface d'admin)
   const updateAffiliateConfig = async (newAffiliates, newPaymentPages) => {
     try {
-      // Mettre à jour les affiliés dans Supabase
-      const { error: affiliatesError } = await supabase
+      console.log('🔄 Début de la sauvegarde...')
+      
+      // Sauvegarder les affiliés
+      // Vérifier si l'enregistrement existe (sans .single() qui peut causer des erreurs)
+      const { data: existingAffiliates, error: checkAffiliatesError } = await supabase
         .from('affiliate_config')
-        .upsert({
-          config_key: 'affiliates',
-          config_value: newAffiliates,
-          updated_at: new Date().toISOString()
-        }, {
-          onConflict: 'config_key'
-        })
+        .select('id')
+        .eq('config_key', 'affiliates')
+        .maybeSingle()
 
-      if (affiliatesError) {
-        console.error('Erreur lors de la sauvegarde des affiliés:', affiliatesError)
-        throw affiliatesError
+      if (checkAffiliatesError) {
+        console.error('Erreur vérification affiliés:', checkAffiliatesError)
+        throw checkAffiliatesError
       }
 
-      // Mettre à jour les pages de paiement dans Supabase
-      const { error: pagesError } = await supabase
-        .from('affiliate_config')
-        .upsert({
-          config_key: 'defaultPages',
-          config_value: newPaymentPages,
-          updated_at: new Date().toISOString()
-        }, {
-          onConflict: 'config_key'
-        })
+      if (existingAffiliates) {
+        // UPDATE
+        console.log('📝 Mise à jour des affiliés existants...')
+        const { error: affiliatesError } = await supabase
+          .from('affiliate_config')
+          .update({
+            config_value: newAffiliates,
+            updated_at: new Date().toISOString()
+          })
+          .eq('config_key', 'affiliates')
 
-      if (pagesError) {
-        console.error('Erreur lors de la sauvegarde des pages:', pagesError)
-        throw pagesError
+        if (affiliatesError) {
+          console.error('Erreur UPDATE affiliés:', affiliatesError)
+          throw affiliatesError
+        }
+        console.log('✅ Affiliés mis à jour')
+      } else {
+        // INSERT
+        console.log('➕ Insertion de nouveaux affiliés...')
+        const { error: affiliatesError } = await supabase
+          .from('affiliate_config')
+          .insert({
+            config_key: 'affiliates',
+            config_value: newAffiliates,
+            updated_at: new Date().toISOString()
+          })
+
+        if (affiliatesError) {
+          console.error('Erreur INSERT affiliés:', affiliatesError)
+          throw affiliatesError
+        }
+        console.log('✅ Affiliés insérés')
+      }
+
+      // Sauvegarder les pages de paiement
+      const { data: existingPages, error: checkPagesError } = await supabase
+        .from('affiliate_config')
+        .select('id')
+        .eq('config_key', 'defaultPages')
+        .maybeSingle()
+
+      if (checkPagesError) {
+        console.error('Erreur vérification pages:', checkPagesError)
+        throw checkPagesError
+      }
+
+      if (existingPages) {
+        // UPDATE
+        console.log('📝 Mise à jour des pages existantes...')
+        const { error: pagesError } = await supabase
+          .from('affiliate_config')
+          .update({
+            config_value: newPaymentPages,
+            updated_at: new Date().toISOString()
+          })
+          .eq('config_key', 'defaultPages')
+
+        if (pagesError) {
+          console.error('Erreur UPDATE pages:', pagesError)
+          throw pagesError
+        }
+        console.log('✅ Pages mises à jour')
+      } else {
+        // INSERT
+        console.log('➕ Insertion de nouvelles pages...')
+        const { error: pagesError } = await supabase
+          .from('affiliate_config')
+          .insert({
+            config_key: 'defaultPages',
+            config_value: newPaymentPages,
+            updated_at: new Date().toISOString()
+          })
+
+        if (pagesError) {
+          console.error('Erreur INSERT pages:', pagesError)
+          throw pagesError
+        }
+        console.log('✅ Pages insérées')
       }
 
       // Mettre à jour le state local après sauvegarde réussie
       setAffiliates(newAffiliates)
       setPaymentPages(newPaymentPages)
       
-      console.log('Configuration sauvegardée avec succès dans Supabase')
+      console.log('✅ Configuration sauvegardée avec succès dans Supabase')
       return { success: true }
     } catch (error) {
-      console.error('Erreur lors de la mise à jour:', error)
+      console.error('❌ Erreur lors de la mise à jour:', error)
+      console.error('Détails:', error.message, error.details, error.hint)
       return { success: false, error }
     }
   }

@@ -88,14 +88,23 @@ const Admin = () => {
 
   const handleSave = async () => {
     try {
+      console.log('💾 Tentative de sauvegarde...')
+      console.log('Affiliés:', localAffiliates)
+      console.log('Pages:', localPaymentPages)
+      
       const result = await updateAffiliateConfig(localAffiliates, localPaymentPages)
+      
       if (result.success) {
         alert('✅ Configuration sauvegardée avec succès dans Supabase!')
+        console.log('✅ Sauvegarde réussie!')
       } else {
-        alert('❌ Erreur lors de la sauvegarde: ' + (result.error?.message || 'Erreur inconnue'))
+        const errorMsg = result.error?.message || result.error?.hint || result.error?.details || 'Erreur inconnue'
+        console.error('❌ Échec de la sauvegarde:', result.error)
+        alert('❌ Erreur lors de la sauvegarde: ' + errorMsg + '\n\nVérifiez la console pour plus de détails.')
       }
     } catch (error) {
-      alert('❌ Erreur lors de la sauvegarde: ' + error.message)
+      console.error('❌ Exception lors de la sauvegarde:', error)
+      alert('❌ Erreur lors de la sauvegarde: ' + error.message + '\n\nVérifiez la console pour plus de détails.')
     }
   }
 
