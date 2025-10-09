@@ -38,8 +38,8 @@ const Comparison = () => {
           {/* Header */}
           <div className="grid grid-cols-3 gap-4 p-6 bg-gradient-to-r from-primary via-secondary to-accent text-white">
             <div className="font-bold text-lg">Fonctionnalité</div>
-            <div className="font-bold text-lg text-center">Global Sourcing Pack</div>
-            <div className="font-bold text-lg text-center">Visionnaire Pack</div>
+            <div className="font-bold text-lg text-center">Pack Starter Fournisseurs</div>
+            <div className="font-bold text-lg text-center">Pack Global Business</div>
           </div>
 
           {/* Features rows */}

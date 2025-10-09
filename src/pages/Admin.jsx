@@ -274,7 +274,7 @@ const Admin = () => {
           <div className="grid md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Global Sourcing Pack (STFOUR)
+                Pack Starter Fournisseurs (STFOUR)
               </label>
               <input
                 type="url"
@@ -286,7 +286,7 @@ const Admin = () => {
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Visionnaire Pack (GLBNS)
+                Pack Global Business (GLBNS)
               </label>
               <input
                 type="url"
@@ -322,7 +322,7 @@ const Admin = () => {
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Lien Global Sourcing Pack
+                Lien Pack Starter Fournisseurs
               </label>
               <input
                 type="url"
@@ -334,7 +334,7 @@ const Admin = () => {
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Lien Visionnaire Pack
+                Lien Pack Global Business
               </label>
               <input
                 type="url"
@@ -377,7 +377,7 @@ const Admin = () => {
                 <div className="grid md:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Global Sourcing Pack
+                      Pack Starter Fournisseurs
                     </label>
                     <input
                       type="url"
@@ -393,7 +393,7 @@ const Admin = () => {
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Visionnaire Pack
+                      Pack Global Business
                     </label>
                     <input
                       type="url"

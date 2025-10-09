@@ -24,7 +24,7 @@ const DiscordCommunity = () => {
             </span>
           </h2>
           <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-            Avec le <span className="font-bold text-purple-600">Visionnaire Pack</span>, accédez à notre serveur Discord privé
+            Avec le <span className="font-bold text-purple-600">Pack Global Business</span>, accédez à notre serveur Discord privé
           </p>
         </motion.div>
 
@@ -104,7 +104,7 @@ const DiscordCommunity = () => {
                     Serveur Discord Privé
                   </h4>
                   <p className="text-gray-600 mb-2">
-                    Réservé aux membres du Visionnaire Pack
+                    Réservé aux membres du Pack Global Business
                   </p>
                   
                   {/* Statistiques */}
@@ -138,7 +138,7 @@ const DiscordCommunity = () => {
                 {/* Note */}
                 <div className="mt-6 pt-6 border-t border-gray-200">
                   <p className="text-sm text-gray-500 text-center">
-                    ✨ <span className="font-semibold">Accès inclus</span> avec le Visionnaire Pack
+                    ✨ <span className="font-semibold">Accès inclus</span> avec le Pack Global Business
                   </p>
                 </div>
               </div>

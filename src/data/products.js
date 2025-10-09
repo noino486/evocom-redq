@@ -3,20 +3,20 @@ import { FaGlobe, FaStar, FaClock, FaLightbulb, FaSync, FaGlobeAmericas, FaBulls
 export const products = [
   {
         id: 'STFOUR',
-    slug: 'global-sourcing-pack',
-    name: 'Global Sourcing Pack',
-    price: 29.99,
+    slug: 'pack-starter-fournisseurs',
+    name: 'Pack Starter Fournisseurs',
+    price: 28,
     popular: false,
     shortDescription: 'La base idéale pour commencer vos recherches.',
-    longDescription: `Le Global Sourcing Pack est votre passerelle vers le commerce international. Nous avons compilé pour vous une base de données exhaustive de fournisseurs internationaux couvrant plus de 50 secteurs d'activité différents.
+    longDescription: `Le Pack Starter Fournisseurs est votre passerelle vers le commerce international. Nous avons compilé pour vous une base de données exhaustive de fournisseurs internationaux couvrant plus de 50 secteurs d'activité différents.
 
 Que vous cherchiez à lancer votre boutique en ligne, à diversifier vos sources d'approvisionnement ou simplement à explorer de nouvelles opportunités commerciales, ce pack vous fait gagner des centaines d'heures de recherche.
 
 Chaque fournisseur a été présélectionné pour sa fiabilité, ses prix compétitifs et sa capacité à travailler avec des entreprises internationales. Vous recevez instantanément un fichier PDF complet avec toutes les coordonnées, les spécialités et les conditions de chaque fournisseur.`,
     images: [
-      'https://images.unsplash.com/photo-1557821552-17105176677c?w=800&q=80',
-      'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&q=80',
-      'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800&q=80'
+      '/1.jpg',
+      '/2.jpg',
+      '/3.jpg'
     ],
     features: [
       'Liste de fournisseurs internationaux dans 50+ secteurs',
@@ -43,12 +43,12 @@ Chaque fournisseur a été présélectionné pour sa fiabilité, ses prix compé
   },
   {
         id: 'GLBNS',
-    slug: 'visionnaire-pack',
-    name: 'Visionnaire Pack',
-    price: 39.99,
+    slug: 'pack-global-business',
+    name: 'Pack Global Business',
+    price: 38,
     popular: true,
     shortDescription: 'La solution complète pour aller plus loin.',
-    longDescription: `Le Visionnaire Pack est notre offre premium qui combine tout ce dont vous avez besoin pour réussir à l'international. En plus de tous les avantages du Global Sourcing Pack, vous obtenez un accès exclusif à nos guides pratiques et à notre communauté d'entrepreneurs.
+    longDescription: `Le Pack Global Business est notre offre premium qui combine tout ce dont vous avez besoin pour réussir à l'international. En plus de tous les avantages du Pack Starter Fournisseurs, vous obtenez un accès exclusif à nos guides pratiques et à notre communauté d'entrepreneurs.
 
 Le PDF Expatriation vous guide pas à pas dans votre projet de vie à l'étranger, avec des conseils pratiques sur les visas, la fiscalité, le logement et l'intégration dans plus de 20 pays populaires.
 
@@ -56,13 +56,13 @@ Le PDF Business Actif & Passif révèle des stratégies éprouvées pour créer 
 
 Enfin, notre Discord privé vous connecte à une communauté active d'entrepreneurs et d'expatriés qui partagent leurs expériences, leurs contacts et leurs opportunités.`,
     images: [
-      'https://images.unsplash.com/photo-1552664730-d307ca884978?w=800&q=80',
-      'https://images.unsplash.com/photo-1600880292203-757bb62b4baf?w=800&q=80',
-      'https://images.unsplash.com/photo-1559136555-9303baea8ebd?w=800&q=80',
-      'https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?w=800&q=80'
+      '/4.jpg',
+      '/5.jpg',
+      '/6.jpg',
+      '/7.jpg'
     ],
     features: [
-      'Inclut tout le Global Sourcing Pack',
+      'Inclut tout le Pack Starter Fournisseurs',
       'PDF Expatriation (guides pratiques pour partir à l\'étranger)',
       'PDF Business Actif & Passif (stratégies de diversification)',
       'Accès à notre Discord privé (entraide & réseau international)',

@@ -21,8 +21,8 @@ const Footer = () => {
           <div>
             <h4 className="text-lg font-semibold text-white mb-4">Produits</h4>
             <ul className="space-y-2 text-gray-400">
-              <li className="hover:text-white transition-colors cursor-pointer">Global Sourcing Pack - 29,99€</li>
-              <li className="hover:text-white transition-colors cursor-pointer">Visionnaire Pack - 39,99€</li>
+              <li className="hover:text-white transition-colors cursor-pointer">Pack Starter Fournisseurs - 28€</li>
+              <li className="hover:text-white transition-colors cursor-pointer">Pack Global Business - 38€</li>
             </ul>
           </div>
 

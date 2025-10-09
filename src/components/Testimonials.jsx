@@ -13,8 +13,8 @@ const Testimonials = () => {
       verified: true,
       avatar: 'https://i.pravatar.cc/150?img=1',
       title: 'Excellent investissement pour mon e-commerce',
-      text: 'Grâce au Global Sourcing Pack, j\'ai trouvé des fournisseurs uniques en Asie que je n\'aurais jamais trouvés seule. Le pack Visionnaire m\'a ensuite permis de structurer mon business. La communauté Discord est incroyable, on s\'entraide vraiment !',
-      productPurchased: 'Visionnaire Pack'
+      text: 'Grâce au Pack Starter Fournisseurs, j\'ai trouvé des fournisseurs uniques en Asie que je n\'aurais jamais trouvés seule. Le Pack Global Business m\'a ensuite permis de structurer mon business. La communauté Discord est incroyable, on s\'entraide vraiment !',
+      productPurchased: 'Pack Global Business'
     },
     {
       name: 'Julien Martin',
@@ -26,7 +26,7 @@ const Testimonials = () => {
       avatar: 'https://i.pravatar.cc/150?img=12',
       title: 'Une mine d\'informations !',
       text: 'Les PDF sont clairs, bien structurés et vont à l\'essentiel. J\'ai économisé des centaines d\'heures de recherche. Le Discord est parfait pour poser des questions et échanger avec d\'autres entrepreneurs qui sont dans la même démarche.',
-      productPurchased: 'Visionnaire Pack'
+      productPurchased: 'Pack Global Business'
     },
     {
       name: 'Sophie Rousseau',
@@ -37,8 +37,8 @@ const Testimonials = () => {
       verified: true,
       avatar: 'https://i.pravatar.cc/150?img=5',
       title: 'Parfait pour débuter à l\'international',
-      text: 'J\'hésitais à me lancer dans l\'import, mais le Global Sourcing Pack m\'a donné toutes les clés pour commencer. Les contacts sont vérifiés et réactifs. Excellent rapport qualité-prix !',
-      productPurchased: 'Global Sourcing Pack'
+      text: 'J\'hésitais à me lancer dans l\'import, mais le Pack Starter Fournisseurs m\'a donné toutes les clés pour commencer. Les contacts sont vérifiés et réactifs. Excellent rapport qualité-prix !',
+      productPurchased: 'Pack Starter Fournisseurs'
     },
     {
       name: 'Thomas Leroy',
@@ -49,8 +49,8 @@ const Testimonials = () => {
       verified: true,
       avatar: 'https://i.pravatar.cc/150?img=15',
       title: 'Idéal pour diversifier ses revenus',
-      text: 'Le PDF Business Actif & Passif du pack Visionnaire est une pépite. Des stratégies concrètes, testées et qui fonctionnent. J\'ai déjà mis en place 2 sources de revenus passifs grâce à ce guide.',
-      productPurchased: 'Visionnaire Pack'
+      text: 'Le PDF Business Actif & Passif du Pack Global Business est une pépite. Des stratégies concrètes, testées et qui fonctionnent. J\'ai déjà mis en place 2 sources de revenus passifs grâce à ce guide.',
+      productPurchased: 'Pack Global Business'
     },
     {
       name: 'Marie Lambert',
@@ -62,7 +62,7 @@ const Testimonials = () => {
       avatar: 'https://i.pravatar.cc/150?img=9',
       title: 'Très bon accompagnement',
       text: 'Les ressources sont complètes et le support est réactif. La communauté Discord est très active et bienveillante. Seul petit bémol : j\'aurais aimé plus de fournisseurs européens, mais c\'est un détail.',
-      productPurchased: 'Global Sourcing Pack'
+      productPurchased: 'Pack Starter Fournisseurs'
     },
     {
       name: 'Alexandre Petit',
@@ -74,7 +74,7 @@ const Testimonials = () => {
       avatar: 'https://i.pravatar.cc/150?img=13',
       title: 'Un vrai gain de temps',
       text: 'J\'ai lancé ma boutique Shopify en 3 semaines grâce aux fournisseurs du pack. Sans ce pack, j\'aurais mis des mois à trouver des contacts fiables. Je recommande à 100% !',
-      productPurchased: 'Global Sourcing Pack'
+      productPurchased: 'Pack Starter Fournisseurs'
     }
   ]
 

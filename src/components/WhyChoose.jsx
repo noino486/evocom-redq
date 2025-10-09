@@ -19,7 +19,7 @@ const WhyChoose = () => {
     {
       icon: FaLightbulb,
       title: 'Ressources exclusives',
-      description: 'Guides, stratégies, communauté (Visionnaire Pack)',
+      description: 'Guides, stratégies, communauté (Pack Global Business)',
       color: 'bg-gradient-to-br from-accent to-primary'
     },
     {
