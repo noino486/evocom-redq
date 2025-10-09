@@ -2,7 +2,7 @@ import React from 'react'
 import { Helmet } from 'react-helmet-async'
 
 const SEO = ({ 
-  title = 'Pack Starter Fournisseurs & Pack Global Business - Packs Digitaux Business',
+  title = 'Evo E-com | Liste fournisseurs internationaux',
   description = 'Liste fournisseurs internationaux, pack business expatriation, business actif passif - Démarrez votre business avec des outils concrets et immédiatement disponibles.',
   keywords = 'liste fournisseurs internationaux, pack business expatriation, business actif passif, sourcing e-commerce, idées de business 2025, fournisseurs du monde entier, guide business PDF, sourcing import export, communauté entrepreneur',
   ogImage = '/og-image.jpg',
