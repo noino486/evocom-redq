@@ -38,7 +38,7 @@ const ProductDetail = () => {
   }
 
   return (
-    <div className="min-h-screen pt-24 pb-20">
+    <div className="min-h-screen pt-24 pb-12">
       {/* Breadcrumbs */}
       <div className="max-w-7xl mx-auto px-4 mb-8">
         <div className="flex items-center gap-2 text-sm text-gray-600">

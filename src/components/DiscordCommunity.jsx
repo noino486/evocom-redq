@@ -5,7 +5,7 @@ import { FaDiscord } from 'react-icons/fa'
 
 const DiscordCommunity = () => {
   return (
-    <section className="py-20 px-4 bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50">
+    <section className="py-10 px-4 bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50">
       <div className="max-w-7xl mx-auto">
         <motion.div
           initial={{ opacity: 0, y: 30 }}

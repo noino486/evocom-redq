@@ -31,7 +31,7 @@ const Process = () => {
   ]
 
   return (
-    <section className="pt-8 pb-20 px-4">
+    <section className="pt-6 pb-10 px-4">
       <div className="max-w-6xl mx-auto">
         <motion.div
           initial={{ opacity: 0, y: 30 }}

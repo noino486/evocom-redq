@@ -9,7 +9,7 @@ const Products = () => {
   const { getPaymentLink, getCurrentAffiliateCode } = useAffiliate()
 
   return (
-    <section id="products" className="py-20 px-4">
+    <section id="products" className="py-10 px-4">
       <div className="max-w-7xl mx-auto">
         <motion.div
           initial={{ opacity: 0, y: 30 }}

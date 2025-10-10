@@ -9,7 +9,7 @@ const WhatsAppContact = () => {
   const whatsappLink = `https://wa.me/${whatsappNumber}?text=${whatsappMessage}`
 
   return (
-    <section className="py-12 bg-gradient-to-br from-green-50 via-white to-green-50">
+    <section className="py-8 bg-gradient-to-br from-green-50 via-white to-green-50">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Titre principal */}
         <div className="text-center mb-8">
