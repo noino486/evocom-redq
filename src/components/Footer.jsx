@@ -21,8 +21,16 @@ const Footer = () => {
           <div>
             <h4 className="text-lg font-semibold text-white mb-4">Produits</h4>
             <ul className="space-y-2 text-gray-400">
-              <li className="hover:text-white transition-colors cursor-pointer">Pack Starter Fournisseurs - 28€</li>
-              <li className="hover:text-white transition-colors cursor-pointer">Pack Global Business - 38€</li>
+              <li>
+                <Link to="/product/pack-starter-fournisseurs" className="hover:text-white transition-colors">
+                  Pack Starter Fournisseurs - 28€
+                </Link>
+              </li>
+              <li>
+                <Link to="/product/pack-global-business" className="hover:text-white transition-colors">
+                  Pack Global Business - 38€
+                </Link>
+              </li>
             </ul>
           </div>
 
@@ -46,9 +54,14 @@ const Footer = () => {
             © {new Date().getFullYear()} Global Sourcing & Visionnaire. Tous droits réservés.
           </p>
           <div className="flex items-center justify-center gap-4 mb-2">
-            <Link to="/mentions-legales" className="text-sm text-gray-500 hover:text-primary transition-colors">
+            <a 
+              href="https://duthdigital.notion.site/Conditions-g-n-rales-de-vente-d-utilisation-du-service-2618528bf9b080b1b9a1e264de3e3c6b?source=copy_link" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="text-sm text-gray-500 hover:text-primary transition-colors"
+            >
               Mentions légales
-            </Link>
+            </a>
           </div>
           <p className="text-sm text-gray-500 mt-2">
             Paiements sécurisés par <span className="text-primary font-semibold">Stripe</span>

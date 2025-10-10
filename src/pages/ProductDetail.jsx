@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { FaCreditCard, FaCheck, FaStar, FaChevronRight, FaHome, FaMinus, FaPlus } from 'react-icons/fa'
+import { FaCreditCard, FaCheck, FaStar, FaChevronRight, FaHome } from 'react-icons/fa'
 import { useAffiliate } from '../context/AffiliateContext'
 import { getProductBySlug, getRelatedProducts } from '../data/products'
 
@@ -13,7 +13,6 @@ const ProductDetail = () => {
   const [product, setProduct] = useState(null)
   const [relatedProducts, setRelatedProducts] = useState([])
   const [selectedImage, setSelectedImage] = useState(0)
-  const [quantity, setQuantity] = useState(1)
 
   useEffect(() => {
     const foundProduct = getProductBySlug(slug)
@@ -152,38 +151,8 @@ const ProductDetail = () => {
               </motion.div>
             )}
 
-            {/* Quantité et achat */}
+            {/* Achat */}
             <div className="bg-gradient-to-br from-purple-50/50 to-pink-50/50 backdrop-blur-sm rounded-xl p-6 mb-6 border border-primary/20">
-              <div className="mb-6">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-gray-700 font-semibold">Quantité:</span>
-                  <div className="flex items-center gap-3 bg-white/80 backdrop-blur-sm rounded-full border border-gray-300/50 px-3 py-2">
-                    <motion.button
-                      whileHover={{ scale: 1.1 }}
-                      whileTap={{ scale: 0.9 }}
-                      onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                      className="w-8 h-8 flex items-center justify-center hover:bg-primary/10 rounded-full transition-colors"
-                    >
-                      <FaMinus className="text-sm text-primary" />
-                    </motion.button>
-                    <span className="font-bold w-8 text-center text-primary">{quantity}</span>
-                    <motion.button
-                      whileHover={{ scale: 1.1 }}
-                      whileTap={{ scale: 0.9 }}
-                      onClick={() => setQuantity(quantity + 1)}
-                      className="w-8 h-8 flex items-center justify-center hover:bg-primary/10 rounded-full transition-colors"
-                    >
-                      <FaPlus className="text-sm text-primary" />
-                    </motion.button>
-                  </div>
-                </div>
-                {quantity > 1 && (
-                  <p className="text-sm text-gray-600 text-right">
-                    Prix unitaire: {product.price}€ × {quantity} = {(product.price * quantity).toFixed(2)}€
-                  </p>
-                )}
-              </div>
-
               <motion.button
                 onClick={handlePurchase}
                 whileHover={{ scale: 1.02 }}
@@ -191,7 +160,7 @@ const ProductDetail = () => {
                 className="w-full bg-gradient-to-r from-primary via-secondary to-accent text-white py-4 rounded-full font-bold text-lg hover:shadow-xl transition-all flex items-center justify-center gap-2 shadow-lg shine-effect glow-effect-hover"
               >
                 <FaCreditCard />
-                Acheter maintenant - {(product.price * quantity).toFixed(2)}€
+                Acheter maintenant - {product.price}€
               </motion.button>
 
               <div className="mt-4 flex items-center justify-center gap-6 text-sm text-gray-600">
