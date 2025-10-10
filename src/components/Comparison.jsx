@@ -6,7 +6,7 @@ const Comparison = () => {
   const features = [
     { name: 'Liste de fournisseurs', global: true, visionnaire: true },
     { name: 'Pack PDF Expatriation', global: false, visionnaire: true },
-    { name: 'Pack PDF Business (actif/passif)', global: false, visionnaire: true },
+    { name: 'Pack PDF Revenues actif passif', global: false, visionnaire: true },
     { name: 'Accès Discord privé', global: false, visionnaire: true },
   ]
 
@@ -38,7 +38,7 @@ const Comparison = () => {
           {/* Header */}
           <div className="grid grid-cols-3 gap-4 p-6 bg-gradient-to-r from-primary via-secondary to-accent text-white">
             <div className="font-bold text-lg">Fonctionnalité</div>
-            <div className="font-bold text-lg text-center">Pack Starter Fournisseurs</div>
+            <div className="font-bold text-lg text-center">Pack Global Sourcing</div>
             <div className="font-bold text-lg text-center">Pack Global Business</div>
           </div>
 
@@ -81,10 +81,10 @@ const Comparison = () => {
             >
               <div className="font-bold text-lg text-gray-900">Prix</div>
               <div className="text-center">
-                <span className="text-2xl font-bold text-primary">29,99 €</span>
+                <span className="text-2xl font-bold text-primary">29,90 €</span>
               </div>
               <div className="text-center">
-                <span className="text-2xl font-bold text-primary">39,99 €</span>
+                <span className="text-2xl font-bold text-primary">39,90 €</span>
               </div>
             </motion.div>
           </div>

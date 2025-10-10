@@ -60,8 +60,8 @@ public/config/affiliates.json
 ```
 
 ### Légende
-- **STFOUR** : Global Sourcing Pack (29.99€)
-- **GLBNS** : Visionnaire Pack (39.99€)
+- **STFOUR** : Global Sourcing Pack (29.90€)
+- **GLBNS** : Visionnaire Pack (39.90€)
 - **affiliates** : Liste des influenceurs et leurs liens personnalisés
 - **defaultPages** : Pages utilisées quand aucun code AF n'est présent
 
@@ -101,8 +101,8 @@ public/config/affiliates.json
 
 | ID Produit | Nom Commercial | Prix |
 |------------|----------------|------|
-| STFOUR | Global Sourcing Pack | 29.99€ TTC |
-| GLBNS | Visionnaire Pack | 39.99€ TTC |
+| STFOUR | Global Sourcing Pack | 29.90€ TTC |
+| GLBNS | Visionnaire Pack | 39.90€ TTC |
 
 ## 🧪 Test de la Configuration
 

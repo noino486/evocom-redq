@@ -32,7 +32,7 @@ const SEO = ({
       {/* Autres meta tags */}
       <meta name="robots" content="index, follow" />
       <meta name="language" content="French" />
-      <meta name="author" content="Pack Starter Fournisseurs & Pack Global Business" />
+      <meta name="author" content="Pack Global Sourcing & Pack Global Business" />
       
       {/* Favicon */}
       <link rel="icon" type="image/svg+xml" href="/logo.-evo-banniere.svg" />
@@ -42,20 +42,20 @@ const SEO = ({
         {JSON.stringify({
           "@context": "https://schema.org",
           "@type": "Product",
-          "name": "Pack Starter Fournisseurs & Pack Global Business",
+          "name": "Pack Global Sourcing & Pack Global Business",
           "description": description,
           "offers": [
             {
               "@type": "Offer",
-              "name": "Pack Starter Fournisseurs",
-              "price": "28",
+              "name": "Pack Global Sourcing",
+              "price": "29.90",
               "priceCurrency": "EUR",
               "availability": "https://schema.org/InStock"
             },
             {
               "@type": "Offer",
               "name": "Pack Global Business",
-              "price": "38",
+              "price": "39.90",
               "priceCurrency": "EUR",
               "availability": "https://schema.org/InStock"
             }

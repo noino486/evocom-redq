@@ -13,7 +13,7 @@ const Testimonials = () => {
       verified: true,
       avatar: 'https://i.pravatar.cc/150?img=1',
       title: 'Excellent investissement pour mon e-commerce',
-      text: 'Grâce au Pack Starter Fournisseurs, j\'ai trouvé des fournisseurs uniques en Asie que je n\'aurais jamais trouvés seule. Le Pack Global Business m\'a ensuite permis de structurer mon business. La communauté Discord est incroyable, on s\'entraide vraiment !',
+      text: 'Grâce au Pack Global Sourcing, j\'ai trouvé des fournisseurs uniques en Asie que je n\'aurais jamais trouvés seule. Le Pack Global Business m\'a ensuite permis de structurer mon business. La communauté Discord est incroyable, on s\'entraide vraiment !',
       productPurchased: 'Pack Global Business'
     },
     {
@@ -37,8 +37,8 @@ const Testimonials = () => {
       verified: true,
       avatar: 'https://i.pravatar.cc/150?img=5',
       title: 'Parfait pour débuter à l\'international',
-      text: 'J\'hésitais à me lancer dans l\'import, mais le Pack Starter Fournisseurs m\'a donné toutes les clés pour commencer. Les contacts sont vérifiés et réactifs. Excellent rapport qualité-prix !',
-      productPurchased: 'Pack Starter Fournisseurs'
+      text: 'J\'hésitais à me lancer dans l\'import, mais le Pack Global Sourcing m\'a donné toutes les clés pour commencer. Les contacts sont vérifiés et réactifs. Excellent rapport qualité-prix !',
+      productPurchased: 'Pack Global Sourcing'
     },
     {
       name: 'Thomas Leroy',
@@ -62,7 +62,7 @@ const Testimonials = () => {
       avatar: 'https://i.pravatar.cc/150?img=9',
       title: 'Très bon accompagnement',
       text: 'Les ressources sont complètes et le support est réactif. La communauté Discord est très active et bienveillante. Seul petit bémol : j\'aurais aimé plus de fournisseurs européens, mais c\'est un détail.',
-      productPurchased: 'Pack Starter Fournisseurs'
+      productPurchased: 'Pack Global Sourcing'
     },
     {
       name: 'Alexandre Petit',
@@ -74,7 +74,7 @@ const Testimonials = () => {
       avatar: 'https://i.pravatar.cc/150?img=13',
       title: 'Un vrai gain de temps',
       text: 'J\'ai lancé ma boutique Shopify en 3 semaines grâce aux fournisseurs du pack. Sans ce pack, j\'aurais mis des mois à trouver des contacts fiables. Je recommande à 100% !',
-      productPurchased: 'Pack Starter Fournisseurs'
+      productPurchased: 'Pack Global Sourcing'
     }
   ]
 

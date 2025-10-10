@@ -283,7 +283,7 @@ const Admin = () => {
           <div className="grid md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Pack Starter Fournisseurs (STFOUR)
+                Pack Global Sourcing (STFOUR)
               </label>
               <input
                 type="url"
@@ -331,7 +331,7 @@ const Admin = () => {
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Lien Pack Starter Fournisseurs
+                Lien Pack Global Sourcing
               </label>
               <input
                 type="url"
@@ -386,7 +386,7 @@ const Admin = () => {
                 <div className="grid md:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Pack Starter Fournisseurs
+                      Pack Global Sourcing
                     </label>
                     <input
                       type="url"

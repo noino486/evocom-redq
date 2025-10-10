@@ -130,10 +130,6 @@ const Products = () => {
               <FaCheck className="text-2xl text-green-600" />
               <span className="text-gray-700 font-medium">Accès Instantané</span>
             </div>
-            <div className="flex items-center gap-2">
-              <FaCheck className="text-2xl text-green-600" />
-              <span className="text-gray-700 font-medium">Garantie Satisfait ou Remboursé</span>
-            </div>
           </div>
         </motion.div>
       </div>

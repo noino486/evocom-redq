@@ -4,11 +4,11 @@ export const products = [
   {
         id: 'STFOUR',
     slug: 'pack-starter-fournisseurs',
-    name: 'Pack Starter Fournisseurs',
-    price: 28,
+    name: 'Pack Global Sourcing',
+    price: 29.90,
     popular: false,
     shortDescription: 'La base idéale pour commencer vos recherches.',
-    longDescription: `Le Pack Starter Fournisseurs est votre passerelle vers le commerce international. Nous avons compilé pour vous une base de données exhaustive de fournisseurs internationaux couvrant plus de 50 secteurs d'activité différents.
+    longDescription: `Le Pack Global Sourcing est votre passerelle vers le commerce international. Nous avons compilé pour vous une base de données exhaustive de fournisseurs internationaux couvrant plus de 50 secteurs d'activité différents.
 
 Que vous cherchiez à lancer votre boutique en ligne, à diversifier vos sources d'approvisionnement ou simplement à explorer de nouvelles opportunités commerciales, ce pack vous fait gagner des centaines d'heures de recherche.
 
@@ -23,7 +23,6 @@ Chaque fournisseur a été présélectionné pour sa fiabilité, ses prix compé
       'Accès immédiat par mail après achat',
       'Simple, clair et exploitable tout de suite',
       'Coordonnées complètes et vérifiées',
-      'Fichier PDF téléchargeable',
       'Mises à jour gratuites pendant 6 mois'
     ],
     benefits: [
@@ -45,10 +44,10 @@ Chaque fournisseur a été présélectionné pour sa fiabilité, ses prix compé
         id: 'GLBNS',
     slug: 'pack-global-business',
     name: 'Pack Global Business',
-    price: 38,
+    price: 39.90,
     popular: true,
     shortDescription: 'La solution complète pour aller plus loin.',
-    longDescription: `Le Pack Global Business est notre offre premium qui combine tout ce dont vous avez besoin pour réussir à l'international. En plus de tous les avantages du Pack Starter Fournisseurs, vous obtenez un accès exclusif à nos guides pratiques et à notre communauté d'entrepreneurs.
+    longDescription: `Le Pack Global Business est notre offre premium qui combine tout ce dont vous avez besoin pour réussir à l'international. En plus de tous les avantages du Pack Global Sourcing, vous obtenez un accès exclusif à nos guides pratiques et à notre communauté d'entrepreneurs.
 
 Le PDF Expatriation vous guide pas à pas dans votre projet de vie à l'étranger, avec des conseils pratiques sur les visas, la fiscalité, le logement et l'intégration dans plus de 20 pays populaires.
 
@@ -62,7 +61,7 @@ Enfin, notre Discord privé vous connecte à une communauté active d'entreprene
       '/7.jpg'
     ],
     features: [
-      'Inclut tout le Pack Starter Fournisseurs',
+      'Inclut tout le Pack Global Sourcing',
       'PDF Expatriation (guides pratiques pour partir à l\'étranger)',
       'PDF Revenues Actif & Passif (stratégies de diversification)',
       'Accès à notre Discord privé (entraide & réseau international)',
@@ -77,7 +76,7 @@ Enfin, notre Discord privé vous connecte à une communauté active d'entreprene
     includes: [
       { icon: FaFileAlt, text: '3 PDF premium (400+ pages)' },
       { icon: FaDiscord, text: 'Accès Discord VIP à vie' },
-      { icon: FaUsers, text: 'Communauté de 500+ membres' },
+      { icon: FaUsers, text: 'Communauté soudée' },
       { icon: FaBook, text: 'Ressources mises à jour mensuellement' }
     ],
       icon: FaStar,

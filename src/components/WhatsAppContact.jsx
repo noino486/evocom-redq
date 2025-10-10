@@ -103,10 +103,6 @@ const WhatsAppContact = () => {
                       <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
                       <span>En ligne</span>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <span className="font-semibold text-gray-900">500+</span>
-                      <span>clients satisfaits</span>
-                    </div>
                   </div>
                 </div>
               </div>

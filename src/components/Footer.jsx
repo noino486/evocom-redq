@@ -23,12 +23,12 @@ const Footer = () => {
             <ul className="space-y-2 text-gray-400">
               <li>
                 <Link to="/product/pack-starter-fournisseurs" className="hover:text-white transition-colors">
-                  Pack Starter Fournisseurs - 28€
+                  Pack Global Sourcing - 29,90€
                 </Link>
               </li>
               <li>
                 <Link to="/product/pack-global-business" className="hover:text-white transition-colors">
-                  Pack Global Business - 38€
+                  Pack Global Business - 39,90€
                 </Link>
               </li>
             </ul>
