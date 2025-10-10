@@ -18,8 +18,8 @@ const Home = () => {
       <WhyChoose />
       <Process />
       <WhatsAppContact />
-      <Testimonials />
       <DiscordCommunity />
+      <Testimonials />
       <FOMO />
     </>
   )
