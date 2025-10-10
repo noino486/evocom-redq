@@ -137,20 +137,6 @@ const ProductDetail = () => {
               {product.shortDescription}
             </p>
 
-            {/* Badge influenceur actif */}
-            {getCurrentAffiliateCode() && (
-              <motion.div
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-lg p-3 mb-6 flex items-center gap-2"
-              >
-                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                <span className="text-sm font-medium text-green-800">
-                  Code partenaire actif : <span className="font-bold">{getCurrentAffiliateCode()}</span>
-                </span>
-              </motion.div>
-            )}
-
             {/* Achat */}
             <div className="bg-gradient-to-br from-purple-50/50 to-pink-50/50 backdrop-blur-sm rounded-xl p-6 mb-6 border border-primary/20">
               <motion.button
