@@ -52,7 +52,7 @@ Chaque fournisseur a été présélectionné pour sa fiabilité, ses prix compé
 
 Le PDF Expatriation vous guide pas à pas dans votre projet de vie à l'étranger, avec des conseils pratiques sur les visas, la fiscalité, le logement et l'intégration dans plus de 20 pays populaires.
 
-Le PDF Business Actif & Passif révèle des stratégies éprouvées pour créer des sources de revenus multiples, que ce soit par le e-commerce, l'investissement, ou d'autres business models scalables.
+Le PDF Revenues Actif & Passif révèle des stratégies éprouvées pour créer des sources de revenus multiples, que ce soit par le e-commerce, l'investissement, ou d'autres business models scalables.
 
 Enfin, notre Discord privé vous connecte à une communauté active d'entrepreneurs et d'expatriés qui partagent leurs expériences, leurs contacts et leurs opportunités.`,
     images: [
@@ -64,7 +64,7 @@ Enfin, notre Discord privé vous connecte à une communauté active d'entreprene
     features: [
       'Inclut tout le Pack Starter Fournisseurs',
       'PDF Expatriation (guides pratiques pour partir à l\'étranger)',
-      'PDF Business Actif & Passif (stratégies de diversification)',
+      'PDF Revenues Actif & Passif (stratégies de diversification)',
       'Accès à notre Discord privé (entraide & réseau international)',
       'Support prioritaire par email',
       'Webinaires mensuels exclusifs'

@@ -49,7 +49,7 @@ const Testimonials = () => {
       verified: true,
       avatar: 'https://i.pravatar.cc/150?img=15',
       title: 'Idéal pour diversifier ses revenus',
-      text: 'Le PDF Business Actif & Passif du Pack Global Business est une pépite. Des stratégies concrètes, testées et qui fonctionnent. J\'ai déjà mis en place 2 sources de revenus passifs grâce à ce guide.',
+      text: 'Le PDF Revenues Actif & Passif du Pack Global Business est une pépite. Des stratégies concrètes, testées et qui fonctionnent. J\'ai déjà mis en place 2 sources de revenus passifs grâce à ce guide.',
       productPurchased: 'Pack Global Business'
     },
     {

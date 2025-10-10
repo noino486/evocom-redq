@@ -41,7 +41,7 @@ const Process = () => {
           className="text-center mb-16"
         >
           <h2 className="text-4xl md:text-5xl font-bold mb-4 text-gray-900">
-            Comment Ça Marche ?
+            Comment Ça Marche&nbsp;?
           </h2>
           <p className="text-xl text-gray-600 mb-8">
             Un processus simple en 4 étapes
