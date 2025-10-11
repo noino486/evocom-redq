@@ -69,7 +69,13 @@ const Products = () => {
                         <div className="flex-shrink-0 w-6 h-6 rounded-full bg-green-100 flex items-center justify-center mt-0.5">
                           <FaCheck className="text-green-600 text-xs" />
                         </div>
-                        <span className="text-gray-700">{feature}</span>
+                        <span className="text-gray-700">
+                          {feature === 'Inclut tout le Pack Global Sourcing' ? (
+                            <span className="font-bold text-accent">{feature}</span>
+                          ) : (
+                            feature
+                          )}
+                        </span>
                       </div>
                     ))}
                   </div>

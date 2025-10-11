@@ -76,7 +76,7 @@ const Hero = () => {
               { 
                 icon: FaGlobe, 
                 title: 'Portée Internationale', 
-                description: 'Accédez à des fournisseurs dans 50+ secteurs',
+                description: 'Accédez à des fournisseurs dans +20 secteurs',
                 color: 'bg-gradient-to-br from-primary to-secondary'
               },
               { 

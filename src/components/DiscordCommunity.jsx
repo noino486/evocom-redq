@@ -107,7 +107,7 @@ const DiscordCommunity = () => {
                   {/* Note */}
                   <div className="mt-6 pt-6 border-t border-gray-200">
                     <p className="text-xl text-gray-700 text-center font-medium">
-                      ✨ <span className="font-bold text-accent">Accès inclus</span> avec le Pack Global Business
+                      ✨ <span className="font-bold text-accent">ACCÈS INCLUS</span> avec le Pack Global Business
                     </p>
                   </div>
                 </div>

@@ -240,7 +240,13 @@ const ProductDetail = () => {
                     <div className="flex-shrink-0 w-6 h-6 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center mt-1">
                       <FaCheck className="text-white text-xs" />
                     </div>
-                    <span className="text-gray-700">{feature}</span>
+                    <span className="text-gray-700">
+                      {feature === 'Inclut tout le Pack Global Sourcing' ? (
+                        <span className="font-bold text-accent">{feature}</span>
+                      ) : (
+                        feature
+                      )}
+                    </span>
                   </motion.div>
                 ))}
               </div>

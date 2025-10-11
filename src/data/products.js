@@ -8,7 +8,7 @@ export const products = [
     price: 29.90,
     popular: false,
     shortDescription: 'La base idéale pour commencer vos recherches.',
-    longDescription: `Le Pack Global Sourcing est votre passerelle vers le commerce international. Nous avons compilé pour vous une base de données exhaustive de fournisseurs internationaux couvrant plus de 50 secteurs d'activité différents.
+    longDescription: `Le Pack Global Sourcing est votre passerelle vers le commerce international. Nous avons compilé pour vous une base de données exhaustive de fournisseurs internationaux couvrant plus de +20 secteurs d'activité différents.
 
 Que vous cherchiez à lancer votre boutique en ligne, à diversifier vos sources d'approvisionnement ou simplement à explorer de nouvelles opportunités commerciales, ce pack vous fait gagner des centaines d'heures de recherche.
 
@@ -19,7 +19,7 @@ Chaque fournisseur a été présélectionné pour sa fiabilité, ses prix compé
       '/3.jpg'
     ],
     features: [
-      'Liste de fournisseurs internationaux dans 20+ secteurs',
+      'Liste de fournisseurs internationaux dans +20 secteurs',
       'Accès immédiat par mail après achat',
       'Simple, clair et exploitable tout de suite',
       'Coordonnées complètes et vérifiées',
@@ -48,7 +48,7 @@ Chaque fournisseur a été présélectionné pour sa fiabilité, ses prix compé
     shortDescription: 'La solution complète pour aller plus loin.',
     longDescription: `Le Pack Global Business est notre offre premium qui combine tout ce dont vous avez besoin pour réussir à l'international. En plus de tous les avantages du Pack Global Sourcing, vous obtenez un accès exclusif à nos guides pratiques et à notre communauté d'entrepreneurs.
 
-Le PDF Expatriation vous guide pas à pas dans votre projet de vie à l'étranger, avec des conseils pratiques sur les visas, la fiscalité, le logement et l'intégration dans plus de 20 pays populaires.
+Le PDF Expatriation vous guide pas à pas dans votre projet de vie à l'étranger, avec des conseils pratiques sur les visas, la fiscalité, le logement et l'intégration dans plus de +20 pays populaires.
 
 Le PDF Revenues Actif & Passif révèle des stratégies éprouvées pour créer des sources de revenus multiples, que ce soit par le e-commerce, l'investissement, ou d'autres business models scalables.
 
@@ -61,16 +61,16 @@ Enfin, notre Discord privé vous connecte à une communauté active d'entreprene
     ],
     features: [
       'Inclut tout le Pack Global Sourcing',
-      'PDF Expatriation (guides pratiques pour partir à l\'étranger)',
+      'PDF Expatriation (Guides Pratiques pour Partir à l\'Étranger)',
       'PDF Revenues Actif & Passif (stratégies de diversification)',
-      'Accès à notre Discord privé (entraide & réseau international)',
+      'Accès à Notre Discord Privé (Entraide & Réseau International)',
       'Support prioritaire par email',
       'Webinaires mensuels exclusifs'
     ],
     benefits: [
       { icon: FaGlobeAmericas, text: 'Développement Global (Sourcing + Stratégie + Communauté)' },
-      { icon: FaBullseye, text: 'Accompagnement concret (de l\'idée à la mise en pratique)' },
-      { icon: FaHandshake, text: 'Networking (échanger avec d\'autres entrepreneurs et expatriés)' }
+      { icon: FaBullseye, text: 'Outil clé en main pour lancer votre projet facilement' },
+      { icon: FaHandshake, text: 'Networking (Échanger avec d\'Autres Entrepreneurs et Expatriés)' }
     ],
     includes: [
       { icon: FaFileAlt, text: '+50 PDF premium ( + 1000 pages)' },

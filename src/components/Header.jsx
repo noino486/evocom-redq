@@ -51,6 +51,7 @@ const Header = () => {
     { name: 'Accueil', id: 'hero' },
     { name: 'Produits', id: 'products' },
     { name: 'Témoignages', id: 'testimonials' },
+    { name: 'Connexion', url: 'https://packs.evoecom.com/login', external: true },
     { name: 'Contact', id: 'footer' }
   ]
 
@@ -77,13 +78,25 @@ const Header = () => {
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-8">
             {navLinks.map((link) => (
-              <button
-                key={link.id}
-                onClick={() => handleNavigation(link.id)}
-                className="text-gray-700 hover:text-primary font-medium transition-colors duration-200"
-              >
-                {link.name}
-              </button>
+              link.external ? (
+                <a
+                  key={link.name}
+                  href={link.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-gray-700 hover:text-primary font-medium transition-colors duration-200"
+                >
+                  {link.name}
+                </a>
+              ) : (
+                <button
+                  key={link.id}
+                  onClick={() => handleNavigation(link.id)}
+                  className="text-gray-700 hover:text-primary font-medium transition-colors duration-200"
+                >
+                  {link.name}
+                </button>
+              )
             ))}
 
             <button
@@ -110,13 +123,25 @@ const Header = () => {
           <div className="md:hidden pb-4 animate-slide-up">
             <div className="flex flex-col space-y-3">
               {navLinks.map((link) => (
-                <button
-                  key={link.id}
-                  onClick={() => handleNavigation(link.id)}
-                  className="text-gray-700 hover:text-primary font-medium text-left py-2 transition-colors duration-200"
-                >
-                  {link.name}
-                </button>
+                link.external ? (
+                  <a
+                    key={link.name}
+                    href={link.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-gray-700 hover:text-primary font-medium text-left py-2 transition-colors duration-200"
+                  >
+                    {link.name}
+                  </a>
+                ) : (
+                  <button
+                    key={link.id}
+                    onClick={() => handleNavigation(link.id)}
+                    className="text-gray-700 hover:text-primary font-medium text-left py-2 transition-colors duration-200"
+                  >
+                    {link.name}
+                  </button>
+                )
               ))}
               <button
                 onClick={() => handleNavigation('products')}
