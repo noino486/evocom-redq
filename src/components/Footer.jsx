@@ -1,5 +1,5 @@
 import React from 'react'
-import { FaEnvelope, FaDiscord } from 'react-icons/fa'
+import { FaEnvelope } from 'react-icons/fa'
 import { Link } from 'react-router-dom'
 
 const Footer = () => {
@@ -37,13 +37,9 @@ const Footer = () => {
           <div>
             <h4 className="text-lg font-semibold text-white mb-4">Contact</h4>
             <div className="space-y-3">
-              <a href="mailto:contact@example.com" className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors">
+              <a href="mailto:contact@evoecom.com" className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors">
                 <FaEnvelope />
-                <span>contact@example.com</span>
-              </a>
-              <a href="#" className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors">
-                <FaDiscord />
-                <span>Rejoindre le Discord</span>
+                <span>contact@evoecom.com</span>
               </a>
             </div>
           </div>

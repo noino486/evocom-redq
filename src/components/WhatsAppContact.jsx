@@ -4,7 +4,7 @@ import { FaWhatsapp } from 'react-icons/fa'
 
 const WhatsAppContact = () => {
   // Numéro WhatsApp (format international sans + ni espaces)
-  const whatsappNumber = '33123456789' // Remplacez par votre numéro
+  const whatsappNumber = '33756968108'
   const whatsappMessage = encodeURIComponent('Bonjour, je souhaite obtenir plus d\'informations sur vos packs digitaux.')
   const whatsappLink = `https://wa.me/${whatsappNumber}?text=${whatsappMessage}`
 
