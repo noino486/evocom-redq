@@ -151,7 +151,7 @@ const ProductDetail = () => {
             </p>
 
             {/* Achat */}
-            <div className="bg-gradient-to-br from-purple-50/50 to-pink-50/50 backdrop-blur-sm rounded-xl p-6 mb-6 border border-primary/20">
+            <div className="bg-gradient-to-br from-blue-50/50 to-pink-50/50 backdrop-blur-sm rounded-xl p-6 mb-6 border border-primary/20">
               <motion.button
                 onClick={handlePurchase}
                 whileHover={{ scale: 1.02 }}
@@ -175,7 +175,7 @@ const ProductDetail = () => {
             </div>
 
             {/* Ce qui est inclus */}
-            <div className="bg-gradient-to-br from-purple-50/50 to-pink-50/50 backdrop-blur-sm rounded-xl p-6 mb-6 border border-primary/20">
+            <div className="bg-gradient-to-br from-blue-50/50 to-pink-50/50 backdrop-blur-sm rounded-xl p-6 mb-6 border border-primary/20">
               <h3 className="font-bold text-gray-900 text-lg mb-4">Ce qui est inclus :</h3>
               <div className="grid grid-cols-2 gap-3">
                 {product.includes.map((item, index) => {
@@ -237,7 +237,7 @@ const ProductDetail = () => {
                     transition={{ delay: index * 0.05 }}
                     className="flex items-start gap-3"
                   >
-                    <div className="flex-shrink-0 w-6 h-6 rounded-full bg-gradient-to-br from-green-400 to-green-600 flex items-center justify-center mt-1">
+                    <div className="flex-shrink-0 w-6 h-6 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center mt-1">
                       <FaCheck className="text-white text-xs" />
                     </div>
                     <span className="text-gray-700">{feature}</span>
@@ -257,7 +257,7 @@ const ProductDetail = () => {
                       initial={{ opacity: 0, x: -10 }}
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: index * 0.1 }}
-                      className="flex items-start gap-3 p-4 bg-gradient-to-r from-purple-50/50 to-pink-50/50 rounded-lg border border-primary/10 hover:border-primary/30 transition-colors"
+                      className="flex items-start gap-3 p-4 bg-gradient-to-r from-blue-50/50 to-pink-50/50 rounded-lg border border-primary/10 hover:border-primary/30 transition-colors"
                     >
                       <BenefitIcon className="text-2xl text-primary mt-1" />
                       <span className="text-gray-700 text-lg">{benefit.text}</span>

@@ -75,7 +75,7 @@ const Products = () => {
                   </div>
                 </div>
 
-                <div className="mb-6 p-5 bg-gradient-to-br from-purple-50/50 to-pink-50/50 rounded-xl border border-primary/20">
+                <div className="mb-6 p-5 bg-gradient-to-br from-blue-50/50 to-pink-50/50 rounded-xl border border-primary/20">
                   <h4 className="text-lg font-semibold mb-3 text-gray-900">Bénéfices :</h4>
                   <div className="space-y-3">
                     {product.benefits.map((benefit, i) => {
@@ -121,7 +121,7 @@ const Products = () => {
           transition={{ delay: 0.4, duration: 0.6 }}
           className="mt-16 text-center"
         >
-          <div className="inline-flex flex-wrap items-center justify-center gap-8 bg-gradient-to-br from-purple-50/50 to-pink-50/50 rounded-2xl px-8 py-6 border border-primary/20">
+          <div className="inline-flex flex-wrap items-center justify-center gap-8 bg-gradient-to-br from-blue-50/50 to-pink-50/50 rounded-2xl px-8 py-6 border border-primary/20">
             <div className="flex items-center gap-2">
               <FaCheck className="text-2xl text-green-600" />
               <span className="text-gray-700 font-medium">Paiement 100% Sécurisé</span>
