@@ -55,7 +55,7 @@ const Footer = () => {
 
         <div className="border-t border-gray-800 pt-8 text-center">
           <p className="text-gray-400 mb-2">
-            © {new Date().getFullYear()} Global Sourcing & Visionnaire. Tous droits réservés.
+            © 2025 EVO E-com. Tous droits réservés.
           </p>
           <div className="flex items-center justify-center gap-4 mb-2">
             <a 

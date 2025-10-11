@@ -6,7 +6,7 @@ const WhyChoose = () => {
   const reasons = [
     {
       icon: FaGlobe,
-      title: 'Portée internationale',
+      title: 'Portée Internationale',
       description: 'Accès à des Fournisseurs du Monde Entier',
       color: 'bg-gradient-to-br from-primary to-secondary'
     },

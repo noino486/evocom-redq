@@ -73,7 +73,7 @@ Enfin, notre Discord privé vous connecte à une communauté active d'entreprene
       { icon: FaHandshake, text: 'Networking (Échanger avec d\'Autres Entrepreneurs et Expatriés)' }
     ],
     includes: [
-      { icon: FaFileAlt, text: '+50 PDF premium ( + 1000 pages)' },
+      { icon: FaFileAlt, text: '+50 PDF Premium (+ 1000 pages)' },
       { icon: FaDiscord, text: 'Accès Discord VIP à vie' },
       { icon: FaUsers, text: 'Communauté Active' },
       { icon: FaBook, text: 'Ressources mises à jour mensuellement' }
