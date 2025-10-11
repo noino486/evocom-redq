@@ -35,7 +35,7 @@ const SEO = ({
       <meta name="author" content="Pack Global Sourcing & Pack Global Business" />
       
       {/* Favicon */}
-      <link rel="icon" type="image/svg+xml" href="/logo.-evo-banniere.svg" />
+      <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
       
       {/* Structured Data / Schema.org pour le SEO */}
       <script type="application/ld+json">
