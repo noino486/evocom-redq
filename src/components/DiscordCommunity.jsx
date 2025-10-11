@@ -15,7 +15,7 @@ const DiscordCommunity = () => {
           className="text-center mb-12"
         >
           <h2 className="text-4xl md:text-5xl font-bold mb-4 text-gray-900">
-            Le lancement de notre communauté
+            Lancement de notre communauté
             <span className="block text-transparent bg-clip-text bg-gradient-to-r from-primary to-accent mt-2">
               Discord Exclusive
             </span>

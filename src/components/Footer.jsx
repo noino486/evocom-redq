@@ -9,7 +9,7 @@ const Footer = () => {
         <div className="grid md:grid-cols-4 gap-8 mb-8">
           <div className="md:col-span-2">
             <img 
-              src="/logo.-evo-banniere.svg" 
+              src="/logo.-evo-banniere-footer.svg" 
               alt="Logo" 
               className="h-10 w-auto mb-4"
             />
