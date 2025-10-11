@@ -28,7 +28,7 @@ const Hero = () => {
             </h1>
 
             <p className="text-lg md:text-xl text-gray-600 mb-8 leading-relaxed">
-              Gagnez du temps, explorez des opportunités mondiales et démarrez votre business 
+              Gagnez du temps, explorez des Opportunités Mondiales et démarrez votre business 
               avec des outils concrets et immédiatement disponibles.
             </p>
 

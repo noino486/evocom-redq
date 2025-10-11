@@ -28,12 +28,11 @@ Chaque fournisseur a été présélectionné pour sa fiabilité, ses prix compé
     benefits: [
       { icon: FaClock, text: 'Gain de temps (plus besoin de chercher des contacts)' },
       { icon: FaLightbulb, text: 'Inspiration (trouvez des idées rapidement)' },
-      { icon: FaSync, text: 'Polyvalence (adapté E-Commerce, Import, Business Local)' }
+      { icon: FaSync, text: 'Polyvalence (Adapté E-Commerce, Import, Business Local)' }
     ],
     includes: [
-      { icon: FaFileAlt, text: 'PDF de 150+ pages' },
-      { icon: FaGlobeAmericas, text: 'Fournisseurs à l\'International' },
-      { icon: FaDownload, text: 'Téléchargement instantané' }
+      { icon: FaFileAlt, text: 'PDF de 1000+ pages' },
+      { icon: FaGlobeAmericas, text: 'Fournisseurs à l\'International' }
     ],
       icon: FaGlobe,
       color: 'bg-primary',

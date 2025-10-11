@@ -7,7 +7,7 @@ const WhyChoose = () => {
     {
       icon: FaGlobe,
       title: 'Portée internationale',
-      description: 'Accès à des fournisseurs du monde entier',
+      description: 'Accès à des Fournisseurs du Monde Entier',
       color: 'bg-gradient-to-br from-primary to-secondary'
     },
     {

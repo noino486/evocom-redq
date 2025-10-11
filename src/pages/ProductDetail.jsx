@@ -46,7 +46,20 @@ const ProductDetail = () => {
             <FaHome /> Accueil
           </Link>
           <FaChevronRight className="text-xs" />
-          <Link to="/#products" className="hover:text-primary transition-colors">
+          <Link 
+            to="/#products" 
+            className="hover:text-primary transition-colors"
+            onClick={(e) => {
+              e.preventDefault()
+              navigate('/')
+              setTimeout(() => {
+                const element = document.getElementById('products')
+                if (element) {
+                  element.scrollIntoView({ behavior: 'smooth' })
+                }
+              }, 100)
+            }}
+          >
             Produits
           </Link>
           <FaChevronRight className="text-xs" />
