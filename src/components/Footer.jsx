@@ -1,5 +1,5 @@
 import React from 'react'
-import { FaEnvelope } from 'react-icons/fa'
+import { FaEnvelope, FaPhone, FaMapMarkerAlt } from 'react-icons/fa'
 import { Link } from 'react-router-dom'
 
 const Footer = () => {
@@ -37,6 +37,14 @@ const Footer = () => {
           <div>
             <h4 className="text-lg font-semibold text-white mb-4">Contact</h4>
             <div className="space-y-3">
+              <div className="flex items-start gap-2 text-gray-400">
+                <FaMapMarkerAlt className="mt-1" />
+                <span>200 RUE DE LA CROIX NIVERT<br />75015 PARIS</span>
+              </div>
+              <a href="tel:+33756968108" className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors">
+                <FaPhone />
+                <span>+33 7 56 96 81 08</span>
+              </a>
               <a href="mailto:contact@evoecom.com" className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors">
                 <FaEnvelope />
                 <span>contact@evoecom.com</span>
@@ -60,7 +68,7 @@ const Footer = () => {
             </a>
           </div>
           <p className="text-sm text-gray-500 mt-2">
-            Paiements sécurisés par <span className="text-primary font-semibold">ThriveCart</span>
+            Paiements sécurisés par <span className="text-secondary font-semibold">ThriveCart</span>
           </p>
         </div>
       </div>
