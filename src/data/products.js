@@ -19,7 +19,7 @@ Chaque fournisseur a été présélectionné pour sa fiabilité, ses prix compé
       '/3.jpg'
     ],
     features: [
-      'Liste de fournisseurs internationaux dans 50+ secteurs',
+      'Liste de fournisseurs internationaux dans 20+ secteurs',
       'Accès immédiat par mail après achat',
       'Simple, clair et exploitable tout de suite',
       'Coordonnées complètes et vérifiées',
@@ -28,11 +28,11 @@ Chaque fournisseur a été présélectionné pour sa fiabilité, ses prix compé
     benefits: [
       { icon: FaClock, text: 'Gain de temps (plus besoin de chercher des contacts)' },
       { icon: FaLightbulb, text: 'Inspiration (trouvez des idées rapidement)' },
-      { icon: FaSync, text: 'Polyvalence (adapté e-commerce, import, business local)' }
+      { icon: FaSync, text: 'Polyvalence (adapté E-Commerce, Import, Business Local)' }
     ],
     includes: [
       { icon: FaFileAlt, text: 'PDF de 150+ pages' },
-      { icon: FaGlobeAmericas, text: 'Fournisseurs de 30+ pays' },
+      { icon: FaGlobeAmericas, text: 'Fournisseurs à l\'International' },
       { icon: FaDownload, text: 'Téléchargement instantané' }
     ],
       icon: FaGlobe,
@@ -69,14 +69,14 @@ Enfin, notre Discord privé vous connecte à une communauté active d'entreprene
       'Webinaires mensuels exclusifs'
     ],
     benefits: [
-      { icon: FaGlobeAmericas, text: 'Développement global (sourcing + stratégie + communauté)' },
+      { icon: FaGlobeAmericas, text: 'Développement Global (Sourcing + Stratégie + Communauté)' },
       { icon: FaBullseye, text: 'Accompagnement concret (de l\'idée à la mise en pratique)' },
       { icon: FaHandshake, text: 'Networking (échanger avec d\'autres entrepreneurs et expatriés)' }
     ],
     includes: [
-      { icon: FaFileAlt, text: '3 PDF premium (400+ pages)' },
+      { icon: FaFileAlt, text: '+50 PDF premium ( + 1000 pages)' },
       { icon: FaDiscord, text: 'Accès Discord VIP à vie' },
-      { icon: FaUsers, text: 'Communauté soudée' },
+      { icon: FaUsers, text: 'Communauté Active' },
       { icon: FaBook, text: 'Ressources mises à jour mensuellement' }
     ],
       icon: FaStar,

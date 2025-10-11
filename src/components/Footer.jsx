@@ -64,7 +64,7 @@ const Footer = () => {
             </a>
           </div>
           <p className="text-sm text-gray-500 mt-2">
-            Paiements sécurisés par <span className="text-primary font-semibold">Stripe</span>
+            Paiements sécurisés par <span className="text-primary font-semibold">ThriveCart</span>
           </p>
         </div>
       </div>
