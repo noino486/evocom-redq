@@ -59,7 +59,7 @@ const Products = () => {
 
                 <div className="mb-6">
                   <div className="text-center mb-8">
-                    <span className="text-5xl font-bold text-primary">{product.price}€</span>
+                    <span className="text-5xl font-bold text-primary">{product.price.toFixed(2).replace('.', ',')}€</span>
                     <span className="text-gray-500 text-lg ml-2">TTC</span>
                   </div>
 

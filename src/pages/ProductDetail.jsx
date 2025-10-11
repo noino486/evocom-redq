@@ -124,7 +124,7 @@ const ProductDetail = () => {
             {/* Prix */}
             <div className="mb-6">
               <div className="flex items-baseline gap-2">
-                <span className="text-5xl font-bold gradient-text">{product.price}€</span>
+                <span className="text-5xl font-bold gradient-text">{product.price.toFixed(2).replace('.', ',')}€</span>
                 <span className="text-gray-500">TTC</span>
               </div>
               <p className="text-sm text-gray-600 mt-1">
@@ -146,7 +146,7 @@ const ProductDetail = () => {
                 className="w-full bg-gradient-to-r from-primary via-secondary to-accent text-white py-4 rounded-full font-bold text-lg hover:shadow-xl transition-all flex items-center justify-center gap-2 shadow-lg shine-effect glow-effect-hover"
               >
                 <FaCreditCard />
-                Acheter maintenant - {product.price}€
+                Acheter maintenant - {product.price.toFixed(2).replace('.', ',')}€
               </motion.button>
 
               <div className="mt-4 flex items-center justify-center gap-6 text-sm text-gray-600">
@@ -290,7 +290,7 @@ const ProductDetail = () => {
                           </h3>
                           <p className="text-gray-600 mb-3">{relatedProduct.shortDescription}</p>
                           <div className="flex items-center justify-between">
-                            <span className="text-2xl font-bold gradient-text">{relatedProduct.price}€</span>
+                            <span className="text-2xl font-bold gradient-text">{relatedProduct.price.toFixed(2).replace('.', ',')}€</span>
                             <span className="text-primary group-hover:translate-x-1 transition-transform flex items-center gap-1">
                               Voir le produit <FaChevronRight className="text-sm" />
                             </span>
