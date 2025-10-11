@@ -186,10 +186,19 @@ const ProductDetail = () => {
                       initial={{ opacity: 0, x: -10 }}
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: index * 0.1 }}
-                      className="flex items-center gap-2"
+                      className="flex items-start gap-2"
                     >
-                      <IncludeIcon className="text-primary" />
-                      <span className="text-sm text-gray-700">{item.text}</span>
+                      <IncludeIcon className="text-primary mt-1 flex-shrink-0" />
+                      <span className="text-sm text-gray-700">
+                        {item.text === '+50 PDF Premium (+ 1000 pages)' ? (
+                          <>
+                            <span className="block sm:inline">+50 PDF Premium</span>
+                            <span className="block sm:inline sm:ml-1">(+ 1000 pages)</span>
+                          </>
+                        ) : (
+                          item.text
+                        )}
+                      </span>
                     </motion.div>
                   )
                 })}

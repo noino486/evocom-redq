@@ -52,7 +52,7 @@ const LegalNotice = () => {
                 <p className="mb-2"><strong>Forme juridique :</strong> [Auto-entrepreneur / SARL / SAS / etc.]</p>
                 <p className="mb-2"><strong>Adresse :</strong> [Votre adresse complète]</p>
                 <p className="mb-2"><strong>SIRET :</strong> [Votre numéro SIRET]</p>
-                <p className="mb-2"><strong>Email :</strong> contact@votresite.com</p>
+                <p className="mb-2"><strong>Email :</strong> contact@evoecom.com</p>
                 <p className="mb-2"><strong>Téléphone :</strong> [Votre numéro de téléphone]</p>
               </div>
             </section>
@@ -110,7 +110,7 @@ const LegalNotice = () => {
               </ul>
               <p className="text-gray-700">
                 Pour exercer vos droits, vous pouvez nous contacter à l'adresse : 
-                <strong> contact@votresite.com</strong>
+                <strong> contact@evoecom.com</strong>
               </p>
             </section>
 
@@ -155,7 +155,7 @@ const LegalNotice = () => {
                 Pour toute question concernant ces mentions légales, vous pouvez nous contacter :
               </p>
               <ul className="text-gray-700 space-y-2">
-                <li><strong>Par email :</strong> contact@votresite.com</li>
+                <li><strong>Par email :</strong> contact@evoecom.com</li>
                 <li><strong>Par courrier :</strong> [Votre adresse postale]</li>
               </ul>
             </section>

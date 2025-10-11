@@ -6,7 +6,7 @@ const SEO = ({
   description = 'Liste fournisseurs internationaux, pack business expatriation, business actif passif - Démarrez votre business avec des outils concrets et immédiatement disponibles.',
   keywords = 'liste fournisseurs internationaux, pack business expatriation, business actif passif, sourcing e-commerce, idées de business 2025, fournisseurs du monde entier, guide business PDF, sourcing import export, communauté entrepreneur',
   ogImage = '/og-image.jpg',
-  ogUrl = 'https://votre-domaine.com'
+  ogUrl = 'https://www.evoecom.com/'
 }) => {
   return (
     <Helmet>

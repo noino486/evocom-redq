@@ -449,7 +449,7 @@ const Admin = () => {
           <ul className="space-y-2 text-gray-700">
             <li>• Les liens par défaut sont utilisés quand aucun paramètre AF n'est présent dans l'URL</li>
             <li>• Les influenceurs sont identifiés par le paramètre ?AF=NOM dans l'URL</li>
-            <li>• Exemple: https://votresite.com?AF=BENJAMIN utilisera les liens de BENJAMIN</li>
+            <li>• Exemple: https://www.evoecom.com/?AF=BENJAMIN utilisera les liens de BENJAMIN</li>
             <li>• Les liens sont automatiquement appliqués sur toutes les pages du site</li>
             <li>• Pensez à sauvegarder après chaque modification</li>
           </ul>
