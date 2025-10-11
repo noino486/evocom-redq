@@ -221,7 +221,7 @@ const ProductDetail = () => {
           className="mt-20"
         >
           <div className="bg-white/80 backdrop-blur-sm rounded-xl p-8 border border-gray-200/50">
-            <h2 className="text-3xl font-bold gradient-text mb-6">Description détaillée</h2>
+            <h2 className="text-3xl font-bold text-primary mb-6">Description détaillée</h2>
             <div className="prose prose-lg max-w-none text-gray-700 leading-relaxed whitespace-pre-line">
               {product.longDescription}
             </div>
