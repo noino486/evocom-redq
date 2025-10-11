@@ -5,79 +5,152 @@ Guide complet pour déployer l'application sur une machine Linux avec Nginx.
 ## 📋 Prérequis
 
 - **Serveur Linux** (Ubuntu 20.04+ / Debian 11+ recommandé)
-- **Node.js** 18+ et npm
-- **Nginx** installé
+- **Accès root** au serveur (SSH)
 - **Compte Supabase** (pour l'authentification admin)
 - **Nom de domaine** configuré (ex: evoecom.com)
 
-## 🔧 Étape 1 : Préparer l'application
+> **Note** : Ce guide utilise l'utilisateur **root**. Les commandes `sudo` ne sont pas nécessaires.
 
-### 1.1 Cloner le projet sur votre machine locale
+## 🎯 Démarrage Rapide
+
+Vous êtes connecté en SSH en tant que **root** ? Parfait ! 
 
 ```bash
-git clone <votre-repo>
-cd evocom-redq
+root@website:~#
 ```
 
-### 1.2 Installer les dépendances
+### 📝 Résumé des étapes
 
-```bash
+1. **Sur Windows** : Build l'application (`npm run build`)
+2. **Sur Linux** : Installer Nginx + outils
+3. **Sur Windows** : Upload des fichiers vers le serveur
+4. **Sur Linux** : Configurer Nginx
+5. **Sur Linux** : Installer le certificat SSL
+6. **Tester** : Visiter votre site !
+
+---
+
+## 🔧 Étape 1 : Préparer l'application (sur votre PC Windows)
+
+### 1.1 Ouvrir le projet
+
+Ouvrez PowerShell ou le terminal dans VSCode :
+
+```powershell
+cd C:\Users\calyy\OneDrive\Documents\dsds\evocom-redq
+```
+
+### 1.2 Installer les dépendances (si pas déjà fait)
+
+```powershell
 npm install
 ```
 
 ### 1.3 Configurer les variables d'environnement
 
-Créez un fichier `.env` à la racine du projet :
+Créez un fichier `.env` à la racine du projet (s'il n'existe pas déjà) :
 
 ```env
 VITE_SUPABASE_URL=https://votre-projet.supabase.co
 VITE_SUPABASE_ANON_KEY=votre_cle_anon_publique
 ```
 
-> **Note** : Récupérez ces informations depuis votre dashboard Supabase → Settings → API
+> **Où trouver ces clés** : Dashboard Supabase → Settings → API → Project URL et anon/public key
 
 ### 1.4 Build de production
 
-```bash
+```powershell
 npm run build
 ```
 
-Cela génère un dossier `dist/` avec tous les fichiers statiques optimisés.
+✅ Cela génère un dossier `dist/` avec tous les fichiers statiques optimisés pour la production.
 
 ## 🖥️ Étape 2 : Préparer le serveur Linux
 
-### 2.1 Installer Nginx (si pas déjà installé)
+### 2.1 Connexion SSH au serveur
 
-```bash
-sudo apt update
-sudo apt install nginx -y
+Depuis votre machine Windows (PowerShell) :
+
+```powershell
+ssh root@votre-ip-serveur
 ```
 
-### 2.2 Créer le répertoire de l'application
+Vous devriez voir : `root@website:~#`
+
+### 2.2 Installer les outils nécessaires
 
 ```bash
-sudo mkdir -p /var/www/evoecom
-sudo chown -R $USER:$USER /var/www/evoecom
+apt update && apt upgrade -y
+apt install nginx certbot python3-certbot-nginx git curl -y
 ```
 
-### 2.3 Transférer les fichiers
-
-Depuis votre machine locale, uploadez le dossier `dist/` :
+### 2.3 Installer Node.js 18+ (pour builder si nécessaire)
 
 ```bash
-# Avec rsync
-rsync -avz dist/ user@votre-serveur:/var/www/evoecom/
-
-# Ou avec SCP
-scp -r dist/* user@votre-serveur:/var/www/evoecom/
+curl -fsSL https://deb.nodesource.com/setup_18.x | bash -
+apt install nodejs -y
+node -v  # Vérifier: devrait afficher v18.x ou plus
+npm -v   # Vérifier npm
 ```
+
+### 2.4 Créer le répertoire de l'application
+
+```bash
+mkdir -p /var/www/evoecom
+cd /var/www/evoecom
+```
+
+### 2.5 Transférer les fichiers (2 options)
+
+**Option A : Build local + Upload depuis Windows**
+
+Depuis votre **machine Windows** (PowerShell), dans le dossier du projet :
+
+```powershell
+# 1. Build l'application
+npm run build
+
+# 2. Upload vers le serveur
+scp -r dist/* root@votre-ip-serveur:/var/www/evoecom/
+```
+
+**Option B : Clone + Build sur le serveur**
+
+Sur le **serveur Linux** (si vous avez un repo Git) :
+
+```bash
+# 1. Cloner le projet
+git clone https://github.com/votre-username/evocom-redq.git /tmp/evocom
+cd /tmp/evocom
+
+# 2. Installer les dépendances
+npm install
+
+# 3. Créer le fichier .env
+cat > .env << EOF
+VITE_SUPABASE_URL=https://votre-projet.supabase.co
+VITE_SUPABASE_ANON_KEY=votre_cle_anon_publique
+EOF
+
+# 4. Build
+npm run build
+
+# 5. Copier les fichiers
+cp -r dist/* /var/www/evoecom/
+
+# 6. Nettoyer
+cd /
+rm -rf /tmp/evocom
+```
+
+> **Recommandation** : Utilisez l'Option A (build local) pour éviter d'installer Node.js sur votre serveur de production.
 
 ## ⚙️ Étape 3 : Configurer Nginx
 
 ### 3.1 Créer le fichier de configuration
 
 ```bash
-sudo nano /etc/nginx/sites-available/evoecom
+nano /etc/nginx/sites-available/evoecom
 ```
 
 ### 3.2 Ajouter cette configuration
@@ -124,37 +197,45 @@ server {
 
 ```bash
 # Créer le lien symbolique
-sudo ln -s /etc/nginx/sites-available/evoecom /etc/nginx/sites-enabled/
+ln -s /etc/nginx/sites-available/evoecom /etc/nginx/sites-enabled/
 
 # Tester la configuration
-sudo nginx -t
+nginx -t
 
 # Redémarrer Nginx
-sudo systemctl restart nginx
+systemctl restart nginx
+
+# Vérifier le statut
+systemctl status nginx
 ```
 
 ## 🔒 Étape 4 : Installer le certificat SSL (HTTPS)
 
-### 4.1 Installer Certbot
+### 4.1 Installer Certbot (si pas déjà fait à l'étape 2.2)
 
 ```bash
-sudo apt install certbot python3-certbot-nginx -y
+apt install certbot python3-certbot-nginx -y
 ```
 
 ### 4.2 Obtenir le certificat SSL
 
 ```bash
-sudo certbot --nginx -d evoecom.com -d www.evoecom.com
+certbot --nginx -d evoecom.com -d www.evoecom.com
 ```
 
 Suivez les instructions à l'écran. Certbot configurera automatiquement Nginx pour HTTPS.
+
+Quand demandé :
+- **Email** : Votre email pour les notifications
+- **Accepter les termes** : Yes (Y)
+- **Rediriger HTTP vers HTTPS** : Yes (2)
 
 ### 4.3 Renouvellement automatique
 
 Le certificat se renouvelle automatiquement. Testez le renouvellement :
 
 ```bash
-sudo certbot renew --dry-run
+certbot renew --dry-run
 ```
 
 ## 🎯 Étape 5 : Configuration des influenceurs
@@ -169,7 +250,7 @@ sudo certbot renew --dry-run
 ### Méthode 2 : Modifier directement le fichier JSON
 
 ```bash
-sudo nano /var/www/evoecom/config/affiliates.json
+nano /var/www/evoecom/config/affiliates.json
 ```
 
 Structure du fichier :
@@ -242,22 +323,23 @@ https://www.evoecom.com/admin
 
 ## 🔄 Mettre à jour l'application
 
-### 1. Build la nouvelle version localement
+### 1. Build la nouvelle version localement (sur Windows)
 
-```bash
+```powershell
+cd C:\Users\calyy\OneDrive\Documents\dsds\evocom-redq
 npm run build
 ```
 
 ### 2. Uploader sur le serveur
 
-```bash
-rsync -avz --delete dist/ user@votre-serveur:/var/www/evoecom/
+```powershell
+scp -r dist/* root@votre-ip-serveur:/var/www/evoecom/
 ```
 
-### 3. Vider le cache Nginx (optionnel)
+### 3. Recharger Nginx sur le serveur
 
 ```bash
-sudo nginx -s reload
+nginx -s reload
 ```
 
 ## 📊 Monitoring et Logs
@@ -265,23 +347,32 @@ sudo nginx -s reload
 ### Voir les logs Nginx
 
 ```bash
-# Logs d'accès
-sudo tail -f /var/log/nginx/evoecom_access.log
+# Logs d'accès en temps réel
+tail -f /var/log/nginx/evoecom_access.log
 
-# Logs d'erreur
-sudo tail -f /var/log/nginx/evoecom_error.log
+# Logs d'erreur en temps réel
+tail -f /var/log/nginx/evoecom_error.log
+
+# Voir les 50 dernières lignes des erreurs
+tail -n 50 /var/log/nginx/evoecom_error.log
 ```
 
 ### Vérifier le statut Nginx
 
 ```bash
-sudo systemctl status nginx
+systemctl status nginx
 ```
 
 ### Redémarrer Nginx si nécessaire
 
 ```bash
-sudo systemctl restart nginx
+systemctl restart nginx
+```
+
+### Tester la configuration Nginx
+
+```bash
+nginx -t
 ```
 
 ## 🛠️ Résolution de problèmes
@@ -289,13 +380,19 @@ sudo systemctl restart nginx
 ### Le site ne s'affiche pas
 ```bash
 # Vérifier la config Nginx
-sudo nginx -t
+nginx -t
 
-# Vérifier les permissions
+# Vérifier que les fichiers existent
 ls -la /var/www/evoecom/
 
+# Vérifier que index.html existe
+cat /var/www/evoecom/index.html | head -n 5
+
 # Vérifier les logs
-sudo tail -n 50 /var/log/nginx/evoecom_error.log
+tail -n 50 /var/log/nginx/evoecom_error.log
+
+# Redémarrer Nginx
+systemctl restart nginx
 ```
 
 ### Erreur 404 sur les routes React
