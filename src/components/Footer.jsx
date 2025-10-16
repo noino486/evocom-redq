@@ -58,14 +58,12 @@ const Footer = () => {
             © 2025 EVO E-com. Tous droits réservés.
           </p>
           <div className="flex items-center justify-center gap-4 mb-2">
-            <a 
-              href="https://duthdigital.notion.site/Conditions-g-n-rales-de-vente-d-utilisation-du-service-2618528bf9b080b1b9a1e264de3e3c6b?source=copy_link" 
-              target="_blank" 
-              rel="noopener noreferrer"
+            <Link 
+              to="/mentions-legales"
               className="text-sm text-gray-500 hover:text-primary transition-colors"
             >
               Mentions légales
-            </a>
+            </Link>
           </div>
           <p className="text-sm text-gray-500 mt-2">
             Paiements sécurisés par <span className="text-secondary font-semibold">ThriveCart</span>
