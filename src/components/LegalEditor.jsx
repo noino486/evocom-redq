@@ -70,7 +70,9 @@ const LegalEditor = () => {
   }
 
   const handleAddArticle = () => {
-    const newId = Math.max(...localContent.articles.map(a => a.id), 0) + 1
+    // Protection contre les articles non définis
+    const currentArticles = localContent.articles || []
+    const newId = currentArticles.length > 0 ? Math.max(...currentArticles.map(a => a.id), 0) + 1 : 1
     const newArticle = {
       id: newId,
       title: 'Nouvel Article',
@@ -79,7 +81,7 @@ const LegalEditor = () => {
     
     setLocalContent(prev => ({
       ...prev,
-      articles: [...prev.articles, newArticle]
+      articles: [...(prev.articles || []), newArticle]
     }))
     setEditingArticle(newId)
   }
@@ -146,7 +148,7 @@ const LegalEditor = () => {
           <div className="prose prose-sm max-w-none">
             <div className="bg-white p-4 rounded border">
               <p className="text-gray-700 mb-4">{localContent.introduction}</p>
-              {localContent.articles.map((article, index) => (
+              {(localContent.articles || []).map((article, index) => (
                 <div key={article.id} className="mb-6">
                   <h4 className="font-semibold text-gray-900 mb-2">Article {index + 1} - {article.title}</h4>
                   <p className="text-gray-700 whitespace-pre-line">{article.content}</p>
@@ -197,7 +199,7 @@ const LegalEditor = () => {
             </div>
 
             <div className="space-y-4">
-              {localContent.articles.map((article, index) => (
+              {(localContent.articles || []).map((article, index) => (
                 <motion.div
                   key={article.id}
                   initial={{ opacity: 0, y: 10 }}
