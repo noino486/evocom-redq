@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { FaSave, FaPlus, FaTrash, FaEye, FaEyeSlash, FaSignOutAlt, FaSpinner } from 'react-icons/fa'
+import { FaSave, FaPlus, FaTrash, FaEye, FaEyeSlash, FaSignOutAlt, FaSpinner, FaFileContract } from 'react-icons/fa'
 import { useAffiliate } from '../context/AffiliateContext'
 import { supabase } from '../config/supabase'
+import LegalEditor from '../components/LegalEditor'
 
 const Admin = () => {
   const { affiliates, paymentPages, updateAffiliateConfig } = useAffiliate()
@@ -18,6 +19,7 @@ const Admin = () => {
   const [showPassword, setShowPassword] = useState(false)
   const [authLoading, setAuthLoading] = useState(false)
   const [error, setError] = useState('')
+  const [activeTab, setActiveTab] = useState('affiliates') // 'affiliates' ou 'legal'
 
   // Vérifier la session au chargement
   useEffect(() => {
@@ -256,7 +258,7 @@ const Admin = () => {
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-4xl font-bold mb-2 gradient-text">
-                Administration des Influenceurs
+                Administration
               </h1>
               <p className="text-gray-600">
                 Connecté en tant que <span className="font-semibold">{user.email}</span>
@@ -272,13 +274,49 @@ const Admin = () => {
           </div>
         </motion.div>
 
-        {/* Pages de paiement par défaut */}
+        {/* Onglets de navigation */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="bg-white/80 backdrop-blur-sm rounded-xl p-6 border border-gray-200/50 mb-8"
+          className="mb-8"
         >
+          <div className="flex space-x-1 bg-gray-100 p-1 rounded-lg">
+            <button
+              onClick={() => setActiveTab('affiliates')}
+              className={`flex-1 flex items-center justify-center gap-2 px-4 py-2 rounded-md transition-colors ${
+                activeTab === 'affiliates'
+                  ? 'bg-white text-primary shadow-sm'
+                  : 'text-gray-600 hover:text-gray-900'
+              }`}
+            >
+              <FaPlus />
+              Influenceurs
+            </button>
+            <button
+              onClick={() => setActiveTab('legal')}
+              className={`flex-1 flex items-center justify-center gap-2 px-4 py-2 rounded-md transition-colors ${
+                activeTab === 'legal'
+                  ? 'bg-white text-primary shadow-sm'
+                  : 'text-gray-600 hover:text-gray-900'
+              }`}
+            >
+              <FaFileContract />
+              Mentions Légales
+            </button>
+          </div>
+        </motion.div>
+
+        {/* Contenu conditionnel selon l'onglet actif */}
+        {activeTab === 'affiliates' ? (
+          <>
+            {/* Pages de paiement par défaut */}
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 }}
+              className="bg-white/80 backdrop-blur-sm rounded-xl p-6 border border-gray-200/50 mb-8"
+            >
           <h2 className="text-2xl font-bold mb-4 text-gray-900">Pages de paiement par défaut</h2>
           <div className="grid md:grid-cols-2 gap-4">
             <div>
@@ -420,23 +458,35 @@ const Admin = () => {
               </div>
             ))}
           </div>
-        </motion.div>
+            </motion.div>
 
-        {/* Bouton de sauvegarde */}
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4 }}
-          className="text-center"
-        >
-          <button
-            onClick={handleSave}
-            className="bg-gradient-to-r from-primary via-secondary to-accent text-white px-8 py-4 rounded-full font-bold text-lg hover:shadow-xl transition-all flex items-center gap-2 mx-auto shine-effect glow-effect-hover"
+            {/* Bouton de sauvegarde */}
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4 }}
+              className="text-center"
+            >
+              <button
+                onClick={handleSave}
+                className="bg-gradient-to-r from-primary via-secondary to-accent text-white px-8 py-4 rounded-full font-bold text-lg hover:shadow-xl transition-all flex items-center gap-2 mx-auto shine-effect glow-effect-hover"
+              >
+                <FaSave />
+                Sauvegarder la configuration
+              </button>
+            </motion.div>
+          </>
+        ) : (
+          /* Section Mentions Légales */
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+            className="bg-white/80 backdrop-blur-sm rounded-xl p-6 border border-gray-200/50"
           >
-            <FaSave />
-            Sauvegarder la configuration
-          </button>
-        </motion.div>
+            <LegalEditor />
+          </motion.div>
+        )}
 
         {/* Instructions */}
         <motion.div
