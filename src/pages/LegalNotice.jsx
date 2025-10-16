@@ -82,7 +82,7 @@ const LegalNotice = () => {
             </section>
 
             {/* Articles dynamiques */}
-            {legalContent.articles.map((article, index) => (
+            {(legalContent.articles || []).map((article, index) => (
               <section key={article.id} className="mb-8">
                 <h2 className="text-2xl font-bold text-gray-900 mb-4">
                   Article {index + 1} - {article.title}

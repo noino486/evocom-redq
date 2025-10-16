@@ -70,19 +70,34 @@ const LegalEditor = () => {
   }
 
   const handleAddArticle = () => {
+    console.log('🔍 Debug - handleAddArticle appelé')
+    console.log('🔍 localContent:', localContent)
+    console.log('🔍 localContent.articles:', localContent.articles)
+    
     // Protection contre les articles non définis
     const currentArticles = localContent.articles || []
+    console.log('🔍 currentArticles:', currentArticles)
+    
     const newId = currentArticles.length > 0 ? Math.max(...currentArticles.map(a => a.id), 0) + 1 : 1
+    console.log('🔍 newId:', newId)
+    
     const newArticle = {
       id: newId,
       title: 'Nouvel Article',
       content: 'Contenu de l\'article...'
     }
     
-    setLocalContent(prev => ({
-      ...prev,
-      articles: [...(prev.articles || []), newArticle]
-    }))
+    console.log('🔍 newArticle:', newArticle)
+    
+    setLocalContent(prev => {
+      console.log('🔍 setLocalContent - prev:', prev)
+      const newContent = {
+        ...prev,
+        articles: [...(prev.articles || []), newArticle]
+      }
+      console.log('🔍 setLocalContent - newContent:', newContent)
+      return newContent
+    })
     setEditingArticle(newId)
   }
 
@@ -190,7 +205,10 @@ const LegalEditor = () => {
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold">Articles</h3>
               <button
-                onClick={handleAddArticle}
+                onClick={(e) => {
+                  console.log('🔍 Bouton cliqué !', e)
+                  handleAddArticle()
+                }}
                 className="flex items-center gap-2 px-3 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors text-sm"
               >
                 <FaPlus />
