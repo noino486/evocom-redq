@@ -24,50 +24,6 @@
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
     
-    <!-- Script pour forcer l'ouverture dans le navigateur web (deeplinking web) -->
-    <script>
-      // Détecter si on est dans une app mobile et forcer l'ouverture dans le navigateur web
-      (function() {
-        const userAgent = navigator.userAgent || navigator.vendor || window.opera;
-        
-        // Détecter les apps mobiles (pas le navigateur web)
-        const isInMobileApp = /FBAN|FBAV|Instagram|Twitter|LinkedInApp|WhatsApp|Telegram|Line|WeChat|Snapchat|TikTok|Instagram|FB_IAB|FBAN|FBAV|FB4A|FBIOS|FBSS|Messenger/i.test(userAgent);
-        
-        // Détecter si on est déjà dans un navigateur web
-        const isInWebBrowser = /Safari|Chrome|Firefox|Edge|Opera/i.test(userAgent) && !isInMobileApp;
-        
-        if (isInMobileApp && !isInWebBrowser) {
-          // Forcer l'ouverture dans le navigateur web
-          const currentUrl = window.location.href;
-          
-          // Méthode 1: Essayer d'ouvrir dans le navigateur par défaut
-          try {
-            // Pour iOS - essayer d'ouvrir dans Safari
-            if (/iPhone|iPad|iPod/i.test(userAgent)) {
-              window.location.href = 'x-web-search://?';
-              setTimeout(() => {
-                window.location.href = currentUrl;
-              }, 100);
-            }
-            // Pour Android - essayer d'ouvrir dans Chrome
-            else if (/Android/i.test(userAgent)) {
-              window.location.href = 'intent://' + currentUrl.replace(/^https?:\/\//, '') + '#Intent;scheme=https;package=com.android.chrome;end';
-              setTimeout(() => {
-                window.location.href = currentUrl;
-              }, 100);
-            }
-            // Fallback général
-            else {
-              window.open(currentUrl, '_blank');
-            }
-          } catch (error) {
-            console.log('Redirection vers navigateur web échouée:', error);
-            // Dernier recours
-            window.location.href = currentUrl;
-          }
-        }
-      })();
-    </script>
   </body>
 </html>
 
