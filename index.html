@@ -6,10 +6,65 @@
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <title>Pack Global Sourcing & Pack Global Business - Packs Digitaux</title>
     <meta name="description" content="Développez votre business international avec nos packs digitaux. Fournisseurs internationaux, guides pratiques et communauté d'entrepreneurs." />
+    
+    <!-- Meta tags pour forcer l'ouverture dans le navigateur mobile -->
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="format-detection" content="telephone=no" />
+    
+    <!-- Meta tags pour éviter l'ouverture dans les apps sociales -->
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:app:name:iphone" content="Safari" />
+    <meta name="twitter:app:name:ipad" content="Safari" />
+    <meta name="twitter:app:name:googleplay" content="Chrome" />
   </head>
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
+    
+    <!-- Script pour redirection automatique vers le navigateur mobile -->
+    <script>
+      // Détecter si on est dans une app sociale et rediriger automatiquement
+      (function() {
+        const userAgent = navigator.userAgent || navigator.vendor || window.opera;
+        
+        // Détecter les apps sociales
+        const isInApp = /FBAN|FBAV|Instagram|Twitter|LinkedInApp|WhatsApp|Telegram|Line|WeChat|Snapchat|TikTok/i.test(userAgent);
+        
+        if (isInApp) {
+          // Redirection automatique vers le navigateur
+          const currentUrl = window.location.href;
+          
+          // Essayer différentes méthodes de redirection
+          try {
+            // Méthode 1: window.open avec _blank
+            window.open(currentUrl, '_blank');
+            
+            // Méthode 2: location.href (fallback)
+            setTimeout(() => {
+              window.location.href = currentUrl;
+            }, 100);
+            
+            // Méthode 3: Créer un lien invisible et le cliquer
+            setTimeout(() => {
+              const link = document.createElement('a');
+              link.href = currentUrl;
+              link.target = '_blank';
+              link.rel = 'noopener noreferrer';
+              link.style.display = 'none';
+              document.body.appendChild(link);
+              link.click();
+              document.body.removeChild(link);
+            }, 200);
+            
+          } catch (error) {
+            console.log('Redirection automatique échouée:', error);
+          }
+        }
+      })();
+    </script>
   </body>
 </html>
 
