@@ -1,6 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react'
 import { supabase } from '../config/supabase'
-import { executeSupabaseQuery } from '../utils/networkUtils'
 
 const AffiliateContext = createContext()
 
@@ -43,25 +42,21 @@ export const AffiliateProvider = ({ children }) => {
   // Charger la configuration depuis Supabase
   const loadAffiliateConfig = async () => {
     try {
-      // Utiliser la fonction avec retry pour charger la configuration
-      const result = await executeSupabaseQuery(async () => {
-        return await supabase
-          .from('affiliate_config')
-          .select('config_key, config_value')
-          .in('config_key', ['affiliates', 'defaultPages'])
-      }, {
-        fallbackData: [],
-        onRetry: (attempt, maxAttempts, errorType) => {
-          console.log(`🔄 Retry ${attempt}/${maxAttempts} pour loadAffiliateConfig (${errorType})`)
-        },
-        onError: (error) => {
-          console.error('❌ Échec définitif pour loadAffiliateConfig:', error)
-        }
-      })
+      // Récupérer la configuration depuis Supabase
+      const { data, error } = await supabase
+        .from('affiliate_config')
+        .select('config_key, config_value')
+        .in('config_key', ['affiliates', 'defaultPages'])
 
-      if (result.success && result.data && result.data.length > 0) {
+      if (error) {
+        console.error('Erreur Supabase:', error)
+        console.log('Utilisation de la configuration par défaut')
+        return
+      }
+
+      if (data && data.length > 0) {
         // Transformer les données en objet utilisable
-        result.data.forEach(item => {
+        data.forEach(item => {
           if (item.config_key === 'affiliates') {
             setAffiliates(item.config_value)
             console.log('Affiliés chargés depuis Supabase:', item.config_value)
