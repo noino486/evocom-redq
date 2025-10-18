@@ -59,49 +59,43 @@ const AppDetector = () => {
 
       // Si on est dans une app tierce
       if (isInAppBrowser && !isNativeBrowser) {
-        const isSnapchatDetected = ua.includes('Snapchat')
+        // Détection Snapchat - méthodes multiples
+        const snapchatPatterns = [
+          'Snapchat',
+          'Snap',
+          'SC',
+          'snapchat'
+        ]
+        
+        const isSnapchatByUA = snapchatPatterns.some(pattern => ua.toLowerCase().includes(pattern.toLowerCase()))
+        
+        // Détection par caractéristiques spécifiques
+        const isSnapchatByFeatures = (
+          // iOS dans WebView sans Safari
+          (ua.includes('iPhone') && ua.includes('Version') && !ua.includes('Safari') && !ua.includes('CriOS')) ||
+          // Android WebView sans Chrome
+          (ua.includes('Android') && ua.includes('wv') && !ua.includes('Chrome')) ||
+          // Détection par les propriétés de l'écran (Snapchat a des dimensions spécifiques)
+          (window.screen && window.screen.width <= 414 && window.screen.height <= 896) ||
+          // Détection par les propriétés du navigateur
+          (window.navigator.standalone === false && ua.includes('iPhone') && !ua.includes('Safari'))
+        
+        const isSnapchatDetected = isSnapchatByUA || isSnapchatByFeatures
+        
+        console.log('🔍 Détection Snapchat:', {
+          userAgent: ua,
+          isSnapchat: isSnapchatDetected,
+          isInAppBrowser,
+          isNativeBrowser
+        })
+        
         setIsSnapchat(isSnapchatDetected)
         
-        if (isSnapchatDetected) {
-          // Pour Snapchat, afficher le modal au lieu de rediriger automatiquement
-          setTimeout(() => {
-            setShowSnapchatModal(true)
-          }, 1000) // Délai de 1 seconde pour laisser la page se charger
-        } else {
-          // Pour les autres apps, redirection automatique
-          const currentUrl = window.location.href
-          
-          setTimeout(() => {
-            if (navigator.userAgent.includes('iPhone') || navigator.userAgent.includes('iPad')) {
-              // iOS - Utiliser le scheme Safari pour forcer l'ouverture
-              const safariUrl = `x-safari-${currentUrl}`
-              window.location.href = safariUrl
-              
-              // Alternative avec window.open
-              setTimeout(() => {
-                const newWindow = window.open('', '_blank')
-                if (newWindow) {
-                  newWindow.location.href = currentUrl
-                }
-              }, 100)
-            } else if (navigator.userAgent.includes('Android')) {
-              // Android - Utiliser l'intent Android pour forcer l'ouverture dans le navigateur
-              const intentUrl = `intent://${currentUrl.replace(/^https?:\/\//, '')}#Intent;scheme=https;package=com.android.chrome;S.browser_fallback_url=${encodeURIComponent(currentUrl)};end`
-              window.location.href = intentUrl
-              
-              // Alternative avec window.open
-              setTimeout(() => {
-                const newWindow = window.open('', '_blank')
-                if (newWindow) {
-                  newWindow.location.href = currentUrl
-                }
-              }, 100)
-            } else {
-              // Desktop - Ouvrir dans un nouvel onglet
-              window.open(currentUrl, '_blank', 'noopener,noreferrer')
-            }
-          }, 300)
-        }
+        // Pour toutes les apps tierces, afficher le modal (plus sûr)
+        console.log('📱 App tierce détectée, affichage du modal')
+        setTimeout(() => {
+          setShowSnapchatModal(true)
+        }, 1000) // Délai de 1 seconde pour laisser la page se charger
       }
     }
 
@@ -178,7 +172,9 @@ const AppDetector = () => {
               <div className="bg-gradient-to-r from-yellow-50 to-orange-50 rounded-xl p-4 mb-4 border border-yellow-200">
                 <div className="flex items-center gap-3 mb-2">
                   <FaMobile className="text-yellow-600" />
-                  <span className="font-semibold text-gray-900">Détecté : Snapchat</span>
+                  <span className="font-semibold text-gray-900">
+                    Détecté : {isSnapchat ? 'Snapchat' : 'Application tierce'}
+                  </span>
                 </div>
                 <p className="text-sm text-gray-700">
                   Pour profiter pleinement de notre site, nous vous recommandons de l'ouvrir dans votre navigateur par défaut.
