@@ -11,6 +11,13 @@ export const LINK_TYPES = {
 // Fonction pour tracker un clic
 export const trackClick = async (linkData) => {
   try {
+    // Détection mobile améliorée
+    const isMobile = /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
+                     (typeof window !== 'undefined' && window.innerWidth <= 768)
+    
+    // Détection d'app tierce améliorée
+    const isInApp = isInAppBrowser()
+    
     const clickData = {
       link_url: linkData.url,
       link_type: linkData.type || LINK_TYPES.EXTERNAL,
@@ -21,10 +28,15 @@ export const trackClick = async (linkData) => {
       referrer: document.referrer,
       timestamp: new Date().toISOString(),
       page_url: window.location.href,
-      is_mobile: /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent),
-      is_in_app: isInAppBrowser(),
+      is_mobile: isMobile,
+      is_in_app: isInApp,
       click_source: linkData.source || 'unknown',
-      affiliate_link_id: linkData.affiliateLinkId || null // Nouveau champ pour identifier le lien affilié
+      affiliate_link_id: linkData.affiliateLinkId || null,
+      // Ajout de métadonnées pour le debug mobile
+      screen_width: typeof window !== 'undefined' ? window.innerWidth : null,
+      screen_height: typeof window !== 'undefined' ? window.innerHeight : null,
+      viewport_width: typeof window !== 'undefined' ? window.innerWidth : null,
+      viewport_height: typeof window !== 'undefined' ? window.innerHeight : null
     }
 
     // Envoyer les données à Supabase

@@ -74,6 +74,65 @@ export const AffiliateProvider = ({ children }) => {
     }
   }
 
+  // Fonction pour sauvegarder de manière robuste
+  const saveAffiliateCode = (code) => {
+    try {
+      // Essayer localStorage d'abord
+      localStorage.setItem('evocom-affiliate', code)
+      
+      // Backup avec sessionStorage
+      sessionStorage.setItem('evocom-affiliate', code)
+      
+      // Backup avec cookie (plus fiable sur mobile)
+      document.cookie = `evocom-affiliate=${code}; path=/; max-age=${7 * 24 * 60 * 60}` // 7 jours
+      
+      console.log(`Code partenaire sauvegardé: ${code}`)
+    } catch (error) {
+      console.warn('Erreur lors de la sauvegarde du code partenaire:', error)
+    }
+  }
+
+  // Fonction pour récupérer le code de manière robuste
+  const getSavedAffiliateCode = () => {
+    try {
+      // Debug localStorage sur mobile
+      console.log('🔍 Debug localStorage mobile:', {
+        localStorage_available: typeof localStorage !== 'undefined',
+        sessionStorage_available: typeof sessionStorage !== 'undefined',
+        cookies_available: typeof document !== 'undefined' && typeof document.cookie !== 'undefined',
+        userAgent: navigator.userAgent,
+        isMobile: /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
+      })
+      
+      // Essayer localStorage d'abord
+      let savedCode = localStorage.getItem('evocom-affiliate')
+      console.log('📱 localStorage result:', savedCode)
+      
+      // Si pas trouvé, essayer sessionStorage
+      if (!savedCode) {
+        savedCode = sessionStorage.getItem('evocom-affiliate')
+        console.log('📱 sessionStorage result:', savedCode)
+      }
+      
+      // Si toujours pas trouvé, essayer les cookies
+      if (!savedCode) {
+        const cookies = document.cookie.split(';')
+        const affiliateCookie = cookies.find(cookie => 
+          cookie.trim().startsWith('evocom-affiliate=')
+        )
+        if (affiliateCookie) {
+          savedCode = affiliateCookie.split('=')[1]
+          console.log('📱 cookie result:', savedCode)
+        }
+      }
+      
+      return savedCode
+    } catch (error) {
+      console.warn('Erreur lors de la récupération du code partenaire:', error)
+      return null
+    }
+  }
+
   // Détecter le paramètre AF dans l'URL
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search)
@@ -85,22 +144,35 @@ export const AffiliateProvider = ({ children }) => {
       // Vérifier si le code existe dans la configuration
       if (affiliates[upperAfParam]) {
         setAffiliateCode(upperAfParam)
-        // Sauvegarder dans le localStorage pour persister la session
-        localStorage.setItem('evocom-affiliate', upperAfParam)
+        // Sauvegarder de manière robuste
+        saveAffiliateCode(upperAfParam)
         console.log(`Code partenaire valide activé: ${upperAfParam}`)
       } else {
         console.warn(`Code partenaire invalide: ${upperAfParam}`)
-        // Supprimer le code invalide du localStorage s'il existe
-        localStorage.removeItem('evocom-affiliate')
+        // Supprimer les codes invalides
+        try {
+          localStorage.removeItem('evocom-affiliate')
+          sessionStorage.removeItem('evocom-affiliate')
+          document.cookie = 'evocom-affiliate=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT'
+        } catch (error) {
+          console.warn('Erreur lors de la suppression du code invalide:', error)
+        }
       }
     } else {
       // Vérifier s'il y a un code sauvegardé
-      const savedAffiliate = localStorage.getItem('evocom-affiliate')
+      const savedAffiliate = getSavedAffiliateCode()
       if (savedAffiliate && affiliates[savedAffiliate]) {
         setAffiliateCode(savedAffiliate)
+        console.log(`Code partenaire restauré: ${savedAffiliate}`)
       } else if (savedAffiliate) {
         // Le code sauvegardé n'existe plus dans la config, le supprimer
-        localStorage.removeItem('evocom-affiliate')
+        try {
+          localStorage.removeItem('evocom-affiliate')
+          sessionStorage.removeItem('evocom-affiliate')
+          document.cookie = 'evocom-affiliate=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT'
+        } catch (error) {
+          console.warn('Erreur lors de la suppression du code invalide:', error)
+        }
       }
     }
   }, [affiliates])
@@ -238,6 +310,62 @@ export const AffiliateProvider = ({ children }) => {
     }
   }
 
+  // Fonction de test pour vérifier le localStorage
+  const testLocalStorage = () => {
+    const testResults = {
+      localStorage: {
+        available: typeof localStorage !== 'undefined',
+        test: null,
+        error: null
+      },
+      sessionStorage: {
+        available: typeof sessionStorage !== 'undefined',
+        test: null,
+        error: null
+      },
+      cookies: {
+        available: typeof document !== 'undefined' && typeof document.cookie !== 'undefined',
+        test: null,
+        error: null
+      }
+    }
+
+    // Test localStorage
+    try {
+      if (typeof localStorage !== 'undefined') {
+        localStorage.setItem('test-key', 'test-value')
+        testResults.localStorage.test = localStorage.getItem('test-key') === 'test-value'
+        localStorage.removeItem('test-key')
+      }
+    } catch (error) {
+      testResults.localStorage.error = error.message
+    }
+
+    // Test sessionStorage
+    try {
+      if (typeof sessionStorage !== 'undefined') {
+        sessionStorage.setItem('test-key', 'test-value')
+        testResults.sessionStorage.test = sessionStorage.getItem('test-key') === 'test-value'
+        sessionStorage.removeItem('test-key')
+      }
+    } catch (error) {
+      testResults.sessionStorage.error = error.message
+    }
+
+    // Test cookies
+    try {
+      if (typeof document !== 'undefined') {
+        document.cookie = 'test-key=test-value; path=/'
+        testResults.cookies.test = document.cookie.includes('test-key=test-value')
+        document.cookie = 'test-key=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT'
+      }
+    } catch (error) {
+      testResults.cookies.error = error.message
+    }
+
+    return testResults
+  }
+
   const value = {
     affiliateCode,
     getPaymentLink,
@@ -245,7 +373,8 @@ export const AffiliateProvider = ({ children }) => {
     hasAffiliateCode,
     updateAffiliateConfig,
     affiliates,
-    paymentPages
+    paymentPages,
+    testLocalStorage
   }
 
   return (

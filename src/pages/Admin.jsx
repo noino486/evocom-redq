@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { FaSave, FaPlus, FaTrash, FaEye, FaEyeSlash, FaSignOutAlt, FaSpinner, FaFileContract, FaChartLine } from 'react-icons/fa'
+import { FaSave, FaPlus, FaTrash, FaEye, FaEyeSlash, FaSignOutAlt, FaSpinner, FaFileContract, FaChartLine, FaBug, FaMobile } from 'react-icons/fa'
 import { useAffiliate } from '../context/AffiliateContext'
 import { supabase } from '../config/supabase'
 import LegalEditor from '../components/LegalEditor'
 import ClickStats from '../components/ClickStats'
 
 const Admin = () => {
-  const { affiliates, paymentPages, updateAffiliateConfig } = useAffiliate()
+  const { affiliates, paymentPages, updateAffiliateConfig, testLocalStorage } = useAffiliate()
   const [localAffiliates, setLocalAffiliates] = useState(affiliates)
   const [localPaymentPages, setLocalPaymentPages] = useState(paymentPages)
   const [newAffiliate, setNewAffiliate] = useState({ name: '', STFOUR: '', GLBNS: '' })
@@ -21,6 +21,7 @@ const Admin = () => {
   const [authLoading, setAuthLoading] = useState(false)
   const [error, setError] = useState('')
   const [activeTab, setActiveTab] = useState('affiliates') // 'affiliates', 'legal' ou 'stats'
+  const [debugResults, setDebugResults] = useState(null)
 
   // Vérifier la session au chargement
   useEffect(() => {
@@ -140,6 +141,13 @@ const Admin = () => {
       ...prev,
       [productId]: newUrl
     }))
+  }
+
+  // Fonction pour tester le localStorage
+  const handleTestLocalStorage = () => {
+    const results = testLocalStorage()
+    setDebugResults(results)
+    console.log('🔍 Test localStorage:', results)
   }
 
   // Écran de chargement
@@ -316,11 +324,91 @@ const Admin = () => {
               <FaChartLine className="text-sm" />
               <span className="hidden sm:inline">Statistiques</span>
             </button>
+            <button
+              onClick={() => setActiveTab('debug')}
+              className={`flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium transition-colors border-l border-gray-200 ${
+                activeTab === 'debug'
+                  ? 'bg-blue-600 text-white'
+                  : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+              }`}
+            >
+              <FaBug className="text-sm" />
+              <span className="hidden sm:inline">Debug</span>
+            </button>
           </div>
         </motion.div>
 
         {/* Contenu conditionnel selon l'onglet actif */}
-        {activeTab === 'affiliates' ? (
+        {activeTab === 'debug' ? (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+            className="bg-white rounded-lg p-6 border border-gray-200"
+          >
+            <h2 className="text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
+              <FaBug className="text-blue-600" />
+              Debug localStorage Mobile
+            </h2>
+            
+            <div className="mb-6">
+              <button
+                onClick={handleTestLocalStorage}
+                className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                <FaMobile />
+                Tester le localStorage
+              </button>
+            </div>
+
+            {debugResults && (
+              <div className="space-y-4">
+                <div className="bg-gray-50 rounded-lg p-4">
+                  <h3 className="font-semibold text-gray-900 mb-2">localStorage</h3>
+                  <div className="text-sm text-gray-600">
+                    <p>Disponible: {debugResults.localStorage.available ? '✅ Oui' : '❌ Non'}</p>
+                    <p>Test: {debugResults.localStorage.test === null ? '⏳ Non testé' : debugResults.localStorage.test ? '✅ Réussi' : '❌ Échec'}</p>
+                    {debugResults.localStorage.error && (
+                      <p className="text-red-600">Erreur: {debugResults.localStorage.error}</p>
+                    )}
+                  </div>
+                </div>
+
+                <div className="bg-gray-50 rounded-lg p-4">
+                  <h3 className="font-semibold text-gray-900 mb-2">sessionStorage</h3>
+                  <div className="text-sm text-gray-600">
+                    <p>Disponible: {debugResults.sessionStorage.available ? '✅ Oui' : '❌ Non'}</p>
+                    <p>Test: {debugResults.sessionStorage.test === null ? '⏳ Non testé' : debugResults.sessionStorage.test ? '✅ Réussi' : '❌ Échec'}</p>
+                    {debugResults.sessionStorage.error && (
+                      <p className="text-red-600">Erreur: {debugResults.sessionStorage.error}</p>
+                    )}
+                  </div>
+                </div>
+
+                <div className="bg-gray-50 rounded-lg p-4">
+                  <h3 className="font-semibold text-gray-900 mb-2">Cookies</h3>
+                  <div className="text-sm text-gray-600">
+                    <p>Disponible: {debugResults.cookies.available ? '✅ Oui' : '❌ Non'}</p>
+                    <p>Test: {debugResults.cookies.test === null ? '⏳ Non testé' : debugResults.cookies.test ? '✅ Réussi' : '❌ Échec'}</p>
+                    {debugResults.cookies.error && (
+                      <p className="text-red-600">Erreur: {debugResults.cookies.error}</p>
+                    )}
+                  </div>
+                </div>
+
+                <div className="bg-blue-50 rounded-lg p-4">
+                  <h3 className="font-semibold text-blue-900 mb-2">Informations système</h3>
+                  <div className="text-sm text-blue-800">
+                    <p>User Agent: {navigator.userAgent}</p>
+                    <p>Écran: {window.innerWidth}x{window.innerHeight}</p>
+                    <p>Mobile: {/Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ? '✅ Oui' : '❌ Non'}</p>
+                    <p>Dans une app: {/FBAN|FBAV|Instagram|Snapchat|WhatsApp|TikTok|wv\)/i.test(navigator.userAgent) ? '✅ Oui' : '❌ Non'}</p>
+                  </div>
+                </div>
+              </div>
+            )}
+          </motion.div>
+        ) : activeTab === 'affiliates' ? (
           <>
             {/* Pages de paiement par défaut */}
             <motion.div
