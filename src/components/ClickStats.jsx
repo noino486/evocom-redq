@@ -3,7 +3,7 @@ import { motion } from 'framer-motion'
 import { FaChartLine, FaMousePointer, FaMobile, FaDesktop, FaExternalLinkAlt, FaCalendarAlt, FaUser, FaLink, FaHome, FaShoppingCart, FaGlobe, FaArrowRight, FaUsers, FaEye, FaClock, FaMapMarkerAlt } from 'react-icons/fa'
 import { getClickStats, getAggregatedStats } from '../utils/clickTracker'
 import { getAggregatedVisitorStats } from '../utils/visitorTracker'
-import { LineChart, Line, AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts'
+import { SimpleBarChart, SimplePieChart, SimpleLineChart } from './SimpleChart'
 
 const ClickStats = () => {
   const [stats, setStats] = useState(null)
@@ -312,38 +312,11 @@ const ClickStats = () => {
             transition={{ delay: 0.4 }}
             className="bg-white/80 backdrop-blur-sm rounded-xl p-6 border border-gray-200/50"
           >
-            <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
-              <FaChartLine className="text-primary" />
-              Évolution des clics
-            </h3>
-            <ResponsiveContainer width="100%" height={300}>
-              <AreaChart data={Object.entries(stats.clicksByDay)
-                .sort(([a], [b]) => new Date(a) - new Date(b))
-                .map(([date, count]) => ({
-                  date: new Date(date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' }),
-                  clics: count
-                }))}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="date" />
-                <YAxis />
-                <Tooltip 
-                  labelStyle={{ color: '#374151' }}
-                  contentStyle={{ 
-                    backgroundColor: '#f9fafb', 
-                    border: '1px solid #e5e7eb',
-                    borderRadius: '8px'
-                  }}
-                />
-                <Area 
-                  type="monotone" 
-                  dataKey="clics" 
-                  stroke="#3b82f6" 
-                  fill="#3b82f6" 
-                  fillOpacity={0.3}
-                  strokeWidth={2}
-                />
-              </AreaChart>
-            </ResponsiveContainer>
+            <SimpleLineChart 
+              data={stats.clicksByDay}
+              title="Évolution des clics"
+              color="#3b82f6"
+            />
           </motion.div>
         )}
 
@@ -355,44 +328,17 @@ const ClickStats = () => {
             transition={{ delay: 0.5 }}
             className="bg-white/80 backdrop-blur-sm rounded-xl p-6 border border-gray-200/50"
           >
-            <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
-              <FaLink className="text-primary" />
-              Répartition des clics
-            </h3>
-            <ResponsiveContainer width="100%" height={300}>
-              <PieChart>
-                <Pie
-                  data={Object.entries(stats.clicksByType).map(([type, count]) => ({
-                    name: type === 'affiliate' ? 'Liens d\'achat' :
-                          type === 'product' ? 'Pages produits' :
-                          type === 'internal' ? 'Liens internes' :
-                          type === 'external' ? 'Liens externes' : type,
-                    value: count,
-                    color: type === 'affiliate' ? '#3b82f6' :
-                           type === 'product' ? '#10b981' :
-                           type === 'internal' ? '#f59e0b' :
-                           type === 'external' ? '#ef4444' : '#6b7280'
-                  }))}
-                  cx="50%"
-                  cy="50%"
-                  labelLine={false}
-                  label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-                  outerRadius={80}
-                  fill="#8884d8"
-                  dataKey="value"
-                >
-                  {Object.entries(stats.clicksByType).map(([type, count], index) => (
-                    <Cell key={`cell-${index}`} fill={
-                      type === 'affiliate' ? '#3b82f6' :
-                      type === 'product' ? '#10b981' :
-                      type === 'internal' ? '#f59e0b' :
-                      type === 'external' ? '#ef4444' : '#6b7280'
-                    } />
-                  ))}
-                </Pie>
-                <Tooltip />
-              </PieChart>
-            </ResponsiveContainer>
+            <SimplePieChart 
+              data={Object.entries(stats.clicksByType).reduce((acc, [type, count]) => {
+                const name = type === 'affiliate' ? 'Liens d\'achat' :
+                           type === 'product' ? 'Pages produits' :
+                           type === 'internal' ? 'Liens internes' :
+                           type === 'external' ? 'Liens externes' : type
+                acc[name] = count
+                return acc
+              }, {})}
+              title="Répartition des clics"
+            />
           </motion.div>
         )}
       </div>
@@ -408,29 +354,11 @@ const ClickStats = () => {
               transition={{ delay: 0.6 }}
               className="bg-white/80 backdrop-blur-sm rounded-xl p-6 border border-gray-200/50"
             >
-              <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
-                <FaMobile className="text-primary" />
-                Visiteurs par appareil
-              </h3>
-              <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={Object.entries(visitorStats.visitorsByDevice).map(([device, count]) => ({
-                  device,
-                  visiteurs: count
-                }))}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="device" />
-                  <YAxis />
-                  <Tooltip 
-                    labelStyle={{ color: '#374151' }}
-                    contentStyle={{ 
-                      backgroundColor: '#f9fafb', 
-                      border: '1px solid #e5e7eb',
-                      borderRadius: '8px'
-                    }}
-                  />
-                  <Bar dataKey="visiteurs" fill="#10b981" radius={[4, 4, 0, 0]} />
-                </BarChart>
-              </ResponsiveContainer>
+              <SimpleBarChart 
+                data={visitorStats.visitorsByDevice}
+                title="Visiteurs par appareil"
+                color="#10b981"
+              />
             </motion.div>
           )}
 
@@ -442,29 +370,11 @@ const ClickStats = () => {
               transition={{ delay: 0.7 }}
               className="bg-white/80 backdrop-blur-sm rounded-xl p-6 border border-gray-200/50"
             >
-              <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
-                <FaGlobe className="text-primary" />
-                Visiteurs par navigateur
-              </h3>
-              <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={Object.entries(visitorStats.visitorsByBrowser).map(([browser, count]) => ({
-                  browser,
-                  visiteurs: count
-                }))}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="browser" />
-                  <YAxis />
-                  <Tooltip 
-                    labelStyle={{ color: '#374151' }}
-                    contentStyle={{ 
-                      backgroundColor: '#f9fafb', 
-                      border: '1px solid #e5e7eb',
-                      borderRadius: '8px'
-                    }}
-                  />
-                  <Bar dataKey="visiteurs" fill="#8b5cf6" radius={[4, 4, 0, 0]} />
-                </BarChart>
-              </ResponsiveContainer>
+              <SimpleBarChart 
+                data={visitorStats.visitorsByBrowser}
+                title="Visiteurs par navigateur"
+                color="#8b5cf6"
+              />
             </motion.div>
           )}
         </div>

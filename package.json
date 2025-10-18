@@ -4,8 +4,8 @@
   "description": "E-commerce site for digital packs with futuristic design and affiliate tracking",
   "private": true,
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
+    "dev": "node --max-old-space-size=4096 ./node_modules/.bin/vite",
+    "build": "node --max-old-space-size=4096 ./node_modules/.bin/vite build",
     "preview": "vite preview"
   },
   "dependencies": {
