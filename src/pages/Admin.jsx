@@ -249,25 +249,25 @@ const Admin = () => {
 
   // Interface d'administration (utilisateur connecté)
   return (
-    <div className="min-h-screen pt-24 pb-20 bg-gradient-to-br from-gray-50 via-blue-50 to-purple-50">
-      <div className="max-w-7xl mx-auto px-4">
+    <div className="min-h-screen pt-20 pb-16 bg-gray-50">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <motion.div
-          initial={{ opacity: 0, y: 30 }}
+          initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="mb-8"
+          className="mb-6"
         >
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
-              <h1 className="text-5xl font-bold mb-2 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
-                Dashboard Admin
+              <h1 className="text-2xl sm:text-3xl font-semibold text-gray-900">
+                Administration
               </h1>
-              <p className="text-gray-600 text-lg">
-                Connecté en tant que <span className="font-semibold text-blue-600">{user.email}</span>
+              <p className="text-sm text-gray-600 mt-1">
+                {user.email}
               </p>
             </div>
             <button
               onClick={handleLogout}
-              className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-xl hover:from-red-600 hover:to-red-700 transition-all shadow-lg hover:shadow-xl"
+              className="flex items-center gap-2 px-4 py-2 text-sm bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
             >
               <FaSignOutAlt />
               Déconnexion
@@ -277,44 +277,44 @@ const Admin = () => {
 
         {/* Onglets de navigation */}
         <motion.div
-          initial={{ opacity: 0, y: 30 }}
+          initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="mb-8"
+          className="mb-6"
         >
-          <div className="flex space-x-2 bg-white/80 backdrop-blur-sm p-2 rounded-2xl shadow-lg border border-white/20">
+          <div className="flex flex-col sm:flex-row bg-white border border-gray-200 rounded-lg overflow-hidden">
             <button
               onClick={() => setActiveTab('affiliates')}
-              className={`flex-1 flex items-center justify-center gap-3 px-6 py-4 rounded-xl transition-all duration-300 ${
+              className={`flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium transition-colors ${
                 activeTab === 'affiliates'
-                  ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg transform scale-105'
-                  : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+                  ? 'bg-blue-600 text-white'
+                  : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
               }`}
             >
-              <FaPlus className="text-lg" />
-              <span className="font-semibold">Influenceurs</span>
+              <FaPlus className="text-sm" />
+              <span className="hidden sm:inline">Influenceurs</span>
             </button>
             <button
               onClick={() => setActiveTab('legal')}
-              className={`flex-1 flex items-center justify-center gap-3 px-6 py-4 rounded-xl transition-all duration-300 ${
+              className={`flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium transition-colors border-l border-gray-200 ${
                 activeTab === 'legal'
-                  ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg transform scale-105'
-                  : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+                  ? 'bg-blue-600 text-white'
+                  : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
               }`}
             >
-              <FaFileContract className="text-lg" />
-              <span className="font-semibold">Mentions Légales</span>
+              <FaFileContract className="text-sm" />
+              <span className="hidden sm:inline">Mentions Légales</span>
             </button>
             <button
               onClick={() => setActiveTab('stats')}
-              className={`flex-1 flex items-center justify-center gap-3 px-6 py-4 rounded-xl transition-all duration-300 ${
+              className={`flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium transition-colors border-l border-gray-200 ${
                 activeTab === 'stats'
-                  ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg transform scale-105'
-                  : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+                  ? 'bg-blue-600 text-white'
+                  : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
               }`}
             >
-              <FaChartLine className="text-lg" />
-              <span className="font-semibold">Statistiques</span>
+              <FaChartLine className="text-sm" />
+              <span className="hidden sm:inline">Statistiques</span>
             </button>
           </div>
         </motion.div>
@@ -324,12 +324,12 @@ const Admin = () => {
           <>
             {/* Pages de paiement par défaut */}
             <motion.div
-              initial={{ opacity: 0, y: 30 }}
+              initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
-              className="bg-white/90 backdrop-blur-sm rounded-2xl p-8 border border-white/20 shadow-xl mb-8"
+              className="bg-white rounded-lg p-6 border border-gray-200 mb-6"
             >
-          <h2 className="text-3xl font-bold mb-6 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Pages de paiement par défaut</h2>
+          <h2 className="text-xl font-semibold text-gray-900 mb-4">Pages de paiement par défaut</h2>
           <div className="grid md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -339,7 +339,7 @@ const Admin = () => {
                 type="url"
                 value={localPaymentPages.STFOUR}
                 onChange={(e) => handleUpdatePaymentPage('STFOUR', e.target.value)}
-                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-sm hover:shadow-md transition-all"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
                 placeholder="https://..."
               />
             </div>
@@ -351,7 +351,7 @@ const Admin = () => {
                 type="url"
                 value={localPaymentPages.GLBNS}
                 onChange={(e) => handleUpdatePaymentPage('GLBNS', e.target.value)}
-                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-sm hover:shadow-md transition-all"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
                 placeholder="https://..."
               />
             </div>
