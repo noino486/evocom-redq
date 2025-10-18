@@ -56,31 +56,24 @@ const AppDetector = () => {
       if (isInAppBrowser && !isNativeBrowser) {
         const currentUrl = window.location.href
         
-        // Attendre un petit délai pour que la page se charge
+        // Redirection automatique immédiate
         setTimeout(() => {
+          // Méthode universelle pour ouvrir dans le navigateur par défaut
+          window.open(currentUrl, '_blank', 'noopener,noreferrer')
+          
+          // Pour les appareils mobiles, essayer des méthodes spécifiques
           if (navigator.userAgent.includes('iPhone') || navigator.userAgent.includes('iPad')) {
-            // iOS - essayer d'ouvrir dans Safari
-            const safariUrl = `x-web-search://?${currentUrl}`
-            window.location.href = safariUrl
-            
-            // Fallback après 1 seconde
+            // iOS - essayer d'ouvrir dans Safari avec un délai
             setTimeout(() => {
-              window.open(currentUrl, '_blank')
-            }, 1000)
+              window.location.href = currentUrl
+            }, 100)
           } else if (navigator.userAgent.includes('Android')) {
             // Android - essayer d'ouvrir dans le navigateur par défaut
-            const intentUrl = `intent://${currentUrl.replace(/^https?:\/\//, '')}#Intent;scheme=https;package=com.android.chrome;end`
-            window.location.href = intentUrl
-            
-            // Fallback
             setTimeout(() => {
-              window.open(currentUrl, '_blank')
-            }, 1000)
-          } else {
-            // Desktop ou autres - ouvrir dans un nouvel onglet
-            window.open(currentUrl, '_blank')
+              window.location.href = currentUrl
+            }, 100)
           }
-        }, 500) // Délai de 500ms pour laisser la page se charger
+        }, 300) // Délai réduit pour une redirection plus rapide
       }
     }
 
