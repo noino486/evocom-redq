@@ -79,6 +79,7 @@ const AppDetector = () => {
           (window.screen && window.screen.width <= 414 && window.screen.height <= 896) ||
           // Détection par les propriétés du navigateur
           (window.navigator.standalone === false && ua.includes('iPhone') && !ua.includes('Safari'))
+        )
         
         const isSnapchatDetected = isSnapchatByUA || isSnapchatByFeatures
         
