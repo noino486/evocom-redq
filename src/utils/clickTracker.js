@@ -23,7 +23,8 @@ export const trackClick = async (linkData) => {
       page_url: window.location.href,
       is_mobile: /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent),
       is_in_app: isInAppBrowser(),
-      click_source: linkData.source || 'unknown'
+      click_source: linkData.source || 'unknown',
+      affiliate_link_id: linkData.affiliateLinkId || null // Nouveau champ pour identifier le lien affilié
     }
 
     // Envoyer les données à Supabase
@@ -161,7 +162,8 @@ export const getAggregatedStats = async (filters = {}) => {
       clicksByDay: {},
       mobileClicks: 0,
       inAppClicks: 0,
-      topLinks: []
+      topLinks: [],
+      affiliateLinkStats: {} // Nouveau: stats par lien affilié
     }
 
     clicks.forEach(click => {
@@ -185,6 +187,34 @@ export const getAggregatedStats = async (filters = {}) => {
       // Mobile/App
       if (click.is_mobile) stats.mobileClicks++
       if (click.is_in_app) stats.inAppClicks++
+
+      // Stats par influenceur
+      if (click.affiliate_name) {
+        if (!stats.affiliateLinkStats[click.affiliate_name]) {
+          stats.affiliateLinkStats[click.affiliate_name] = {
+            influenceur: click.affiliate_name,
+            total_clicks: 0,
+            mobile_clicks: 0,
+            in_app_clicks: 0,
+            unique_links: new Set(),
+            first_click: click.timestamp,
+            last_click: click.timestamp
+          }
+        }
+        
+        stats.affiliateLinkStats[click.affiliate_name].total_clicks++
+        if (click.is_mobile) stats.affiliateLinkStats[click.affiliate_name].mobile_clicks++
+        if (click.is_in_app) stats.affiliateLinkStats[click.affiliate_name].in_app_clicks++
+        stats.affiliateLinkStats[click.affiliate_name].unique_links.add(click.link_url)
+        
+        // Mettre à jour les dates
+        if (click.timestamp < stats.affiliateLinkStats[click.affiliate_name].first_click) {
+          stats.affiliateLinkStats[click.affiliate_name].first_click = click.timestamp
+        }
+        if (click.timestamp > stats.affiliateLinkStats[click.affiliate_name].last_click) {
+          stats.affiliateLinkStats[click.affiliate_name].last_click = click.timestamp
+        }
+      }
     })
 
     // Top liens

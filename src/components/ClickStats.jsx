@@ -335,22 +335,92 @@ const ClickStats = () => {
         </motion.div>
       </div>
 
+      {/* Performance par influenceur */}
+      {stats.affiliateLinkStats && Object.keys(stats.affiliateLinkStats).length > 0 && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4 }}
+          className="bg-white rounded-lg p-6 border border-gray-200"
+        >
+          <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+            <FaUser className="text-blue-600" />
+            Performance par influenceur
+          </h3>
+          <div className="space-y-4">
+            {Object.values(stats.affiliateLinkStats)
+              .sort((a, b) => b.total_clicks - a.total_clicks)
+              .map((influenceurStats, index) => (
+                <div key={influenceurStats.influenceur} className="bg-gray-50 rounded-lg p-4">
+                  <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-3 mb-2">
+                        <span className="text-sm font-medium text-gray-600">#{index + 1}</span>
+                        <span className="text-lg font-semibold text-gray-900">
+                          {influenceurStats.influenceur}
+                        </span>
+                      </div>
+                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-sm text-gray-600">
+                        <div>
+                          <span className="font-medium">Total:</span> {influenceurStats.total_clicks} clics
+                        </div>
+                        <div>
+                          <span className="font-medium">Mobile:</span> {influenceurStats.mobile_clicks}
+                        </div>
+                        <div>
+                          <span className="font-medium">Apps:</span> {influenceurStats.in_app_clicks}
+                        </div>
+                        <div>
+                          <span className="font-medium">Liens uniques:</span> {influenceurStats.unique_links.size}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="text-center lg:text-right">
+                      <div className="text-3xl font-bold text-blue-600">
+                        {influenceurStats.total_clicks}
+                      </div>
+                      <div className="text-sm text-gray-500">clics</div>
+                    </div>
+                  </div>
+                  <div className="mt-4">
+                    <div className="w-full bg-gray-200 rounded-full h-3">
+                      <div 
+                        className="bg-blue-600 h-3 rounded-full transition-all duration-300"
+                        style={{ 
+                          width: `${Math.min(
+                            (influenceurStats.total_clicks / Math.max(...Object.values(stats.affiliateLinkStats).map(s => s.total_clicks))) * 100, 
+                            100
+                          )}%` 
+                        }}
+                      ></div>
+                    </div>
+                    <div className="flex justify-between text-xs text-gray-500 mt-1">
+                      <span>Premier clic: {new Date(influenceurStats.first_click).toLocaleDateString('fr-FR')}</span>
+                      <span>Dernier clic: {new Date(influenceurStats.last_click).toLocaleDateString('fr-FR')}</span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+          </div>
+        </motion.div>
+      )}
+
       {/* Répartition par type de lien */}
       {stats.clicksByType && Object.keys(stats.clicksByType).length > 0 && (
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4 }}
-          className="bg-white/80 backdrop-blur-sm rounded-xl p-6 border border-gray-200/50"
+          transition={{ delay: 0.5 }}
+          className="bg-white rounded-lg p-6 border border-gray-200"
         >
-          <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
-            <FaLink className="text-primary" />
+          <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+            <FaLink className="text-blue-600" />
             Répartition par type de lien
           </h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {Object.entries(stats.clicksByType).map(([type, count]) => (
               <div key={type} className="bg-gray-50 rounded-lg p-4">
-                <div className="text-2xl font-bold text-primary mb-1">
+                <div className="text-2xl font-bold text-blue-600 mb-1">
                   {formatNumber(count)}
                 </div>
                 <div className="text-sm text-gray-600 capitalize">

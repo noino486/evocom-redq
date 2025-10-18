@@ -14,14 +14,15 @@ const Products = () => {
     const paymentUrl = getPaymentLink(product.id)
     const affiliateCode = getCurrentAffiliateCode()
     
-    // Tracker le clic
+    // Tracker le clic avec l'ID de l'influenceur
     await trackClick({
       url: paymentUrl,
       text: `Acheter ${product.name}`,
       type: LINK_TYPES.AFFILIATE,
       affiliateName: affiliateCode || 'default',
       productId: product.id,
-      source: 'products_section'
+      source: 'products_section',
+      affiliateLinkId: affiliateCode || 'default' // ID unique pour l'influenceur
     })
   }
 
