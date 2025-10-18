@@ -7,6 +7,7 @@ import Header from './components/Header'
 import Footer from './components/Footer'
 import AppDetector from './components/AppDetector'
 import useGlobalClickTracker from './hooks/useGlobalClickTracker'
+import useVisitorTracker from './hooks/useVisitorTracker'
 import Home from './pages/Home'
 import ProductDetail from './pages/ProductDetail'
 import Admin from './pages/Admin'
@@ -15,6 +16,9 @@ import LegalNotice from './pages/LegalNotice'
 function App() {
   // Activer le tracking global de tous les clics
   useGlobalClickTracker()
+  
+  // Activer le tracking des visiteurs
+  useVisitorTracker()
 
   return (
     <>

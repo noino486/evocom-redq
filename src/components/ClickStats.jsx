@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { FaChartLine, FaMousePointer, FaMobile, FaDesktop, FaExternalLinkAlt, FaCalendarAlt, FaUser, FaLink, FaHome, FaShoppingCart, FaGlobe, FaArrowRight } from 'react-icons/fa'
+import { FaChartLine, FaMousePointer, FaMobile, FaDesktop, FaExternalLinkAlt, FaCalendarAlt, FaUser, FaLink, FaHome, FaShoppingCart, FaGlobe, FaArrowRight, FaUsers, FaEye, FaClock, FaMapMarkerAlt } from 'react-icons/fa'
 import { getClickStats, getAggregatedStats } from '../utils/clickTracker'
+import { getAggregatedVisitorStats, getCurrentVisitors } from '../utils/visitorTracker'
 
 const ClickStats = () => {
   const [stats, setStats] = useState(null)
+  const [visitorStats, setVisitorStats] = useState(null)
+  const [currentVisitors, setCurrentVisitors] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [dateRange, setDateRange] = useState('7d')
@@ -49,12 +52,25 @@ const ClickStats = () => {
         source: selectedSource !== 'all' ? selectedSource : null
       }
 
-      const result = await getAggregatedStats(filters)
+      // Charger les stats de clics et de visiteurs en parallèle
+      const [clicksResult, visitorsResult, currentVisitorsResult] = await Promise.all([
+        getAggregatedStats(filters),
+        getAggregatedVisitorStats(filters),
+        getCurrentVisitors()
+      ])
       
-      if (result.success) {
-        setStats(result.data)
+      if (clicksResult.success) {
+        setStats(clicksResult.data)
       } else {
-        setError(result.error?.message || 'Erreur lors du chargement des statistiques')
+        setError(clicksResult.error?.message || 'Erreur lors du chargement des statistiques de clics')
+      }
+
+      if (visitorsResult.success) {
+        setVisitorStats(visitorsResult.data)
+      }
+
+      if (currentVisitorsResult.success) {
+        setCurrentVisitors(currentVisitorsResult.data)
       }
     } catch (err) {
       setError('Erreur lors du chargement des statistiques')
@@ -204,7 +220,7 @@ const ClickStats = () => {
               <FaMousePointer className="text-white text-xl" />
             </div>
             <span className="text-2xl font-bold text-blue-600">
-              {formatNumber(stats.totalClicks)}
+              {formatNumber(stats?.totalClicks || 0)}
             </span>
           </div>
           <h3 className="text-lg font-semibold text-gray-900">Total des clics</h3>
@@ -215,6 +231,60 @@ const ClickStats = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
+          className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl p-6 border border-purple-200"
+        >
+          <div className="flex items-center justify-between mb-4">
+            <div className="p-3 bg-purple-500 rounded-lg">
+              <FaUsers className="text-white text-xl" />
+            </div>
+            <span className="text-2xl font-bold text-purple-600">
+              {formatNumber(visitorStats?.totalVisitors || 0)}
+            </span>
+          </div>
+          <h3 className="text-lg font-semibold text-gray-900">Visiteurs totaux</h3>
+          <p className="text-sm text-gray-600">Toutes les sessions</p>
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+          className="bg-gradient-to-br from-green-50 to-green-100 rounded-xl p-6 border border-green-200"
+        >
+          <div className="flex items-center justify-between mb-4">
+            <div className="p-3 bg-green-500 rounded-lg">
+              <FaEye className="text-white text-xl" />
+            </div>
+            <span className="text-2xl font-bold text-green-600">
+              {formatNumber(visitorStats?.uniqueVisitors || 0)}
+            </span>
+          </div>
+          <h3 className="text-lg font-semibold text-gray-900">Visiteurs uniques</h3>
+          <p className="text-sm text-gray-600">Sessions distinctes</p>
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3 }}
+          className="bg-gradient-to-br from-orange-50 to-orange-100 rounded-xl p-6 border border-orange-200"
+        >
+          <div className="flex items-center justify-between mb-4">
+            <div className="p-3 bg-orange-500 rounded-lg">
+              <FaClock className="text-white text-xl" />
+            </div>
+            <span className="text-2xl font-bold text-orange-600">
+              {currentVisitors.length}
+            </span>
+          </div>
+          <h3 className="text-lg font-semibold text-gray-900">Visiteurs actuels</h3>
+          <p className="text-sm text-gray-600">En ligne maintenant</p>
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4 }}
           className="bg-gradient-to-br from-green-50 to-green-100 rounded-xl p-6 border border-green-200"
         >
           <div className="flex items-center justify-between mb-4">
@@ -222,19 +292,19 @@ const ClickStats = () => {
               <FaMobile className="text-white text-xl" />
             </div>
             <span className="text-2xl font-bold text-green-600">
-              {formatNumber(stats.mobileClicks)}
+              {formatNumber(stats?.mobileClicks || 0)}
             </span>
           </div>
           <h3 className="text-lg font-semibold text-gray-900">Clics mobiles</h3>
           <p className="text-sm text-gray-600">
-            {stats.totalClicks > 0 ? Math.round((stats.mobileClicks / stats.totalClicks) * 100) : 0}% du total
+            {stats?.totalClicks > 0 ? Math.round(((stats.mobileClicks || 0) / stats.totalClicks) * 100) : 0}% du total
           </p>
         </motion.div>
 
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
+          transition={{ delay: 0.5 }}
           className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl p-6 border border-purple-200"
         >
           <div className="flex items-center justify-between mb-4">
@@ -242,7 +312,7 @@ const ClickStats = () => {
               <FaExternalLinkAlt className="text-white text-xl" />
             </div>
             <span className="text-2xl font-bold text-purple-600">
-              {formatNumber(stats.inAppClicks)}
+              {formatNumber(stats?.inAppClicks || 0)}
             </span>
           </div>
           <h3 className="text-lg font-semibold text-gray-900">Clics depuis apps</h3>
@@ -254,7 +324,7 @@ const ClickStats = () => {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
+          transition={{ delay: 0.6 }}
           className="bg-gradient-to-br from-orange-50 to-orange-100 rounded-xl p-6 border border-orange-200"
         >
           <div className="flex items-center justify-between mb-4">
@@ -262,12 +332,12 @@ const ClickStats = () => {
               <FaDesktop className="text-white text-xl" />
             </div>
             <span className="text-2xl font-bold text-orange-600">
-              {formatNumber(stats.totalClicks - stats.mobileClicks)}
+              {formatNumber((stats?.totalClicks || 0) - (stats?.mobileClicks || 0))}
             </span>
           </div>
           <h3 className="text-lg font-semibold text-gray-900">Clics desktop</h3>
           <p className="text-sm text-gray-600">
-            {stats.totalClicks > 0 ? Math.round(((stats.totalClicks - stats.mobileClicks) / stats.totalClicks) * 100) : 0}% du total
+            {stats?.totalClicks > 0 ? Math.round((((stats.totalClicks - (stats.mobileClicks || 0)) / stats.totalClicks) * 100)) : 0}% du total
           </p>
         </motion.div>
       </div>

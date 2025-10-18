@@ -19,6 +19,35 @@ CREATE TABLE IF NOT EXISTS link_clicks (
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
+-- Créer la table visitors pour tracker les visiteurs
+CREATE TABLE IF NOT EXISTS visitors (
+  id BIGSERIAL PRIMARY KEY,
+  session_id TEXT NOT NULL,
+  user_agent TEXT,
+  referrer TEXT,
+  page_url TEXT NOT NULL,
+  timestamp TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  is_mobile BOOLEAN NOT NULL DEFAULT FALSE,
+  is_in_app BOOLEAN NOT NULL DEFAULT FALSE,
+  ip_address TEXT,
+  country TEXT,
+  city TEXT,
+  device_type TEXT,
+  browser TEXT,
+  os TEXT,
+  screen_resolution TEXT,
+  viewport_size TEXT,
+  language TEXT,
+  timezone TEXT,
+  affiliate_code TEXT,
+  utm_source TEXT,
+  utm_medium TEXT,
+  utm_campaign TEXT,
+  utm_term TEXT,
+  utm_content TEXT,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
 -- Créer des index pour optimiser les requêtes
 CREATE INDEX IF NOT EXISTS idx_link_clicks_timestamp ON link_clicks(timestamp);
 CREATE INDEX IF NOT EXISTS idx_link_clicks_affiliate_name ON link_clicks(affiliate_name);
@@ -28,7 +57,17 @@ CREATE INDEX IF NOT EXISTS idx_link_clicks_is_mobile ON link_clicks(is_mobile);
 CREATE INDEX IF NOT EXISTS idx_link_clicks_is_in_app ON link_clicks(is_in_app);
 CREATE INDEX IF NOT EXISTS idx_link_clicks_click_source ON link_clicks(click_source);
 
--- Créer une vue pour les statistiques agrégées
+-- Index pour la table visitors
+CREATE INDEX IF NOT EXISTS idx_visitors_timestamp ON visitors(timestamp);
+CREATE INDEX IF NOT EXISTS idx_visitors_session_id ON visitors(session_id);
+CREATE INDEX IF NOT EXISTS idx_visitors_affiliate_code ON visitors(affiliate_code);
+CREATE INDEX IF NOT EXISTS idx_visitors_device_type ON visitors(device_type);
+CREATE INDEX IF NOT EXISTS idx_visitors_browser ON visitors(browser);
+CREATE INDEX IF NOT EXISTS idx_visitors_country ON visitors(country);
+CREATE INDEX IF NOT EXISTS idx_visitors_is_mobile ON visitors(is_mobile);
+CREATE INDEX IF NOT EXISTS idx_visitors_is_in_app ON visitors(is_in_app);
+
+-- Créer une vue pour les statistiques agrégées des clics
 CREATE OR REPLACE VIEW link_click_stats AS
 SELECT 
   DATE(timestamp) as click_date,
@@ -49,6 +88,30 @@ GROUP BY
   is_mobile,
   is_in_app;
 
+-- Créer une vue pour les statistiques agrégées des visiteurs
+CREATE OR REPLACE VIEW visitor_stats AS
+SELECT 
+  DATE(timestamp) as visit_date,
+  device_type,
+  browser,
+  os,
+  country,
+  affiliate_code,
+  is_mobile,
+  is_in_app,
+  COUNT(*) as visitor_count,
+  COUNT(DISTINCT session_id) as unique_visitor_count
+FROM visitors
+GROUP BY 
+  DATE(timestamp),
+  device_type,
+  browser,
+  os,
+  country,
+  affiliate_code,
+  is_mobile,
+  is_in_app;
+
 -- Créer une fonction pour nettoyer les anciens clics (optionnel)
 CREATE OR REPLACE FUNCTION cleanup_old_clicks()
 RETURNS void AS $$
@@ -59,12 +122,26 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+-- Créer une fonction pour nettoyer les anciens visiteurs (optionnel)
+CREATE OR REPLACE FUNCTION cleanup_old_visitors()
+RETURNS void AS $$
+BEGIN
+  -- Supprimer les visiteurs plus anciens que 1 an
+  DELETE FROM visitors 
+  WHERE timestamp < NOW() - INTERVAL '1 year';
+END;
+$$ LANGUAGE plpgsql;
+
 -- Activer RLS (Row Level Security) pour la sécurité
 ALTER TABLE link_clicks ENABLE ROW LEVEL SECURITY;
+ALTER TABLE visitors ENABLE ROW LEVEL SECURITY;
 
 -- Créer une politique pour permettre la lecture et l'écriture
 -- (Ajustez selon vos besoins de sécurité)
 CREATE POLICY "Allow all operations on link_clicks" ON link_clicks
+  FOR ALL USING (true);
+
+CREATE POLICY "Allow all operations on visitors" ON visitors
   FOR ALL USING (true);
 
 -- Insérer des données de test (optionnel - à supprimer en production)
@@ -92,12 +169,25 @@ CREATE POLICY "Allow all operations on link_clicks" ON link_clicks
 --   'test'
 -- );
 
--- Afficher les informations de la table créée
+-- Afficher les informations des tables créées
 SELECT 
   table_name,
   column_name,
   data_type,
   is_nullable
 FROM information_schema.columns 
+WHERE table_name IN ('link_clicks', 'visitors')
+ORDER BY table_name, ordinal_position;
+
+-- Afficher un résumé des tables créées
+SELECT 
+  'link_clicks' as table_name,
+  COUNT(*) as column_count
+FROM information_schema.columns 
 WHERE table_name = 'link_clicks'
-ORDER BY ordinal_position;
+UNION ALL
+SELECT 
+  'visitors' as table_name,
+  COUNT(*) as column_count
+FROM information_schema.columns 
+WHERE table_name = 'visitors';
