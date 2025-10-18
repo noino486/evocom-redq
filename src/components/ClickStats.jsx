@@ -1,9 +1,13 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, Suspense, lazy } from 'react'
 import { motion } from 'framer-motion'
 import { FaChartLine, FaMousePointer, FaMobile, FaDesktop, FaExternalLinkAlt, FaCalendarAlt, FaUser, FaLink, FaHome, FaShoppingCart, FaGlobe, FaArrowRight, FaUsers, FaEye, FaClock, FaMapMarkerAlt } from 'react-icons/fa'
 import { getClickStats, getAggregatedStats } from '../utils/clickTracker'
 import { getAggregatedVisitorStats } from '../utils/visitorTracker'
-import { SimpleBarChart, SimplePieChart, SimpleLineChart } from './SimpleChart'
+
+// Lazy loading des composants de graphiques
+const SimpleBarChart = lazy(() => import('./SimpleChart').then(module => ({ default: module.SimpleBarChart })))
+const SimplePieChart = lazy(() => import('./SimpleChart').then(module => ({ default: module.SimplePieChart })))
+const SimpleLineChart = lazy(() => import('./SimpleChart').then(module => ({ default: module.SimpleLineChart })))
 
 const ClickStats = () => {
   const [stats, setStats] = useState(null)
@@ -312,11 +316,13 @@ const ClickStats = () => {
             transition={{ delay: 0.4 }}
             className="bg-white/80 backdrop-blur-sm rounded-xl p-6 border border-gray-200/50"
           >
-            <SimpleLineChart 
-              data={stats.clicksByDay}
-              title="Évolution des clics"
-              color="#3b82f6"
-            />
+            <Suspense fallback={<div className="h-48 flex items-center justify-center text-gray-500">Chargement du graphique...</div>}>
+              <SimpleLineChart 
+                data={stats.clicksByDay}
+                title="Évolution des clics"
+                color="#3b82f6"
+              />
+            </Suspense>
           </motion.div>
         )}
 
@@ -328,17 +334,19 @@ const ClickStats = () => {
             transition={{ delay: 0.5 }}
             className="bg-white/80 backdrop-blur-sm rounded-xl p-6 border border-gray-200/50"
           >
-            <SimplePieChart 
-              data={Object.entries(stats.clicksByType).reduce((acc, [type, count]) => {
-                const name = type === 'affiliate' ? 'Liens d\'achat' :
-                           type === 'product' ? 'Pages produits' :
-                           type === 'internal' ? 'Liens internes' :
-                           type === 'external' ? 'Liens externes' : type
-                acc[name] = count
-                return acc
-              }, {})}
-              title="Répartition des clics"
-            />
+            <Suspense fallback={<div className="h-48 flex items-center justify-center text-gray-500">Chargement du graphique...</div>}>
+              <SimplePieChart 
+                data={Object.entries(stats.clicksByType).reduce((acc, [type, count]) => {
+                  const name = type === 'affiliate' ? 'Liens d\'achat' :
+                             type === 'product' ? 'Pages produits' :
+                             type === 'internal' ? 'Liens internes' :
+                             type === 'external' ? 'Liens externes' : type
+                  acc[name] = count
+                  return acc
+                }, {})}
+                title="Répartition des clics"
+              />
+            </Suspense>
           </motion.div>
         )}
       </div>
@@ -354,11 +362,13 @@ const ClickStats = () => {
               transition={{ delay: 0.6 }}
               className="bg-white/80 backdrop-blur-sm rounded-xl p-6 border border-gray-200/50"
             >
-              <SimpleBarChart 
-                data={visitorStats.visitorsByDevice}
-                title="Visiteurs par appareil"
-                color="#10b981"
-              />
+              <Suspense fallback={<div className="h-48 flex items-center justify-center text-gray-500">Chargement du graphique...</div>}>
+                <SimpleBarChart 
+                  data={visitorStats.visitorsByDevice}
+                  title="Visiteurs par appareil"
+                  color="#10b981"
+                />
+              </Suspense>
             </motion.div>
           )}
 
@@ -370,11 +380,13 @@ const ClickStats = () => {
               transition={{ delay: 0.7 }}
               className="bg-white/80 backdrop-blur-sm rounded-xl p-6 border border-gray-200/50"
             >
-              <SimpleBarChart 
-                data={visitorStats.visitorsByBrowser}
-                title="Visiteurs par navigateur"
-                color="#8b5cf6"
-              />
+              <Suspense fallback={<div className="h-48 flex items-center justify-center text-gray-500">Chargement du graphique...</div>}>
+                <SimpleBarChart 
+                  data={visitorStats.visitorsByBrowser}
+                  title="Visiteurs par navigateur"
+                  color="#8b5cf6"
+                />
+              </Suspense>
             </motion.div>
           )}
         </div>
