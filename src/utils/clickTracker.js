@@ -11,12 +11,23 @@ export const LINK_TYPES = {
 // Fonction pour tracker un clic
 export const trackClick = async (linkData) => {
   try {
-    // Détection mobile améliorée
+    // Détection mobile robuste
     const isMobile = /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
-                     (typeof window !== 'undefined' && window.innerWidth <= 768)
+                     (typeof window !== 'undefined' && window.innerWidth <= 768) ||
+                     (typeof window !== 'undefined' && window.screen.width <= 768)
     
-    // Détection d'app tierce améliorée
+    // Détection d'app tierce robuste
     const isInApp = isInAppBrowser()
+    
+    console.log('📱 Debug tracking mobile:', {
+      userAgent: navigator.userAgent,
+      isMobile,
+      isInApp,
+      screenWidth: typeof window !== 'undefined' ? window.screen.width : 'N/A',
+      screenHeight: typeof window !== 'undefined' ? window.screen.height : 'N/A',
+      innerWidth: typeof window !== 'undefined' ? window.innerWidth : 'N/A',
+      innerHeight: typeof window !== 'undefined' ? window.innerHeight : 'N/A'
+    })
     
     const clickData = {
       link_url: linkData.url,
@@ -31,12 +42,7 @@ export const trackClick = async (linkData) => {
       is_mobile: isMobile,
       is_in_app: isInApp,
       click_source: linkData.source || 'unknown',
-      affiliate_link_id: linkData.affiliateLinkId || null,
-      // Ajout de métadonnées pour le debug mobile
-      screen_width: typeof window !== 'undefined' ? window.innerWidth : null,
-      screen_height: typeof window !== 'undefined' ? window.innerHeight : null,
-      viewport_width: typeof window !== 'undefined' ? window.innerWidth : null,
-      viewport_height: typeof window !== 'undefined' ? window.innerHeight : null
+      affiliate_link_id: linkData.affiliateLinkId || null
     }
 
     // Envoyer les données à Supabase
@@ -68,9 +74,26 @@ export const isInAppBrowser = () => {
     'Discord', 'Reddit', 'YouTube', 'Twitch', 'Spotify'
   ]
 
-  return inAppBrowsers.some(pattern => ua.includes(pattern)) ||
-         /wv\)/i.test(ua) || // Android WebView
-         /Version\/.*Chrome\/.*Mobile/i.test(ua) // Chrome mobile dans app
+  const webViewPatterns = [
+    /wv\)/i, // Android WebView
+    /Version\/.*Chrome\/.*Mobile/i, // Chrome mobile dans app
+    /CriOS/i, // Chrome iOS dans app
+    /FxiOS/i, // Firefox iOS dans app
+    /OPiOS/i, // Opera iOS dans app
+    /EdgiOS/i // Edge iOS dans app
+  ]
+
+  const isInApp = inAppBrowsers.some(pattern => ua.includes(pattern)) ||
+                  webViewPatterns.some(pattern => pattern.test(ua))
+
+  console.log('🔍 Debug isInAppBrowser:', {
+    userAgent: ua,
+    isInApp,
+    detectedPatterns: inAppBrowsers.filter(pattern => ua.includes(pattern)),
+    detectedWebViews: webViewPatterns.filter(pattern => pattern.test(ua))
+  })
+
+  return isInApp
 }
 
 // Fonction pour créer un lien tracké

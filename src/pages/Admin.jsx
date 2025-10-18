@@ -158,6 +158,66 @@ const Admin = () => {
     console.log('🔍 Test liens AF:', results)
   }
 
+  // Fonction pour tester le tracking mobile
+  const handleTestMobileTracking = () => {
+    const testResults = {
+      userAgent: navigator.userAgent,
+      isMobile: /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent),
+      screenWidth: window.screen.width,
+      screenHeight: window.screen.height,
+      innerWidth: window.innerWidth,
+      innerHeight: window.innerHeight,
+      localStorage: {
+        available: typeof localStorage !== 'undefined',
+        test: null
+      },
+      sessionStorage: {
+        available: typeof sessionStorage !== 'undefined',
+        test: null
+      },
+      cookies: {
+        available: typeof document !== 'undefined' && typeof document.cookie !== 'undefined',
+        test: null
+      }
+    }
+
+    // Test localStorage
+    try {
+      if (typeof localStorage !== 'undefined') {
+        localStorage.setItem('mobile-test', 'test-value')
+        testResults.localStorage.test = localStorage.getItem('mobile-test') === 'test-value'
+        localStorage.removeItem('mobile-test')
+      }
+    } catch (error) {
+      testResults.localStorage.error = error.message
+    }
+
+    // Test sessionStorage
+    try {
+      if (typeof sessionStorage !== 'undefined') {
+        sessionStorage.setItem('mobile-test', 'test-value')
+        testResults.sessionStorage.test = sessionStorage.getItem('mobile-test') === 'test-value'
+        sessionStorage.removeItem('mobile-test')
+      }
+    } catch (error) {
+      testResults.sessionStorage.error = error.message
+    }
+
+    // Test cookies
+    try {
+      if (typeof document !== 'undefined') {
+        document.cookie = 'mobile-test=test-value; path=/'
+        testResults.cookies.test = document.cookie.includes('mobile-test=test-value')
+        document.cookie = 'mobile-test=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT'
+      }
+    } catch (error) {
+      testResults.cookies.error = error.message
+    }
+
+    setDebugResults(testResults)
+    console.log('📱 Test tracking mobile:', testResults)
+  }
+
   // Écran de chargement
   if (loading) {
     return (
@@ -359,20 +419,27 @@ const Admin = () => {
               Debug localStorage Mobile
             </h2>
             
-            <div className="mb-6 flex gap-4">
+            <div className="mb-6 flex flex-wrap gap-4">
               <button
                 onClick={handleTestLocalStorage}
                 className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
               >
                 <FaMobile />
-                Tester le localStorage
+                Test localStorage
               </button>
               <button
                 onClick={handleTestAffiliateLinks}
                 className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
               >
                 <FaBug />
-                Tester les liens AF
+                Test liens AF
+              </button>
+              <button
+                onClick={handleTestMobileTracking}
+                className="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+              >
+                <FaMobile />
+                Test tracking mobile
               </button>
             </div>
 

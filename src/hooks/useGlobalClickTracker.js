@@ -40,11 +40,30 @@ const useGlobalClickTracker = () => {
       const text = element.textContent?.trim() || element.title || element.alt || ''
       const url = element.href || window.location.href
       
-      // Détecter l'affilié depuis l'URL ou le localStorage
+      // Détecter l'affilié depuis l'URL ou le localStorage (avec fallbacks)
       const urlParams = new URLSearchParams(window.location.search)
       const affiliateFromUrl = urlParams.get('AF')
-      const affiliateFromStorage = localStorage.getItem('evocom-affiliate')
+      
+      let affiliateFromStorage = null
+      try {
+        affiliateFromStorage = localStorage.getItem('evocom-affiliate')
+      } catch (error) {
+        console.warn('Erreur localStorage:', error)
+        try {
+          affiliateFromStorage = sessionStorage.getItem('evocom-affiliate')
+        } catch (error2) {
+          console.warn('Erreur sessionStorage:', error2)
+        }
+      }
+      
       const affiliateName = affiliateFromUrl || affiliateFromStorage || null
+      
+      console.log('🔍 Debug affilié dans useGlobalClickTracker:', {
+        affiliateFromUrl,
+        affiliateFromStorage,
+        affiliateName,
+        currentUrl: window.location.href
+      })
       
       // Détecter le produit depuis l'URL
       let productId = null
@@ -108,16 +127,31 @@ const useGlobalClickTracker = () => {
         return
       }
       
+      console.log('📱 Debug clic mobile:', {
+        element: element.tagName,
+        href: element.href,
+        text: element.textContent?.trim(),
+        userAgent: navigator.userAgent,
+        isMobile: /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
+      })
+      
       try {
         const clickInfo = extractClickInfo(element)
         
+        console.log('📊 Données de tracking:', clickInfo)
+        
         // Attendre un petit délai pour s'assurer que la navigation se fait
         setTimeout(async () => {
-          await trackClick(clickInfo)
+          try {
+            const result = await trackClick(clickInfo)
+            console.log('✅ Tracking réussi:', result)
+          } catch (trackingError) {
+            console.error('❌ Erreur tracking:', trackingError)
+          }
         }, 100)
         
       } catch (error) {
-        console.error('Erreur lors du tracking du clic:', error)
+        console.error('❌ Erreur lors du tracking du clic:', error)
       }
     }
 
