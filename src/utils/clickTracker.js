@@ -40,9 +40,8 @@ export const trackClick = async (linkData) => {
       timestamp: new Date().toISOString(),
       page_url: window.location.href,
       is_mobile: isMobile,
-      is_in_app: isInApp,
-      click_source: linkData.source || 'unknown',
-      affiliate_link_id: linkData.affiliateLinkId || null
+      is_in_app: isInApp, // Utiliser le bon nom de colonne
+      click_source: linkData.source || 'unknown'
     }
 
     // Envoyer les données à Supabase
@@ -187,6 +186,14 @@ export const getAggregatedStats = async (filters = {}) => {
     if (error) {
       return { success: false, error }
     }
+
+    console.log('📊 Debug données brutes:', {
+      totalClicks: clicks.length,
+      sampleClicks: clicks.slice(0, 3),
+      mobileClicks: clicks.filter(c => c.is_mobile).length,
+      inAppClicks: clicks.filter(c => c.is_in_app).length,
+      affiliateClicks: clicks.filter(c => c.affiliate_name).length
+    })
 
     // Calculer les statistiques agrégées
     const stats = {

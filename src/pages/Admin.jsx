@@ -5,6 +5,7 @@ import { useAffiliate } from '../context/AffiliateContext'
 import { supabase } from '../config/supabase'
 import LegalEditor from '../components/LegalEditor'
 import ClickStats from '../components/ClickStats'
+import { getClickStats } from '../utils/clickTracker'
 
 const Admin = () => {
   const { affiliates, paymentPages, updateAffiliateConfig, testLocalStorage, testAffiliateLinks } = useAffiliate()
@@ -23,6 +24,7 @@ const Admin = () => {
   const [activeTab, setActiveTab] = useState('affiliates') // 'affiliates', 'legal' ou 'stats'
   const [debugResults, setDebugResults] = useState(null)
   const [affiliateTestResults, setAffiliateTestResults] = useState(null)
+  const [rawDataResults, setRawDataResults] = useState(null)
 
   // Vérifier la session au chargement
   useEffect(() => {
@@ -216,6 +218,39 @@ const Admin = () => {
 
     setDebugResults(testResults)
     console.log('📱 Test tracking mobile:', testResults)
+  }
+
+  // Fonction pour vérifier les données brutes
+  const handleCheckRawData = async () => {
+    try {
+      const result = await getClickStats({})
+      if (result.success) {
+        const rawData = result.data
+        const analysis = {
+          totalClicks: rawData.length,
+          mobileClicks: rawData.filter(c => c.is_mobile).length,
+          inAppClicks: rawData.filter(c => c.is_in_app).length,
+          affiliateClicks: rawData.filter(c => c.affiliate_name).length,
+          recentClicks: rawData.slice(0, 5),
+          byType: rawData.reduce((acc, click) => {
+            acc[click.link_type] = (acc[click.link_type] || 0) + 1
+            return acc
+          }, {}),
+          byAffiliate: rawData.reduce((acc, click) => {
+            if (click.affiliate_name) {
+              acc[click.affiliate_name] = (acc[click.affiliate_name] || 0) + 1
+            }
+            return acc
+          }, {})
+        }
+        setRawDataResults(analysis)
+        console.log('📊 Données brutes analysées:', analysis)
+      } else {
+        console.error('Erreur lors de la récupération des données:', result.error)
+      }
+    } catch (error) {
+      console.error('Erreur lors de la vérification des données:', error)
+    }
   }
 
   // Écran de chargement
@@ -441,6 +476,13 @@ const Admin = () => {
                 <FaMobile />
                 Test tracking mobile
               </button>
+              <button
+                onClick={handleCheckRawData}
+                className="flex items-center gap-2 px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors"
+              >
+                <FaBug />
+                Vérifier données brutes
+              </button>
             </div>
 
             {debugResults && (
@@ -511,6 +553,54 @@ const Admin = () => {
                           <p><strong>STFOUR:</strong> <a href={links.STFOUR} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">{links.STFOUR}</a></p>
                           <p><strong>GLBNS:</strong> <a href={links.GLBNS} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">{links.GLBNS}</a></p>
                         </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {rawDataResults && (
+              <div className="mt-8 space-y-4">
+                <div className="bg-orange-50 rounded-lg p-4">
+                  <h3 className="font-semibold text-orange-900 mb-2">Analyse des données brutes</h3>
+                  <div className="text-sm text-orange-800 space-y-2">
+                    <p><strong>Total clics:</strong> {rawDataResults.totalClicks}</p>
+                    <p><strong>Clics mobiles:</strong> {rawDataResults.mobileClicks}</p>
+                    <p><strong>Clics depuis apps:</strong> {rawDataResults.inAppClicks}</p>
+                    <p><strong>Clics avec affilié:</strong> {rawDataResults.affiliateClicks}</p>
+                  </div>
+                </div>
+
+                <div className="bg-gray-50 rounded-lg p-4">
+                  <h3 className="font-semibold text-gray-900 mb-2">Répartition par type</h3>
+                  <div className="text-sm text-gray-600">
+                    {Object.entries(rawDataResults.byType).map(([type, count]) => (
+                      <p key={type}><strong>{type}:</strong> {count} clics</p>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="bg-gray-50 rounded-lg p-4">
+                  <h3 className="font-semibold text-gray-900 mb-2">Répartition par affilié</h3>
+                  <div className="text-sm text-gray-600">
+                    {Object.entries(rawDataResults.byAffiliate).map(([affiliate, count]) => (
+                      <p key={affiliate}><strong>{affiliate}:</strong> {count} clics</p>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="bg-gray-50 rounded-lg p-4">
+                  <h3 className="font-semibold text-gray-900 mb-2">Clics récents (5 derniers)</h3>
+                  <div className="space-y-2">
+                    {rawDataResults.recentClicks.map((click, index) => (
+                      <div key={index} className="bg-white rounded p-2 text-xs">
+                        <p><strong>URL:</strong> {click.link_url}</p>
+                        <p><strong>Type:</strong> {click.link_type}</p>
+                        <p><strong>Affilié:</strong> {click.affiliate_name || 'Aucun'}</p>
+                        <p><strong>Mobile:</strong> {click.is_mobile ? 'Oui' : 'Non'}</p>
+                        <p><strong>App:</strong> {click.is_in_app ? 'Oui' : 'Non'}</p>
+                        <p><strong>Date:</strong> {new Date(click.timestamp).toLocaleString('fr-FR')}</p>
                       </div>
                     ))}
                   </div>
