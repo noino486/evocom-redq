@@ -56,24 +56,37 @@ const AppDetector = () => {
       if (isInAppBrowser && !isNativeBrowser) {
         const currentUrl = window.location.href
         
-        // Redirection automatique immédiate
+        // Redirection automatique pour forcer l'ouverture dans le navigateur par défaut
         setTimeout(() => {
-          // Méthode universelle pour ouvrir dans le navigateur par défaut
-          window.open(currentUrl, '_blank', 'noopener,noreferrer')
-          
-          // Pour les appareils mobiles, essayer des méthodes spécifiques
           if (navigator.userAgent.includes('iPhone') || navigator.userAgent.includes('iPad')) {
-            // iOS - essayer d'ouvrir dans Safari avec un délai
+            // iOS - Utiliser le scheme Safari pour forcer l'ouverture
+            const safariUrl = `x-safari-${currentUrl}`
+            window.location.href = safariUrl
+            
+            // Alternative avec window.open
             setTimeout(() => {
-              window.location.href = currentUrl
+              const newWindow = window.open('', '_blank')
+              if (newWindow) {
+                newWindow.location.href = currentUrl
+              }
             }, 100)
           } else if (navigator.userAgent.includes('Android')) {
-            // Android - essayer d'ouvrir dans le navigateur par défaut
+            // Android - Utiliser l'intent Android pour forcer l'ouverture dans le navigateur
+            const intentUrl = `intent://${currentUrl.replace(/^https?:\/\//, '')}#Intent;scheme=https;package=com.android.chrome;S.browser_fallback_url=${encodeURIComponent(currentUrl)};end`
+            window.location.href = intentUrl
+            
+            // Alternative avec window.open
             setTimeout(() => {
-              window.location.href = currentUrl
+              const newWindow = window.open('', '_blank')
+              if (newWindow) {
+                newWindow.location.href = currentUrl
+              }
             }, 100)
+          } else {
+            // Desktop - Ouvrir dans un nouvel onglet
+            window.open(currentUrl, '_blank', 'noopener,noreferrer')
           }
-        }, 300) // Délai réduit pour une redirection plus rapide
+        }, 300)
       }
     }
 
