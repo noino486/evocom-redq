@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { FaSave, FaPlus, FaTrash, FaEye, FaEyeSlash, FaSignOutAlt, FaSpinner, FaFileContract } from 'react-icons/fa'
+import { FaSave, FaPlus, FaTrash, FaEye, FaEyeSlash, FaSignOutAlt, FaSpinner, FaFileContract, FaChartLine } from 'react-icons/fa'
 import { useAffiliate } from '../context/AffiliateContext'
 import { supabase } from '../config/supabase'
 import LegalEditor from '../components/LegalEditor'
+import ClickStats from '../components/ClickStats'
 
 const Admin = () => {
   const { affiliates, paymentPages, updateAffiliateConfig } = useAffiliate()
@@ -19,7 +20,7 @@ const Admin = () => {
   const [showPassword, setShowPassword] = useState(false)
   const [authLoading, setAuthLoading] = useState(false)
   const [error, setError] = useState('')
-  const [activeTab, setActiveTab] = useState('affiliates') // 'affiliates' ou 'legal'
+  const [activeTab, setActiveTab] = useState('affiliates') // 'affiliates', 'legal' ou 'stats'
 
   // Vérifier la session au chargement
   useEffect(() => {
@@ -304,6 +305,17 @@ const Admin = () => {
               <FaFileContract />
               Mentions Légales
             </button>
+            <button
+              onClick={() => setActiveTab('stats')}
+              className={`flex-1 flex items-center justify-center gap-2 px-4 py-2 rounded-md transition-colors ${
+                activeTab === 'stats'
+                  ? 'bg-white text-primary shadow-sm'
+                  : 'text-gray-600 hover:text-gray-900'
+              }`}
+            >
+              <FaChartLine />
+              Statistiques
+            </button>
           </div>
         </motion.div>
 
@@ -476,7 +488,7 @@ const Admin = () => {
               </button>
             </motion.div>
           </>
-        ) : (
+        ) : activeTab === 'legal' ? (
           /* Section Mentions Légales */
           <motion.div
             initial={{ opacity: 0, y: 30 }}
@@ -485,6 +497,15 @@ const Admin = () => {
             className="bg-white/80 backdrop-blur-sm rounded-xl p-6 border border-gray-200/50"
           >
             <LegalEditor />
+          </motion.div>
+        ) : (
+          /* Section Statistiques */
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+          >
+            <ClickStats />
           </motion.div>
         )}
 

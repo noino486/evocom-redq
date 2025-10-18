@@ -5,16 +5,24 @@ import { LegalProvider } from './context/LegalContext'
 import SEO from './components/SEO'
 import Header from './components/Header'
 import Footer from './components/Footer'
+import AppDetector from './components/AppDetector'
+import useGlobalClickTracker from './hooks/useGlobalClickTracker'
 import Home from './pages/Home'
 import ProductDetail from './pages/ProductDetail'
 import Admin from './pages/Admin'
 import LegalNotice from './pages/LegalNotice'
 
 function App() {
+  // Activer le tracking global de tous les clics
+  useGlobalClickTracker()
+
   return (
     <>
       {/* Gestion du SEO entièrement en JSX */}
       <SEO />
+      
+      {/* Détecteur d'applications tierces */}
+      <AppDetector />
       
       <Router>
         <AffiliateProvider>
