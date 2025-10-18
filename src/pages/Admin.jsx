@@ -5,7 +5,7 @@ import { useAffiliate } from '../context/AffiliateContext'
 import { supabase } from '../config/supabase'
 import LegalEditor from '../components/LegalEditor'
 import ClickStats from '../components/ClickStats'
-import { getClickStats } from '../utils/clickTracker'
+import { getClickStats, trackClick, LINK_TYPES } from '../utils/clickTracker'
 
 const Admin = () => {
   const { affiliates, paymentPages, updateAffiliateConfig, testLocalStorage, testAffiliateLinks } = useAffiliate()
@@ -253,6 +253,37 @@ const Admin = () => {
     }
   }
 
+  // Fonction pour tester le tracking en temps réel
+  const handleTestTracking = async () => {
+    try {
+      const testData = {
+        url: 'https://test.example.com',
+        text: 'Test de tracking',
+        type: LINK_TYPES.AFFILIATE,
+        affiliateName: 'TEST_ADMIN',
+        productId: 'TEST_PRODUCT',
+        source: 'admin_test'
+      }
+
+      console.log('🧪 Test de tracking en cours...', testData)
+      const result = await trackClick(testData)
+      console.log('📊 Résultat du test:', result)
+
+      if (result.success) {
+        alert('✅ Test de tracking réussi ! Vérifiez les données brutes.')
+        // Recharger les données brutes
+        setTimeout(() => {
+          handleCheckRawData()
+        }, 1000)
+      } else {
+        alert('❌ Test de tracking échoué : ' + (result.error?.message || 'Erreur inconnue'))
+      }
+    } catch (error) {
+      console.error('Erreur lors du test de tracking:', error)
+      alert('❌ Erreur lors du test de tracking : ' + error.message)
+    }
+  }
+
   // Écran de chargement
   if (loading) {
     return (
@@ -482,6 +513,13 @@ const Admin = () => {
               >
                 <FaBug />
                 Vérifier données brutes
+              </button>
+              <button
+                onClick={handleTestTracking}
+                className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+              >
+                <FaBug />
+                Test tracking
               </button>
             </div>
 
