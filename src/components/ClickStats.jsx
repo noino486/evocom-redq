@@ -14,13 +14,26 @@ const ClickStats = () => {
   const [selectedAffiliate, setSelectedAffiliate] = useState('all')
   const [selectedSource, setSelectedSource] = useState('all')
   const [selectedLinkType, setSelectedLinkType] = useState('all')
+  const [lastUpdate, setLastUpdate] = useState(new Date())
+  const [isUpdating, setIsUpdating] = useState(false)
 
   useEffect(() => {
     loadStats()
+    
+    // Mise à jour automatique toutes les 30 secondes
+    const interval = setInterval(() => {
+      loadStats(true)
+    }, 30000) // 30 secondes
+    
+    return () => clearInterval(interval)
   }, [dateRange, selectedAffiliate, selectedSource, selectedLinkType])
 
-  const loadStats = async () => {
-    setLoading(true)
+  const loadStats = async (isAutoUpdate = false) => {
+    if (isAutoUpdate) {
+      setIsUpdating(true)
+    } else {
+      setLoading(true)
+    }
     setError(null)
 
     try {
@@ -72,11 +85,14 @@ const ClickStats = () => {
       if (currentVisitorsResult.success) {
         setCurrentVisitors(currentVisitorsResult.data)
       }
+      
+      setLastUpdate(new Date())
     } catch (err) {
       setError('Erreur lors du chargement des statistiques')
       console.error('Erreur stats:', err)
     } finally {
       setLoading(false)
+      setIsUpdating(false)
     }
   }
 
@@ -138,11 +154,22 @@ const ClickStats = () => {
       <div className="bg-white/80 backdrop-blur-sm rounded-xl p-6 border border-gray-200/50">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div>
-            <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-              <FaChartLine className="text-primary" />
-              Statistiques des clics
-            </h2>
+            <div className="flex items-center gap-3 mb-2">
+              <h2 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent flex items-center gap-3">
+                <FaChartLine className="text-blue-500" />
+                Statistiques des clics
+              </h2>
+              {isUpdating && (
+                <div className="flex items-center gap-2 text-sm text-blue-600">
+                  <div className="w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+                  <span>Mise à jour...</span>
+                </div>
+              )}
+            </div>
             <p className="text-gray-600">{getDateRangeLabel()}</p>
+            <p className="text-xs text-gray-500">
+              Dernière mise à jour : {lastUpdate.toLocaleTimeString('fr-FR')}
+            </p>
           </div>
           
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
@@ -213,17 +240,17 @@ const ClickStats = () => {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-6 border border-blue-200"
+          className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-2xl p-6 border border-blue-200 shadow-lg hover:shadow-xl transition-all duration-300"
         >
           <div className="flex items-center justify-between mb-4">
-            <div className="p-3 bg-blue-500 rounded-lg">
-              <FaMousePointer className="text-white text-xl" />
+            <div className="p-4 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl shadow-lg">
+              <FaMousePointer className="text-white text-2xl" />
             </div>
-            <span className="text-2xl font-bold text-blue-600">
+            <span className="text-3xl font-bold text-blue-600">
               {formatNumber(stats?.totalClicks || 0)}
             </span>
           </div>
-          <h3 className="text-lg font-semibold text-gray-900">Total des clics</h3>
+          <h3 className="text-xl font-semibold text-gray-900 mb-1">Total des clics</h3>
           <p className="text-sm text-gray-600">Tous les liens trackés</p>
         </motion.div>
 
@@ -231,17 +258,17 @@ const ClickStats = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl p-6 border border-purple-200"
+          className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-2xl p-6 border border-purple-200 shadow-lg hover:shadow-xl transition-all duration-300"
         >
           <div className="flex items-center justify-between mb-4">
-            <div className="p-3 bg-purple-500 rounded-lg">
-              <FaUsers className="text-white text-xl" />
+            <div className="p-4 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl shadow-lg">
+              <FaUsers className="text-white text-2xl" />
             </div>
-            <span className="text-2xl font-bold text-purple-600">
+            <span className="text-3xl font-bold text-purple-600">
               {formatNumber(visitorStats?.totalVisitors || 0)}
             </span>
           </div>
-          <h3 className="text-lg font-semibold text-gray-900">Visiteurs totaux</h3>
+          <h3 className="text-xl font-semibold text-gray-900 mb-1">Visiteurs totaux</h3>
           <p className="text-sm text-gray-600">Toutes les sessions</p>
         </motion.div>
 
@@ -251,17 +278,17 @@ const ClickStats = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
-          className="bg-gradient-to-br from-green-50 to-green-100 rounded-xl p-6 border border-green-200"
+          className="bg-gradient-to-br from-green-50 to-green-100 rounded-2xl p-6 border border-green-200 shadow-lg hover:shadow-xl transition-all duration-300"
         >
           <div className="flex items-center justify-between mb-4">
-            <div className="p-3 bg-green-500 rounded-lg">
-              <FaMobile className="text-white text-xl" />
+            <div className="p-4 bg-gradient-to-br from-green-500 to-green-600 rounded-xl shadow-lg">
+              <FaMobile className="text-white text-2xl" />
             </div>
-            <span className="text-2xl font-bold text-green-600">
+            <span className="text-3xl font-bold text-green-600">
               {formatNumber(stats?.mobileClicks || 0)}
             </span>
           </div>
-          <h3 className="text-lg font-semibold text-gray-900">Clics mobiles</h3>
+          <h3 className="text-xl font-semibold text-gray-900 mb-1">Clics mobiles</h3>
           <p className="text-sm text-gray-600">
             {stats?.totalClicks > 0 ? Math.round(((stats.mobileClicks || 0) / stats.totalClicks) * 100) : 0}% du total
           </p>
@@ -271,17 +298,17 @@ const ClickStats = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
-          className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl p-6 border border-purple-200"
+          className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-2xl p-6 border border-purple-200 shadow-lg hover:shadow-xl transition-all duration-300"
         >
           <div className="flex items-center justify-between mb-4">
-            <div className="p-3 bg-purple-500 rounded-lg">
-              <FaExternalLinkAlt className="text-white text-xl" />
+            <div className="p-4 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl shadow-lg">
+              <FaExternalLinkAlt className="text-white text-2xl" />
             </div>
-            <span className="text-2xl font-bold text-purple-600">
+            <span className="text-3xl font-bold text-purple-600">
               {formatNumber(stats?.inAppClicks || 0)}
             </span>
           </div>
-          <h3 className="text-lg font-semibold text-gray-900">Clics depuis apps</h3>
+          <h3 className="text-xl font-semibold text-gray-900 mb-1">Clics depuis apps</h3>
           <p className="text-sm text-gray-600">
             Snapchat, Instagram, etc.
           </p>
@@ -291,17 +318,17 @@ const ClickStats = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4 }}
-          className="bg-gradient-to-br from-orange-50 to-orange-100 rounded-xl p-6 border border-orange-200"
+          className="bg-gradient-to-br from-orange-50 to-orange-100 rounded-2xl p-6 border border-orange-200 shadow-lg hover:shadow-xl transition-all duration-300"
         >
           <div className="flex items-center justify-between mb-4">
-            <div className="p-3 bg-orange-500 rounded-lg">
-              <FaDesktop className="text-white text-xl" />
+            <div className="p-4 bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl shadow-lg">
+              <FaDesktop className="text-white text-2xl" />
             </div>
-            <span className="text-2xl font-bold text-orange-600">
+            <span className="text-3xl font-bold text-orange-600">
               {formatNumber((stats?.totalClicks || 0) - (stats?.mobileClicks || 0))}
             </span>
           </div>
-          <h3 className="text-lg font-semibold text-gray-900">Clics desktop</h3>
+          <h3 className="text-xl font-semibold text-gray-900 mb-1">Clics desktop</h3>
           <p className="text-sm text-gray-600">
             {stats?.totalClicks > 0 ? Math.round((((stats.totalClicks - (stats.mobileClicks || 0)) / stats.totalClicks) * 100)) : 0}% du total
           </p>

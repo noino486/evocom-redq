@@ -249,8 +249,8 @@ const Admin = () => {
 
   // Interface d'administration (utilisateur connecté)
   return (
-    <div className="min-h-screen pt-24 pb-20">
-      <div className="max-w-6xl mx-auto px-4">
+    <div className="min-h-screen pt-24 pb-20 bg-gradient-to-br from-gray-50 via-blue-50 to-purple-50">
+      <div className="max-w-7xl mx-auto px-4">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
@@ -258,16 +258,16 @@ const Admin = () => {
         >
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-4xl font-bold mb-2 gradient-text">
-                Administration
+              <h1 className="text-5xl font-bold mb-2 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
+                Dashboard Admin
               </h1>
-              <p className="text-gray-600">
-                Connecté en tant que <span className="font-semibold">{user.email}</span>
+              <p className="text-gray-600 text-lg">
+                Connecté en tant que <span className="font-semibold text-blue-600">{user.email}</span>
               </p>
             </div>
             <button
               onClick={handleLogout}
-              className="flex items-center gap-2 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
+              className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-xl hover:from-red-600 hover:to-red-700 transition-all shadow-lg hover:shadow-xl"
             >
               <FaSignOutAlt />
               Déconnexion
@@ -282,39 +282,39 @@ const Admin = () => {
           transition={{ delay: 0.1 }}
           className="mb-8"
         >
-          <div className="flex space-x-1 bg-gray-100 p-1 rounded-lg">
+          <div className="flex space-x-2 bg-white/80 backdrop-blur-sm p-2 rounded-2xl shadow-lg border border-white/20">
             <button
               onClick={() => setActiveTab('affiliates')}
-              className={`flex-1 flex items-center justify-center gap-2 px-4 py-2 rounded-md transition-colors ${
+              className={`flex-1 flex items-center justify-center gap-3 px-6 py-4 rounded-xl transition-all duration-300 ${
                 activeTab === 'affiliates'
-                  ? 'bg-white text-primary shadow-sm'
-                  : 'text-gray-600 hover:text-gray-900'
+                  ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg transform scale-105'
+                  : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
               }`}
             >
-              <FaPlus />
-              Influenceurs
+              <FaPlus className="text-lg" />
+              <span className="font-semibold">Influenceurs</span>
             </button>
             <button
               onClick={() => setActiveTab('legal')}
-              className={`flex-1 flex items-center justify-center gap-2 px-4 py-2 rounded-md transition-colors ${
+              className={`flex-1 flex items-center justify-center gap-3 px-6 py-4 rounded-xl transition-all duration-300 ${
                 activeTab === 'legal'
-                  ? 'bg-white text-primary shadow-sm'
-                  : 'text-gray-600 hover:text-gray-900'
+                  ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg transform scale-105'
+                  : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
               }`}
             >
-              <FaFileContract />
-              Mentions Légales
+              <FaFileContract className="text-lg" />
+              <span className="font-semibold">Mentions Légales</span>
             </button>
             <button
               onClick={() => setActiveTab('stats')}
-              className={`flex-1 flex items-center justify-center gap-2 px-4 py-2 rounded-md transition-colors ${
+              className={`flex-1 flex items-center justify-center gap-3 px-6 py-4 rounded-xl transition-all duration-300 ${
                 activeTab === 'stats'
-                  ? 'bg-white text-primary shadow-sm'
-                  : 'text-gray-600 hover:text-gray-900'
+                  ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg transform scale-105'
+                  : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
               }`}
             >
-              <FaChartLine />
-              Statistiques
+              <FaChartLine className="text-lg" />
+              <span className="font-semibold">Statistiques</span>
             </button>
           </div>
         </motion.div>
@@ -327,9 +327,9 @@ const Admin = () => {
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
-              className="bg-white/80 backdrop-blur-sm rounded-xl p-6 border border-gray-200/50 mb-8"
+              className="bg-white/90 backdrop-blur-sm rounded-2xl p-8 border border-white/20 shadow-xl mb-8"
             >
-          <h2 className="text-2xl font-bold mb-4 text-gray-900">Pages de paiement par défaut</h2>
+          <h2 className="text-3xl font-bold mb-6 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Pages de paiement par défaut</h2>
           <div className="grid md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -339,7 +339,7 @@ const Admin = () => {
                 type="url"
                 value={localPaymentPages.STFOUR}
                 onChange={(e) => handleUpdatePaymentPage('STFOUR', e.target.value)}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-sm hover:shadow-md transition-all"
                 placeholder="https://..."
               />
             </div>
@@ -351,7 +351,7 @@ const Admin = () => {
                 type="url"
                 value={localPaymentPages.GLBNS}
                 onChange={(e) => handleUpdatePaymentPage('GLBNS', e.target.value)}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-sm hover:shadow-md transition-all"
                 placeholder="https://..."
               />
             </div>
