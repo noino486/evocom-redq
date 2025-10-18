@@ -7,7 +7,7 @@ import LegalEditor from '../components/LegalEditor'
 import ClickStats from '../components/ClickStats'
 
 const Admin = () => {
-  const { affiliates, paymentPages, updateAffiliateConfig, testLocalStorage } = useAffiliate()
+  const { affiliates, paymentPages, updateAffiliateConfig, testLocalStorage, testAffiliateLinks } = useAffiliate()
   const [localAffiliates, setLocalAffiliates] = useState(affiliates)
   const [localPaymentPages, setLocalPaymentPages] = useState(paymentPages)
   const [newAffiliate, setNewAffiliate] = useState({ name: '', STFOUR: '', GLBNS: '' })
@@ -22,6 +22,7 @@ const Admin = () => {
   const [error, setError] = useState('')
   const [activeTab, setActiveTab] = useState('affiliates') // 'affiliates', 'legal' ou 'stats'
   const [debugResults, setDebugResults] = useState(null)
+  const [affiliateTestResults, setAffiliateTestResults] = useState(null)
 
   // Vérifier la session au chargement
   useEffect(() => {
@@ -148,6 +149,13 @@ const Admin = () => {
     const results = testLocalStorage()
     setDebugResults(results)
     console.log('🔍 Test localStorage:', results)
+  }
+
+  // Fonction pour tester les liens AF
+  const handleTestAffiliateLinks = () => {
+    const results = testAffiliateLinks()
+    setAffiliateTestResults(results)
+    console.log('🔍 Test liens AF:', results)
   }
 
   // Écran de chargement
@@ -351,13 +359,20 @@ const Admin = () => {
               Debug localStorage Mobile
             </h2>
             
-            <div className="mb-6">
+            <div className="mb-6 flex gap-4">
               <button
                 onClick={handleTestLocalStorage}
                 className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
               >
                 <FaMobile />
                 Tester le localStorage
+              </button>
+              <button
+                onClick={handleTestAffiliateLinks}
+                className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+              >
+                <FaBug />
+                Tester les liens AF
               </button>
             </div>
 
@@ -403,6 +418,34 @@ const Admin = () => {
                     <p>Écran: {window.innerWidth}x{window.innerHeight}</p>
                     <p>Mobile: {/Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ? '✅ Oui' : '❌ Non'}</p>
                     <p>Dans une app: {/FBAN|FBAV|Instagram|Snapchat|WhatsApp|TikTok|wv\)/i.test(navigator.userAgent) ? '✅ Oui' : '❌ Non'}</p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {affiliateTestResults && (
+              <div className="mt-8 space-y-4">
+                <div className="bg-green-50 rounded-lg p-4">
+                  <h3 className="font-semibold text-green-900 mb-2">Test des liens AF</h3>
+                  <div className="text-sm text-green-800">
+                    <p><strong>Code actuel:</strong> {affiliateTestResults.currentCode || 'Aucun'}</p>
+                    <p><strong>Affiliés disponibles:</strong> {affiliateTestResults.availableAffiliates.join(', ')}</p>
+                    <p><strong>Pages de paiement:</strong> {affiliateTestResults.paymentPages.join(', ')}</p>
+                  </div>
+                </div>
+
+                <div className="bg-gray-50 rounded-lg p-4">
+                  <h3 className="font-semibold text-gray-900 mb-2">Liens de test</h3>
+                  <div className="space-y-2">
+                    {Object.entries(affiliateTestResults.testLinks).map(([affiliateName, links]) => (
+                      <div key={affiliateName} className="bg-white rounded p-3">
+                        <h4 className="font-medium text-gray-900 mb-2">{affiliateName}</h4>
+                        <div className="text-sm text-gray-600 space-y-1">
+                          <p><strong>STFOUR:</strong> <a href={links.STFOUR} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">{links.STFOUR}</a></p>
+                          <p><strong>GLBNS:</strong> <a href={links.GLBNS} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">{links.GLBNS}</a></p>
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 </div>
               </div>

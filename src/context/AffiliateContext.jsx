@@ -138,6 +138,12 @@ export const AffiliateProvider = ({ children }) => {
     const urlParams = new URLSearchParams(window.location.search)
     const afParam = urlParams.get('AF')
     
+    console.log('🔍 Détection AF:', {
+      afParam,
+      currentAffiliateCode: affiliateCode,
+      affiliates: Object.keys(affiliates)
+    })
+    
     if (afParam) {
       const upperAfParam = afParam.toUpperCase()
       
@@ -146,9 +152,9 @@ export const AffiliateProvider = ({ children }) => {
         setAffiliateCode(upperAfParam)
         // Sauvegarder de manière robuste
         saveAffiliateCode(upperAfParam)
-        console.log(`Code partenaire valide activé: ${upperAfParam}`)
+        console.log(`✅ Code partenaire valide activé: ${upperAfParam}`)
       } else {
-        console.warn(`Code partenaire invalide: ${upperAfParam}`)
+        console.warn(`❌ Code partenaire invalide: ${upperAfParam}`)
         // Supprimer les codes invalides
         try {
           localStorage.removeItem('evocom-affiliate')
@@ -161,10 +167,13 @@ export const AffiliateProvider = ({ children }) => {
     } else {
       // Vérifier s'il y a un code sauvegardé
       const savedAffiliate = getSavedAffiliateCode()
+      console.log('🔍 Code sauvegardé trouvé:', savedAffiliate)
+      
       if (savedAffiliate && affiliates[savedAffiliate]) {
         setAffiliateCode(savedAffiliate)
-        console.log(`Code partenaire restauré: ${savedAffiliate}`)
+        console.log(`✅ Code partenaire restauré: ${savedAffiliate}`)
       } else if (savedAffiliate) {
+        console.log(`❌ Code sauvegardé invalide: ${savedAffiliate}`)
         // Le code sauvegardé n'existe plus dans la config, le supprimer
         try {
           localStorage.removeItem('evocom-affiliate')
@@ -173,24 +182,42 @@ export const AffiliateProvider = ({ children }) => {
         } catch (error) {
           console.warn('Erreur lors de la suppression du code invalide:', error)
         }
+      } else {
+        console.log('ℹ️ Aucun code partenaire trouvé')
       }
     }
   }, [affiliates])
 
   // Obtenir le lien de paiement pour un produit donné
   const getPaymentLink = (productId) => {
+    console.log('🔍 getPaymentLink appelé:', {
+      productId,
+      affiliateCode,
+      hasAffiliate: !!affiliateCode,
+      currentAffiliate: affiliates[affiliateCode],
+      paymentPages: paymentPages[productId]
+    })
+    
     const currentAffiliate = affiliates[affiliateCode]
     
     if (currentAffiliate && currentAffiliate[productId]) {
+      console.log('✅ Lien affilié trouvé:', currentAffiliate[productId])
       return currentAffiliate[productId]
     }
     
     // Retourner la page par défaut
-    return paymentPages[productId] || '#'
+    const defaultLink = paymentPages[productId] || '#'
+    console.log('ℹ️ Utilisation du lien par défaut:', defaultLink)
+    return defaultLink
   }
 
   // Obtenir le code d'affiliation actuel
   const getCurrentAffiliateCode = () => {
+    console.log('🔍 getCurrentAffiliateCode appelé:', {
+      affiliateCode,
+      hasAffiliate: !!affiliateCode,
+      affiliates: Object.keys(affiliates)
+    })
     return affiliateCode
   }
 
@@ -366,6 +393,26 @@ export const AffiliateProvider = ({ children }) => {
     return testResults
   }
 
+  // Fonction pour tester les liens AF
+  const testAffiliateLinks = () => {
+    const testResults = {
+      currentCode: affiliateCode,
+      availableAffiliates: Object.keys(affiliates),
+      paymentPages: Object.keys(paymentPages),
+      testLinks: {}
+    }
+
+    // Tester les liens pour chaque affilié
+    Object.keys(affiliates).forEach(affiliateName => {
+      testResults.testLinks[affiliateName] = {
+        STFOUR: affiliates[affiliateName].STFOUR,
+        GLBNS: affiliates[affiliateName].GLBNS
+      }
+    })
+
+    return testResults
+  }
+
   const value = {
     affiliateCode,
     getPaymentLink,
@@ -374,7 +421,8 @@ export const AffiliateProvider = ({ children }) => {
     updateAffiliateConfig,
     affiliates,
     paymentPages,
-    testLocalStorage
+    testLocalStorage,
+    testAffiliateLinks
   }
 
   return (
