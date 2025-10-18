@@ -132,3 +132,4 @@ const useGlobalClickTracker = () => {
 }
 
 export default useGlobalClickTracker
+
