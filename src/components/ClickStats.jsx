@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { FaChartLine, FaMousePointer, FaMobile, FaDesktop, FaExternalLinkAlt, FaCalendarAlt, FaUser, FaLink, FaHome, FaShoppingCart, FaGlobe, FaArrowRight, FaUsers, FaEye, FaClock, FaMapMarkerAlt } from 'react-icons/fa'
+import { FaChartLine, FaMousePointer, FaMobile, FaDesktop, FaExternalLinkAlt, FaCalendarAlt, FaUser, FaLink, FaHome, FaShoppingCart, FaGlobe, FaArrowRight, FaUsers, FaEye, FaClock, FaMapMarkerAlt, FaWifi, FaExclamationTriangle, FaRefresh } from 'react-icons/fa'
 import { getClickStats, getAggregatedStats } from '../utils/clickTracker'
 import { getAggregatedVisitorStats, getCurrentVisitors } from '../utils/visitorTracker'
+import { useNetworkStatus, formatNetworkError, NETWORK_ERROR_TYPES } from '../utils/networkUtils'
 
 const ClickStats = () => {
   const [stats, setStats] = useState(null)
@@ -16,6 +17,10 @@ const ClickStats = () => {
   const [selectedLinkType, setSelectedLinkType] = useState('all')
   const [lastUpdate, setLastUpdate] = useState(new Date())
   const [isUpdating, setIsUpdating] = useState(false)
+  const [retryCount, setRetryCount] = useState(0)
+  
+  // Hook pour l'état de la connexion réseau
+  const { isOnline, isConnecting, testConnection } = useNetworkStatus()
 
   useEffect(() => {
     loadStats()
@@ -37,6 +42,12 @@ const ClickStats = () => {
     setError(null)
 
     try {
+      // Vérifier la connectivité avant de charger
+      if (!isOnline) {
+        setError('Pas de connexion internet. Vérifiez votre connexion réseau.')
+        return
+      }
+
       // Calculer les dates selon la période sélectionnée
       const now = new Date()
       let dateFrom = null
@@ -74,8 +85,11 @@ const ClickStats = () => {
       
       if (clicksResult.success) {
         setStats(clicksResult.data)
+        setRetryCount(0) // Reset retry count on success
       } else {
-        setError(clicksResult.error?.message || 'Erreur lors du chargement des statistiques de clics')
+        const errorMessage = formatNetworkError(clicksResult.error)
+        setError(errorMessage)
+        setRetryCount(prev => prev + 1)
       }
 
       if (visitorsResult.success) {
@@ -88,7 +102,9 @@ const ClickStats = () => {
       
       setLastUpdate(new Date())
     } catch (err) {
-      setError('Erreur lors du chargement des statistiques')
+      const errorMessage = formatNetworkError(err)
+      setError(errorMessage)
+      setRetryCount(prev => prev + 1)
       console.error('Erreur stats:', err)
     } finally {
       setLoading(false)
@@ -110,6 +126,23 @@ const ClickStats = () => {
     }
   }
 
+  // Fonction pour tester la connexion et recharger
+  const handleTestConnectionAndReload = async () => {
+    setLoading(true)
+    setError(null)
+    
+    try {
+      const connectionOk = await testConnection()
+      if (connectionOk) {
+        await loadStats()
+      } else {
+        setError('Connexion internet non disponible. Vérifiez votre réseau.')
+      }
+    } catch (error) {
+      setError('Erreur lors du test de connexion.')
+    }
+  }
+
   if (loading) {
     return (
       <div className="bg-white/80 backdrop-blur-sm rounded-xl p-6 border border-gray-200/50">
@@ -125,14 +158,55 @@ const ClickStats = () => {
     return (
       <div className="bg-white/80 backdrop-blur-sm rounded-xl p-6 border border-gray-200/50">
         <div className="text-center py-8">
-          <div className="text-red-500 text-lg mb-2">⚠️ Erreur</div>
-          <p className="text-gray-600">{error}</p>
-          <button
-            onClick={loadStats}
-            className="mt-4 bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary/90 transition-colors"
-          >
-            Réessayer
-          </button>
+          <div className="flex items-center justify-center mb-4">
+            {!isOnline ? (
+              <FaWifi className="text-red-500 text-3xl mr-2" />
+            ) : (
+              <FaExclamationTriangle className="text-orange-500 text-3xl mr-2" />
+            )}
+            <div className="text-red-500 text-lg">Erreur de connexion</div>
+          </div>
+          <p className="text-gray-600 mb-4">{error}</p>
+          
+          <div className="flex flex-col sm:flex-row gap-3 justify-center">
+            <button
+              onClick={handleTestConnectionAndReload}
+              disabled={isConnecting}
+              className="flex items-center gap-2 bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-50"
+            >
+              {isConnecting ? (
+                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+              ) : (
+                <FaRefresh />
+              )}
+              {isConnecting ? 'Test en cours...' : 'Tester et recharger'}
+            </button>
+            
+            <button
+              onClick={loadStats}
+              className="flex items-center gap-2 bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors"
+            >
+              <FaRefresh />
+              Réessayer
+            </button>
+          </div>
+          
+          {retryCount > 0 && (
+            <p className="text-sm text-gray-500 mt-3">
+              Tentatives: {retryCount}
+            </p>
+          )}
+          
+          <div className="mt-4 p-3 bg-blue-50 rounded-lg">
+            <p className="text-sm text-blue-800">
+              <strong>État de la connexion:</strong> {isOnline ? '🟢 En ligne' : '🔴 Hors ligne'}
+            </p>
+            {!isOnline && (
+              <p className="text-xs text-blue-600 mt-1">
+                Vérifiez votre connexion internet et réessayez.
+              </p>
+            )}
+          </div>
         </div>
       </div>
     )
@@ -165,6 +239,21 @@ const ClickStats = () => {
                   <span>Mise à jour...</span>
                 </div>
               )}
+              
+              {/* Indicateur de connexion */}
+              <div className="flex items-center gap-2 text-sm">
+                {isOnline ? (
+                  <div className="flex items-center gap-1 text-green-600">
+                    <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                    <span>En ligne</span>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-1 text-red-600">
+                    <div className="w-2 h-2 bg-red-500 rounded-full"></div>
+                    <span>Hors ligne</span>
+                  </div>
+                )}
+              </div>
             </div>
             <p className="text-sm text-gray-600">{getDateRangeLabel()}</p>
             <p className="text-xs text-gray-500">

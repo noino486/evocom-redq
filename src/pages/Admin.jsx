@@ -5,6 +5,7 @@ import { useAffiliate } from '../context/AffiliateContext'
 import { supabase } from '../config/supabase'
 import LegalEditor from '../components/LegalEditor'
 import ClickStats from '../components/ClickStats'
+import NetworkStatus from '../components/NetworkStatus'
 import { getClickStats, trackClick, LINK_TYPES } from '../utils/clickTracker'
 
 const Admin = () => {
@@ -403,9 +404,12 @@ const Admin = () => {
               <h1 className="text-2xl sm:text-3xl font-semibold text-gray-900">
                 Administration
               </h1>
-              <p className="text-sm text-gray-600 mt-1">
-                {user.email}
-              </p>
+              <div className="flex items-center gap-4 mt-1">
+                <p className="text-sm text-gray-600">
+                  {user.email}
+                </p>
+                <NetworkStatus />
+              </div>
             </div>
             <button
               onClick={handleLogout}

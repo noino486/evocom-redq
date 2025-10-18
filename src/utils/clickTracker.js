@@ -1,4 +1,5 @@
 import { supabase } from '../config/supabase'
+import { executeSupabaseQuery, getClickStatsWithRetry, trackClickWithRetry } from './networkUtils'
 
 // Types de liens trackés
 export const LINK_TYPES = {
@@ -44,18 +45,16 @@ export const trackClick = async (linkData) => {
       click_source: linkData.source || 'unknown'
     }
 
-    // Envoyer les données à Supabase
-    const { data, error } = await supabase
-      .from('link_clicks')
-      .insert([clickData])
+    // Utiliser la fonction avec retry
+    const result = await trackClickWithRetry(clickData)
 
-    if (error) {
-      console.error('Erreur lors du tracking:', error)
-      return { success: false, error }
+    if (result.success) {
+      console.log('✅ Clic tracké avec succès:', clickData)
+      return { success: true, data: result.data }
+    } else {
+      console.error('Erreur lors du tracking:', result.error)
+      return { success: false, error: result.error }
     }
-
-    console.log('✅ Clic tracké avec succès:', clickData)
-    return { success: true, data }
   } catch (error) {
     console.error('Erreur lors du tracking:', error)
     return { success: false, error }
@@ -143,35 +142,14 @@ export const createTrackedLink = (url, options = {}) => {
 // Fonction pour obtenir les statistiques de clics
 export const getClickStats = async (filters = {}) => {
   try {
-    let query = supabase
-      .from('link_clicks')
-      .select('*')
-
-    // Appliquer les filtres
-    if (filters.dateFrom) {
-      query = query.gte('timestamp', filters.dateFrom)
+    const result = await getClickStatsWithRetry(filters)
+    
+    if (result.success) {
+      return { success: true, data: result.data }
+    } else {
+      console.error('Erreur lors de la récupération des stats:', result.error)
+      return { success: false, error: result.error }
     }
-    if (filters.dateTo) {
-      query = query.lte('timestamp', filters.dateTo)
-    }
-    if (filters.linkType) {
-      query = query.eq('link_type', filters.linkType)
-    }
-    if (filters.affiliateName) {
-      query = query.eq('affiliate_name', filters.affiliateName)
-    }
-    if (filters.source) {
-      query = query.eq('click_source', filters.source)
-    }
-
-    const { data, error } = await query.order('timestamp', { ascending: false })
-
-    if (error) {
-      console.error('Erreur lors de la récupération des stats:', error)
-      return { success: false, error }
-    }
-
-    return { success: true, data }
   } catch (error) {
     console.error('Erreur lors de la récupération des stats:', error)
     return { success: false, error }

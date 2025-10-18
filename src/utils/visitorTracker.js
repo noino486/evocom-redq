@@ -1,4 +1,5 @@
 import { supabase } from '../config/supabase'
+import { getVisitorsWithRetry, getCurrentVisitorsWithRetry, trackVisitorWithRetry } from './networkUtils'
 
 // Fonction pour tracker un visiteur
 export const trackVisitor = async (visitorData) => {
@@ -29,18 +30,16 @@ export const trackVisitor = async (visitorData) => {
       utm_content: visitorData.utmContent || null
     }
 
-    // Envoyer les données à Supabase
-    const { data, error } = await supabase
-      .from('visitors')
-      .insert([visitorInfo])
+    // Utiliser la fonction avec retry
+    const result = await trackVisitorWithRetry(visitorInfo)
 
-    if (error) {
-      console.error('Erreur lors du tracking visiteur:', error)
-      return { success: false, error }
+    if (result.success) {
+      console.log('✅ Visiteur tracké avec succès:', visitorInfo)
+      return { success: true, data: result.data }
+    } else {
+      console.error('Erreur lors du tracking visiteur:', result.error)
+      return { success: false, error: result.error }
     }
-
-    console.log('✅ Visiteur tracké avec succès:', visitorInfo)
-    return { success: true, data }
   } catch (error) {
     console.error('Erreur lors du tracking visiteur:', error)
     return { success: false, error }
@@ -113,35 +112,14 @@ const getOSInfo = () => {
 // Fonction pour obtenir les statistiques des visiteurs
 export const getVisitorStats = async (filters = {}) => {
   try {
-    let query = supabase
-      .from('visitors')
-      .select('*')
-
-    // Appliquer les filtres
-    if (filters.dateFrom) {
-      query = query.gte('timestamp', filters.dateFrom)
+    const result = await getVisitorsWithRetry(filters)
+    
+    if (result.success) {
+      return { success: true, data: result.data }
+    } else {
+      console.error('Erreur lors de la récupération des stats visiteurs:', result.error)
+      return { success: false, error: result.error }
     }
-    if (filters.dateTo) {
-      query = query.lte('timestamp', filters.dateTo)
-    }
-    if (filters.deviceType) {
-      query = query.eq('device_type', filters.deviceType)
-    }
-    if (filters.browser) {
-      query = query.eq('browser', filters.browser)
-    }
-    if (filters.affiliateCode) {
-      query = query.eq('affiliate_code', filters.affiliateCode)
-    }
-
-    const { data, error } = await query.order('timestamp', { ascending: false })
-
-    if (error) {
-      console.error('Erreur lors de la récupération des stats visiteurs:', error)
-      return { success: false, error }
-    }
-
-    return { success: true, data }
   } catch (error) {
     console.error('Erreur lors de la récupération des stats visiteurs:', error)
     return { success: false, error }
@@ -224,21 +202,14 @@ export const getAggregatedVisitorStats = async (filters = {}) => {
 // Fonction pour obtenir les visiteurs en temps réel
 export const getCurrentVisitors = async () => {
   try {
-    const now = new Date()
-    const fiveMinutesAgo = new Date(now.getTime() - 5 * 60 * 1000) // 5 minutes
+    const result = await getCurrentVisitorsWithRetry()
     
-    const { data, error } = await supabase
-      .from('visitors')
-      .select('*')
-      .gte('timestamp', fiveMinutesAgo.toISOString())
-      .order('timestamp', { ascending: false })
-
-    if (error) {
-      console.error('Erreur lors de la récupération des visiteurs actuels:', error)
-      return { success: false, error }
+    if (result.success) {
+      return { success: true, data: result.data }
+    } else {
+      console.error('Erreur lors de la récupération des visiteurs actuels:', result.error)
+      return { success: false, error: result.error }
     }
-
-    return { success: true, data }
   } catch (error) {
     console.error('Erreur lors de la récupération des visiteurs actuels:', error)
     return { success: false, error }
