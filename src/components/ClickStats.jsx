@@ -2,12 +2,12 @@ import React, { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { FaChartLine, FaMousePointer, FaMobile, FaDesktop, FaExternalLinkAlt, FaCalendarAlt, FaUser, FaLink, FaHome, FaShoppingCart, FaGlobe, FaArrowRight, FaUsers, FaEye, FaClock, FaMapMarkerAlt } from 'react-icons/fa'
 import { getClickStats, getAggregatedStats } from '../utils/clickTracker'
-import { getAggregatedVisitorStats, getCurrentVisitors } from '../utils/visitorTracker'
+import { getAggregatedVisitorStats } from '../utils/visitorTracker'
+import { LineChart, Line, AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts'
 
 const ClickStats = () => {
   const [stats, setStats] = useState(null)
   const [visitorStats, setVisitorStats] = useState(null)
-  const [currentVisitors, setCurrentVisitors] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [dateRange, setDateRange] = useState('7d')
@@ -53,10 +53,9 @@ const ClickStats = () => {
       }
 
       // Charger les stats de clics et de visiteurs en parallèle
-      const [clicksResult, visitorsResult, currentVisitorsResult] = await Promise.all([
+      const [clicksResult, visitorsResult] = await Promise.all([
         getAggregatedStats(filters),
-        getAggregatedVisitorStats(filters),
-        getCurrentVisitors()
+        getAggregatedVisitorStats(filters)
       ])
       
       if (clicksResult.success) {
@@ -67,10 +66,6 @@ const ClickStats = () => {
 
       if (visitorsResult.success) {
         setVisitorStats(visitorsResult.data)
-      }
-
-      if (currentVisitorsResult.success) {
-        setCurrentVisitors(currentVisitorsResult.data)
       }
     } catch (err) {
       setError('Erreur lors du chargement des statistiques')
@@ -245,41 +240,6 @@ const ClickStats = () => {
           <p className="text-sm text-gray-600">Toutes les sessions</p>
         </motion.div>
 
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-          className="bg-gradient-to-br from-green-50 to-green-100 rounded-xl p-6 border border-green-200"
-        >
-          <div className="flex items-center justify-between mb-4">
-            <div className="p-3 bg-green-500 rounded-lg">
-              <FaEye className="text-white text-xl" />
-            </div>
-            <span className="text-2xl font-bold text-green-600">
-              {formatNumber(visitorStats?.uniqueVisitors || 0)}
-            </span>
-          </div>
-          <h3 className="text-lg font-semibold text-gray-900">Visiteurs uniques</h3>
-          <p className="text-sm text-gray-600">Sessions distinctes</p>
-        </motion.div>
-
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
-          className="bg-gradient-to-br from-orange-50 to-orange-100 rounded-xl p-6 border border-orange-200"
-        >
-          <div className="flex items-center justify-between mb-4">
-            <div className="p-3 bg-orange-500 rounded-lg">
-              <FaClock className="text-white text-xl" />
-            </div>
-            <span className="text-2xl font-bold text-orange-600">
-              {currentVisitors.length}
-            </span>
-          </div>
-          <h3 className="text-lg font-semibold text-gray-900">Visiteurs actuels</h3>
-          <p className="text-sm text-gray-600">En ligne maintenant</p>
-        </motion.div>
 
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -341,6 +301,174 @@ const ClickStats = () => {
           </p>
         </motion.div>
       </div>
+
+      {/* Graphiques */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Graphique d'évolution des clics */}
+        {stats?.clicksByDay && Object.keys(stats.clicksByDay).length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4 }}
+            className="bg-white/80 backdrop-blur-sm rounded-xl p-6 border border-gray-200/50"
+          >
+            <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+              <FaChartLine className="text-primary" />
+              Évolution des clics
+            </h3>
+            <ResponsiveContainer width="100%" height={300}>
+              <AreaChart data={Object.entries(stats.clicksByDay)
+                .sort(([a], [b]) => new Date(a) - new Date(b))
+                .map(([date, count]) => ({
+                  date: new Date(date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' }),
+                  clics: count
+                }))}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="date" />
+                <YAxis />
+                <Tooltip 
+                  labelStyle={{ color: '#374151' }}
+                  contentStyle={{ 
+                    backgroundColor: '#f9fafb', 
+                    border: '1px solid #e5e7eb',
+                    borderRadius: '8px'
+                  }}
+                />
+                <Area 
+                  type="monotone" 
+                  dataKey="clics" 
+                  stroke="#3b82f6" 
+                  fill="#3b82f6" 
+                  fillOpacity={0.3}
+                  strokeWidth={2}
+                />
+              </AreaChart>
+            </ResponsiveContainer>
+          </motion.div>
+        )}
+
+        {/* Graphique des types de clics */}
+        {stats?.clicksByType && Object.keys(stats.clicksByType).length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.5 }}
+            className="bg-white/80 backdrop-blur-sm rounded-xl p-6 border border-gray-200/50"
+          >
+            <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+              <FaLink className="text-primary" />
+              Répartition des clics
+            </h3>
+            <ResponsiveContainer width="100%" height={300}>
+              <PieChart>
+                <Pie
+                  data={Object.entries(stats.clicksByType).map(([type, count]) => ({
+                    name: type === 'affiliate' ? 'Liens d\'achat' :
+                          type === 'product' ? 'Pages produits' :
+                          type === 'internal' ? 'Liens internes' :
+                          type === 'external' ? 'Liens externes' : type,
+                    value: count,
+                    color: type === 'affiliate' ? '#3b82f6' :
+                           type === 'product' ? '#10b981' :
+                           type === 'internal' ? '#f59e0b' :
+                           type === 'external' ? '#ef4444' : '#6b7280'
+                  }))}
+                  cx="50%"
+                  cy="50%"
+                  labelLine={false}
+                  label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                  outerRadius={80}
+                  fill="#8884d8"
+                  dataKey="value"
+                >
+                  {Object.entries(stats.clicksByType).map(([type, count], index) => (
+                    <Cell key={`cell-${index}`} fill={
+                      type === 'affiliate' ? '#3b82f6' :
+                      type === 'product' ? '#10b981' :
+                      type === 'internal' ? '#f59e0b' :
+                      type === 'external' ? '#ef4444' : '#6b7280'
+                    } />
+                  ))}
+                </Pie>
+                <Tooltip />
+              </PieChart>
+            </ResponsiveContainer>
+          </motion.div>
+        )}
+      </div>
+
+      {/* Graphiques des visiteurs */}
+      {visitorStats && (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Graphique des appareils */}
+          {visitorStats.visitorsByDevice && Object.keys(visitorStats.visitorsByDevice).length > 0 && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.6 }}
+              className="bg-white/80 backdrop-blur-sm rounded-xl p-6 border border-gray-200/50"
+            >
+              <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+                <FaMobile className="text-primary" />
+                Visiteurs par appareil
+              </h3>
+              <ResponsiveContainer width="100%" height={300}>
+                <BarChart data={Object.entries(visitorStats.visitorsByDevice).map(([device, count]) => ({
+                  device,
+                  visiteurs: count
+                }))}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="device" />
+                  <YAxis />
+                  <Tooltip 
+                    labelStyle={{ color: '#374151' }}
+                    contentStyle={{ 
+                      backgroundColor: '#f9fafb', 
+                      border: '1px solid #e5e7eb',
+                      borderRadius: '8px'
+                    }}
+                  />
+                  <Bar dataKey="visiteurs" fill="#10b981" radius={[4, 4, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </motion.div>
+          )}
+
+          {/* Graphique des navigateurs */}
+          {visitorStats.visitorsByBrowser && Object.keys(visitorStats.visitorsByBrowser).length > 0 && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.7 }}
+              className="bg-white/80 backdrop-blur-sm rounded-xl p-6 border border-gray-200/50"
+            >
+              <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+                <FaGlobe className="text-primary" />
+                Visiteurs par navigateur
+              </h3>
+              <ResponsiveContainer width="100%" height={300}>
+                <BarChart data={Object.entries(visitorStats.visitorsByBrowser).map(([browser, count]) => ({
+                  browser,
+                  visiteurs: count
+                }))}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="browser" />
+                  <YAxis />
+                  <Tooltip 
+                    labelStyle={{ color: '#374151' }}
+                    contentStyle={{ 
+                      backgroundColor: '#f9fafb', 
+                      border: '1px solid #e5e7eb',
+                      borderRadius: '8px'
+                    }}
+                  />
+                  <Bar dataKey="visiteurs" fill="#8b5cf6" radius={[4, 4, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </motion.div>
+          )}
+        </div>
+      )}
 
       {/* Répartition par type de lien */}
       {stats.clicksByType && Object.keys(stats.clicksByType).length > 0 && (
