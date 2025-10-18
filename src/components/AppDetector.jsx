@@ -55,36 +55,69 @@ const AppDetector = () => {
       // Si on est dans une app tierce, rediriger automatiquement
       if (isInAppBrowser && !isNativeBrowser) {
         const currentUrl = window.location.href
+        const isSnapchat = ua.includes('Snapchat')
         
         // Redirection automatique pour forcer l'ouverture dans le navigateur par défaut
         setTimeout(() => {
-          if (navigator.userAgent.includes('iPhone') || navigator.userAgent.includes('iPad')) {
-            // iOS - Utiliser le scheme Safari pour forcer l'ouverture
-            const safariUrl = `x-safari-${currentUrl}`
-            window.location.href = safariUrl
-            
-            // Alternative avec window.open
-            setTimeout(() => {
-              const newWindow = window.open('', '_blank')
-              if (newWindow) {
-                newWindow.location.href = currentUrl
-              }
-            }, 100)
-          } else if (navigator.userAgent.includes('Android')) {
-            // Android - Utiliser l'intent Android pour forcer l'ouverture dans le navigateur
-            const intentUrl = `intent://${currentUrl.replace(/^https?:\/\//, '')}#Intent;scheme=https;package=com.android.chrome;S.browser_fallback_url=${encodeURIComponent(currentUrl)};end`
-            window.location.href = intentUrl
-            
-            // Alternative avec window.open
-            setTimeout(() => {
-              const newWindow = window.open('', '_blank')
-              if (newWindow) {
-                newWindow.location.href = currentUrl
-              }
-            }, 100)
+          if (isSnapchat) {
+            // Snapchat - Méthodes spéciales pour contourner les restrictions
+            if (navigator.userAgent.includes('iPhone') || navigator.userAgent.includes('iPad')) {
+              // iOS Snapchat - Essayer plusieurs méthodes
+              const methods = [
+                `x-safari-${currentUrl}`,
+                `safari-${currentUrl}`,
+                currentUrl
+              ]
+              
+              methods.forEach((method, index) => {
+                setTimeout(() => {
+                  window.location.href = method
+                }, index * 200)
+              })
+            } else if (navigator.userAgent.includes('Android')) {
+              // Android Snapchat - Utiliser des intents multiples
+              const intentMethods = [
+                `intent://${currentUrl.replace(/^https?:\/\//, '')}#Intent;scheme=https;package=com.android.chrome;end`,
+                `intent://${currentUrl.replace(/^https?:\/\//, '')}#Intent;scheme=https;end`,
+                currentUrl
+              ]
+              
+              intentMethods.forEach((method, index) => {
+                setTimeout(() => {
+                  window.location.href = method
+                }, index * 200)
+              })
+            }
           } else {
-            // Desktop - Ouvrir dans un nouvel onglet
-            window.open(currentUrl, '_blank', 'noopener,noreferrer')
+            // Autres apps (Instagram, Facebook, etc.) - Méthodes normales
+            if (navigator.userAgent.includes('iPhone') || navigator.userAgent.includes('iPad')) {
+              // iOS - Utiliser le scheme Safari pour forcer l'ouverture
+              const safariUrl = `x-safari-${currentUrl}`
+              window.location.href = safariUrl
+              
+              // Alternative avec window.open
+              setTimeout(() => {
+                const newWindow = window.open('', '_blank')
+                if (newWindow) {
+                  newWindow.location.href = currentUrl
+                }
+              }, 100)
+            } else if (navigator.userAgent.includes('Android')) {
+              // Android - Utiliser l'intent Android pour forcer l'ouverture dans le navigateur
+              const intentUrl = `intent://${currentUrl.replace(/^https?:\/\//, '')}#Intent;scheme=https;package=com.android.chrome;S.browser_fallback_url=${encodeURIComponent(currentUrl)};end`
+              window.location.href = intentUrl
+              
+              // Alternative avec window.open
+              setTimeout(() => {
+                const newWindow = window.open('', '_blank')
+                if (newWindow) {
+                  newWindow.location.href = currentUrl
+                }
+              }, 100)
+            } else {
+              // Desktop - Ouvrir dans un nouvel onglet
+              window.open(currentUrl, '_blank', 'noopener,noreferrer')
+            }
           }
         }, 300)
       }
