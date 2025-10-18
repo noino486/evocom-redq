@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { FaChartLine, FaMousePointer, FaMobile, FaDesktop, FaExternalLinkAlt, FaCalendarAlt, FaUser, FaLink, FaHome, FaShoppingCart, FaGlobe, FaArrowRight, FaUsers, FaEye, FaClock, FaMapMarkerAlt, FaWifi, FaExclamationTriangle, FaRefresh } from 'react-icons/fa'
+import { FaChartLine, FaMousePointer, FaMobile, FaDesktop, FaExternalLinkAlt, FaCalendarAlt, FaUser, FaLink, FaHome, FaShoppingCart, FaGlobe, FaArrowRight, FaUsers, FaEye, FaClock, FaMapMarkerAlt, FaWifi, FaExclamationTriangle, FaRedo } from 'react-icons/fa'
 import { getClickStats, getAggregatedStats } from '../utils/clickTracker'
 import { getAggregatedVisitorStats, getCurrentVisitors } from '../utils/visitorTracker'
 import { useNetworkStatus, formatNetworkError, NETWORK_ERROR_TYPES } from '../utils/networkUtils'
@@ -177,7 +177,7 @@ const ClickStats = () => {
               {isConnecting ? (
                 <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
               ) : (
-                <FaRefresh />
+                <FaRedo />
               )}
               {isConnecting ? 'Test en cours...' : 'Tester et recharger'}
             </button>
@@ -186,7 +186,7 @@ const ClickStats = () => {
               onClick={loadStats}
               className="flex items-center gap-2 bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors"
             >
-              <FaRefresh />
+              <FaRedo />
               Réessayer
             </button>
           </div>
