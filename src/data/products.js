@@ -6,6 +6,7 @@ export const products = [
     slug: 'pack-starter-fournisseurs',
     name: 'Pack Global Sourcing',
     price: 29.90,
+    originalPrice: 39.99,
     popular: false,
     shortDescription: 'La base idéale pour commencer vos recherches.',
     longDescription: `Le Pack Global Sourcing est votre passerelle vers le commerce international. Nous avons compilé pour vous une base de données exhaustive de fournisseurs internationaux couvrant plus de +20 secteurs d'activité différents.
@@ -44,6 +45,7 @@ Chaque fournisseur a été présélectionné pour sa fiabilité, ses prix compé
     slug: 'pack-global-business',
     name: 'Pack Global Business',
     price: 39.90,
+    originalPrice: 49.99,
     popular: true,
     shortDescription: 'La solution complète pour aller plus loin.',
     longDescription: `Le Pack Global Business est notre offre premium qui combine tout ce dont vous avez besoin pour réussir à l'international. En plus de tous les avantages du Pack Global Sourcing, vous obtenez un accès exclusif à nos guides pratiques et à notre communauté d'entrepreneurs.

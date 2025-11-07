@@ -51,7 +51,7 @@ const Header = () => {
     { name: 'Accueil', id: 'hero' },
     { name: 'Produits', id: 'products' },
     { name: 'Témoignages', id: 'testimonials' },
-    { name: 'Connexion', url: 'https://packs.evoecom.com/login', external: true },
+    { name: 'Connexion', path: '/login' },
     { name: 'Contact', id: 'footer' }
   ]
 
@@ -88,6 +88,17 @@ const Header = () => {
                 >
                   {link.name}
                 </a>
+              ) : link.path ? (
+                <button
+                  key={link.name}
+                  onClick={() => {
+                    setIsMobileMenuOpen(false)
+                    navigate(link.path)
+                  }}
+                  className="text-gray-700 hover:text-primary font-medium transition-colors duration-200"
+                >
+                  {link.name}
+                </button>
               ) : (
                 <button
                   key={link.id}
@@ -133,6 +144,17 @@ const Header = () => {
                   >
                     {link.name}
                   </a>
+                ) : link.path ? (
+                  <button
+                    key={link.name}
+                    onClick={() => {
+                      setIsMobileMenuOpen(false)
+                      navigate(link.path)
+                    }}
+                    className="text-gray-700 hover:text-primary font-medium text-left py-2 transition-colors duration-200"
+                  >
+                    {link.name}
+                  </button>
                 ) : (
                   <button
                     key={link.id}
