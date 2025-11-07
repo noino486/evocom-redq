@@ -28,28 +28,28 @@ export const LegalProvider = ({ children }) => {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
 
-  // Charger les mentions légales depuis Supabase (une seule fois)
+  // Charger les mentions légales depuis Supabase
   useEffect(() => {
-    let mounted = true
-    
-    const loadLegalContent = async () => {
-      try {
-        const { data, error } = await supabase
-          .from('legal_content')
-          .select('content')
-          .single()
+    loadLegalContent()
+  }, [])
 
-        if (error && error.code !== 'PGRST116') {
-          if (mounted) setError(error)
-          return
-        }
+  const loadLegalContent = async () => {
+    try {
+      setLoading(true)
+      const { data, error } = await supabase
+        .from('legal_content')
+        .select('*')
+        .single()
 
-        if (mounted) {
-          if (data) {
-            setLegalContent(data.content)
-          } else {
-            // Contenu par défaut
-            setLegalContent({
+      if (error && error.code !== 'PGRST116') { // PGRST116 = no rows returned
+        throw error
+      }
+
+      if (data) {
+        setLegalContent(data.content)
+      } else {
+        // Contenu par défaut
+        setLegalContent({
           introduction: 'Les présentes Conditions Générales de Vente et d\'Utilisation (ci-après « CGV & CGU ») régissent les relations contractuelles entre TRIUM TRADE, société par actions simplifiée immatriculée au RCS de Paris sous le numéro 990 320 590, dont le siège social est situé au 231 rue Saint-Honoré, 75001 Paris, agissant pour la distribution de ses produits sous la marque EVO ECOM (ci-après « EVO ECOM »), et toute personne physique ou morale procédant à un achat ou utilisant le site internet https://evoecom.com (ci-après « le Site »).',
           articles: [
             {
@@ -128,23 +128,14 @@ export const LegalProvider = ({ children }) => {
             hosting: 'Kajabi LLC, 17100 Laguna Canyon Rd Suite 100, Irvine, CA 92603, États-Unis'
           }
         })
-        }
-        setLoading(false)
       }
     } catch (error) {
-      if (mounted) {
-        setError(error.message)
-        setLoading(false)
-      }
+      console.error('Erreur lors du chargement des mentions légales:', error)
+      setError(error.message)
+    } finally {
+      setLoading(false)
     }
   }
-  
-  loadLegalContent()
-  
-  return () => {
-    mounted = false
-  }
-}, [])
 
   const updateLegalContent = async (newContent) => {
     try {

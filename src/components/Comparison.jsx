@@ -81,16 +81,10 @@ const Comparison = () => {
             >
               <div className="font-bold text-lg text-gray-900">Prix</div>
               <div className="text-center">
-                <div className="flex flex-col items-center gap-1">
-                  <span className="text-lg font-semibold text-gray-400 line-through">39,99 €</span>
-                  <span className="text-2xl font-bold text-primary">29,90 €</span>
-                </div>
+                <span className="text-2xl font-bold text-primary">29,90 €</span>
               </div>
               <div className="text-center">
-                <div className="flex flex-col items-center gap-1">
-                  <span className="text-lg font-semibold text-gray-400 line-through">49,99 €</span>
-                  <span className="text-2xl font-bold text-primary">39,90 €</span>
-                </div>
+                <span className="text-2xl font-bold text-primary">39,90 €</span>
               </div>
             </motion.div>
           </div>

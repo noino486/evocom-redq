@@ -69,20 +69,5 @@
   .futuristic-border {
     border-image: linear-gradient(135deg, #6366f1, #8b5cf6, #ec4899) 1;
   }
-
-  /* Protection contre le copier-coller pour les fournisseurs */
-  [data-supplier-section] {
-    -webkit-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-    user-select: none;
-  }
-
-  [data-supplier-section] * {
-    -webkit-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-    user-select: none;
-  }
 }
 

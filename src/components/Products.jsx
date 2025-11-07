@@ -77,17 +77,8 @@ const Products = () => {
 
                 <div className="mb-6">
                   <div className="text-center mb-8">
-                    {product.originalPrice && (
-                      <div className="mb-2">
-                        <span className="text-2xl font-semibold text-gray-400 line-through">
-                          {product.originalPrice.toFixed(2).replace('.', ',')}€
-                        </span>
-                      </div>
-                    )}
-                    <div className="flex items-center justify-center gap-2">
-                      <span className="text-5xl font-bold text-primary">{product.price.toFixed(2).replace('.', ',')}€</span>
-                      <span className="text-gray-500 text-lg">TTC</span>
-                    </div>
+                    <span className="text-5xl font-bold text-primary">{product.price.toFixed(2).replace('.', ',')}€</span>
+                    <span className="text-gray-500 text-lg ml-2">TTC</span>
                   </div>
 
                   <div className="space-y-4 mb-8">

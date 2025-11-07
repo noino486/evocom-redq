@@ -136,13 +136,6 @@ const ProductDetail = () => {
 
             {/* Prix */}
             <div className="mb-6">
-              {product.originalPrice && (
-                <div className="mb-2">
-                  <span className="text-3xl font-semibold text-gray-400 line-through">
-                    {product.originalPrice.toFixed(2).replace('.', ',')}€
-                  </span>
-                </div>
-              )}
               <div className="flex items-baseline gap-2">
                 <span className="text-5xl font-bold gradient-text">{product.price.toFixed(2).replace('.', ',')}€</span>
                 <span className="text-gray-500">TTC</span>
@@ -343,14 +336,7 @@ const ProductDetail = () => {
                           </h3>
                           <p className="text-gray-600 mb-3">{relatedProduct.shortDescription}</p>
                           <div className="flex items-center justify-between">
-                            <div className="flex flex-col gap-1">
-                              {relatedProduct.originalPrice && (
-                                <span className="text-lg font-semibold text-gray-400 line-through">
-                                  {relatedProduct.originalPrice.toFixed(2).replace('.', ',')}€
-                                </span>
-                              )}
-                              <span className="text-2xl font-bold gradient-text">{relatedProduct.price.toFixed(2).replace('.', ',')}€</span>
-                            </div>
+                            <span className="text-2xl font-bold gradient-text">{relatedProduct.price.toFixed(2).replace('.', ',')}€</span>
                             <span className="text-primary group-hover:translate-x-1 transition-transform flex items-center gap-1">
                               Voir le produit <FaChevronRight className="text-sm" />
                             </span>
