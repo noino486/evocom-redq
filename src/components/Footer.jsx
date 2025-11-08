@@ -45,9 +45,9 @@ const Footer = () => {
                 <FaPhone />
                 <span>+33 7 56 96 81 08</span>
               </a>
-              <a href="mailto:contact@evoecom.com" className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors">
+              <a href="mailto:support@evoecom.com" className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors">
                 <FaEnvelope />
-                <span>contact@evoecom.com</span>
+                <span>support@evoecom.com</span>
               </a>
             </div>
           </div>
