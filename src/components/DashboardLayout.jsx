@@ -43,66 +43,57 @@ const DashboardLayout = ({ children }) => {
         icon: FaGlobe,
         title: 'Pack Global Sourcing',
         path: '/dashboard/pack-global-sourcing',
-        visible: hasPackSourcing,
-        badge: null
+        visible: hasPackSourcing
       },
       // Pack Global Business
       {
         icon: FaStar,
         title: 'Pack Global Business',
         path: '/dashboard/pack-global-business',
-        visible: hasPackBusiness,
-        badge: null
+        visible: hasPackBusiness
       },
       {
         icon: FaChartLine,
         title: 'Statistiques',
         path: '/dashboard/stats',
-        visible: supportCheck,
-        badge: 'Pro'
+        visible: supportCheck
       },
       {
         icon: FaUsers,
         title: 'Utilisateurs',
         path: '/dashboard/users',
-        visible: adminCheck, // Seulement niveau 4 (Admin)
-        badge: 'Admin'
+        visible: adminCheck // Seulement niveau 4 (Admin)
       },
       {
         icon: FaUserTag,
         title: 'Influenceurs',
         path: '/dashboard/affiliates',
-        visible: adminCheck, // Seulement niveau 4 (Admin)
-        badge: 'Admin'
+        visible: adminCheck // Seulement niveau 4 (Admin)
       },
       {
         icon: FaList,
         title: 'PDFs par Section',
         path: '/dashboard/pdf-sections',
-        visible: adminCheck, // Seulement niveau 4 (Admin)
-        badge: 'Admin'
+        visible: adminCheck // Seulement niveau 4 (Admin)
       },
       {
         icon: FaGavel,
         title: 'Mentions légales',
         path: '/dashboard/legal',
-        visible: adminCheck,
-        badge: 'Admin'
+        visible: adminCheck
       },
       // Scraper (admin seulement)
       {
         icon: FaSearch,
         title: 'Scraper Fournisseurs',
         path: '/dashboard/scraper',
-        visible: adminCheck,
-        badge: 'Admin'
+        visible: adminCheck
       },
       {
         icon: FaCog,
         title: 'Paramètres',
         path: '/dashboard/settings',
-        visible: true,
-        badge: null
+        visible: true
       }
     ]
   }, [profile, isAdmin, isSupportOrAdmin])
@@ -135,18 +126,18 @@ const DashboardLayout = ({ children }) => {
   }, [activePath])
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-slate-50">
       {/* Sidebar */}
       <aside
         className={`
-          fixed top-0 left-0 h-full w-64 bg-white border-r border-gray-200 z-50
+          fixed top-0 left-0 h-full w-64 bg-white/95 backdrop-blur border-r border-slate-200 z-50 shadow-lg
           transform transition-transform duration-300 ease-in-out
           lg:translate-x-0
           ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
         `}
       >
         {/* Logo */}
-        <div className="flex items-center justify-between h-16 px-4 sm:px-6 border-b border-gray-200">
+        <div className="flex items-center justify-between h-16 px-5 sm:px-6 border-b border-slate-200 bg-white/90 backdrop-blur">
           <img 
             src="/logo.-evo-banniere.svg" 
             alt="EvoEcom Logo" 
@@ -154,15 +145,15 @@ const DashboardLayout = ({ children }) => {
           />
           <button
             onClick={() => setSidebarOpen(false)}
-            className="lg:hidden text-gray-600 hover:text-gray-900"
+            className="lg:hidden text-slate-500 hover:text-slate-900 transition-colors"
           >
             <FaTimes />
           </button>
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 overflow-y-auto py-4">
-          <div className="px-2 sm:px-4 space-y-1">
+        <nav className="flex-1 overflow-y-auto py-5">
+          <div className="px-3 sm:px-5 space-y-1.5">
             {menuItems
               .filter(item => item.visible)
               .map((item) => {
@@ -181,24 +172,24 @@ const DashboardLayout = ({ children }) => {
                           [item.title]: !prev[item.title]
                         }))}
                         className={`
-                          w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors
+                          group w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all border
                           ${hasActiveChild 
-                            ? 'bg-primary/10 text-primary border border-primary/20' 
-                            : 'text-gray-700 hover:bg-gray-50'
+                            ? 'bg-primary/10 text-primary border-primary/30 shadow-sm' 
+                            : 'text-slate-600 border-transparent hover:border-slate-200 hover:bg-slate-100/60'
                           }
                         `}
                       >
-                        <item.icon className={hasActiveChild ? 'text-primary' : 'text-gray-500'} />
-                        <span className="flex-1 font-medium text-left">{item.title}</span>
+                        <item.icon className={`text-base ${hasActiveChild ? 'text-primary' : 'text-slate-500 group-hover:text-primary'}`} />
+                        <span className="flex-1 font-medium text-left text-sm">{item.title}</span>
                         {item.badge && (
                           <span className="text-xs px-2 py-0.5 bg-gradient-to-r from-primary to-secondary text-white rounded">
                             {item.badge}
                           </span>
                         )}
                         {isExpanded ? (
-                          <FaChevronDown className="text-xs text-gray-400" />
+                          <FaChevronDown className="text-xs text-slate-400" />
                         ) : (
-                          <FaChevronRight className="text-xs text-gray-400" />
+                          <FaChevronRight className="text-xs text-slate-400" />
                         )}
                       </button>
                       
@@ -215,16 +206,16 @@ const DashboardLayout = ({ children }) => {
                                   key={child.path}
                                   to={child.path}
                                   onClick={() => setSidebarOpen(false)}
-                                  className={`
-                                    flex items-center gap-3 px-4 py-2 rounded-lg transition-colors text-sm
-                                    ${isActive 
-                                      ? 'bg-primary/10 text-primary border border-primary/20' 
-                                      : 'text-gray-600 hover:bg-gray-50'
-                                    }
-                                  `}
+                                className={`
+                                  flex items-center gap-3 px-4 py-2.5 rounded-lg transition-all text-sm
+                                  ${isActive 
+                                    ? 'bg-primary/10 text-primary border border-primary/20 shadow-sm' 
+                                    : 'text-slate-500 hover:bg-slate-100/60 hover:text-slate-700'
+                                  }
+                                `}
                                 >
-                                  <child.icon className={isActive ? 'text-primary' : 'text-gray-400'} />
-                                  <span className="flex-1 font-medium">{child.title}</span>
+                                <child.icon className={`text-sm ${isActive ? 'text-primary' : 'text-slate-400'}`} />
+                                <span className="flex-1 font-medium text-sm">{child.title}</span>
                                 </Link>
                               )
                             })}
@@ -246,20 +237,15 @@ const DashboardLayout = ({ children }) => {
                     to={item.path}
                     onClick={() => setSidebarOpen(false)}
                     className={`
-                      flex items-center gap-3 px-4 py-3 rounded-lg transition-colors
+                      group flex items-center gap-3 px-4 py-3 rounded-xl transition-all border
                       ${isActive 
-                        ? 'bg-primary/10 text-primary border border-primary/20' 
-                        : 'text-gray-700 hover:bg-gray-50'
+                        ? 'bg-primary/10 text-primary border-primary/30 shadow-sm' 
+                        : 'text-slate-600 border-transparent hover:border-slate-200 hover:bg-slate-100/60'
                       }
                     `}
                   >
-                    <item.icon className={isActive ? 'text-primary' : 'text-gray-500'} />
-                    <span className="flex-1 font-medium">{item.title}</span>
-                    {item.badge && (
-                      <span className="text-xs px-2 py-0.5 bg-gradient-to-r from-primary to-secondary text-white rounded">
-                        {item.badge}
-                      </span>
-                    )}
+                    <item.icon className={`text-base ${isActive ? 'text-primary' : 'text-slate-500 group-hover:text-primary'}`} />
+                    <span className="flex-1 font-medium text-sm tracking-wide">{item.title}</span>
                   </Link>
                 )
               })}
@@ -267,12 +253,12 @@ const DashboardLayout = ({ children }) => {
         </nav>
 
         {/* User info & Logout */}
-        <div className="border-t border-gray-200 p-3 sm:p-4">
-          <div className="mb-3 px-2 sm:px-4">
-            <p className="text-xs sm:text-sm font-medium text-gray-900 truncate">
+        <div className="border-t border-slate-200 bg-white/90 backdrop-blur p-4 sm:p-5">
+          <div className="mb-3 px-2 sm:px-3">
+            <p className="text-xs sm:text-sm font-semibold text-slate-800 truncate">
               {profile?.email || 'Chargement...'}
             </p>
-            <p className="text-xs text-gray-500 truncate">
+            <p className="text-xs text-slate-500 truncate">
               {profile?.access_level === 4 ? 'Administrateur' :
                profile?.access_level === 3 ? 'Support' :
                profile?.access_level === 2 ? 'Produits 1 & 2' :
@@ -281,10 +267,10 @@ const DashboardLayout = ({ children }) => {
           </div>
           <button
             onClick={handleSignOut}
-            className="w-full flex items-center gap-2 sm:gap-3 px-3 sm:px-4 py-2 text-gray-700 hover:bg-gray-50 rounded-lg transition-colors"
+            className="w-full flex items-center gap-2 sm:gap-3 px-3 sm:px-4 py-2 text-slate-600 hover:bg-red-50 hover:text-red-600 rounded-lg transition-colors border border-transparent hover:border-red-200"
           >
-            <FaSignOutAlt className="text-gray-500 text-sm sm:text-base" />
-            <span className="text-sm sm:text-base font-medium">Déconnexion</span>
+            <FaSignOutAlt className="text-slate-500 text-sm sm:text-base" />
+            <span className="text-sm sm:text-base font-semibold">Déconnexion</span>
           </button>
         </div>
       </aside>
@@ -292,7 +278,7 @@ const DashboardLayout = ({ children }) => {
       {/* Overlay pour mobile */}
       {sidebarOpen && (
         <div
-          className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
+          className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-40 lg:hidden"
           onClick={() => setSidebarOpen(false)}
         />
       )}
@@ -303,7 +289,7 @@ const DashboardLayout = ({ children }) => {
         <header className="sticky top-0 z-30 bg-white border-b border-gray-200 h-16 flex items-center px-4 sm:px-6">
           <button
             onClick={() => setSidebarOpen(true)}
-            className="lg:hidden text-gray-600 hover:text-gray-900 mr-2 sm:mr-4"
+            className="lg:hidden text-slate-500 hover:text-slate-900 transition-colors mr-2 sm:mr-4"
           >
             <FaBars className="text-xl" />
           </button>
