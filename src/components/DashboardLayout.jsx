@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import { 
   FaBox, 
   FaUsers, 
@@ -162,7 +162,7 @@ const DashboardLayout = ({ children }) => {
         )
         if (hasActiveChild) {
           setExpandedSections(prev => {
-            if (!prev[item.title]) {
+            if (prev[item.title] !== true) {
               return { ...prev, [item.title]: true }
             }
             return prev
@@ -207,7 +207,7 @@ const DashboardLayout = ({ children }) => {
               .map((item) => {
                 // Si c'est une section avec sous-menus
                 if (item.type === 'section' && item.children) {
-                  const isExpanded = expandedSections[item.title] !== false
+                  const isExpanded = expandedSections[item.title] ?? false
                   const hasActiveChild = item.children.some(child => 
                     child.path && (activePath === child.path || activePath.startsWith(child.path))
                   )
@@ -227,6 +227,14 @@ const DashboardLayout = ({ children }) => {
                           }
                         `}
                       >
+                        <motion.span
+                          initial={false}
+                          animate={{ rotate: isExpanded ? 180 : 0 }}
+                          transition={{ duration: 0.2 }}
+                          className="text-xs text-gray-400"
+                        >
+                          <FaChevronRight />
+                        </motion.span>
                         <item.icon className={hasActiveChild ? 'text-primary' : 'text-gray-500'} />
                         <span className="flex-1 font-medium text-left">{item.title}</span>
                         {item.badge && (
@@ -234,41 +242,50 @@ const DashboardLayout = ({ children }) => {
                             {item.badge}
                           </span>
                         )}
-                        {isExpanded ? (
-                          <FaChevronDown className="text-xs text-gray-400" />
-                        ) : (
-                          <FaChevronRight className="text-xs text-gray-400" />
-                        )}
                       </button>
                       
                       {/* Sous-menus */}
-                      {isExpanded && (
-                        <div className="ml-4 mt-1 space-y-1">
-                          {item.children
-                            .filter(child => child.visible)
-                            .map((child) => {
-                              const isActive = child.path && (activePath === child.path || activePath.startsWith(child.path))
-                              
-                              return (
-                                <Link
-                                  key={child.path}
-                                  to={child.path}
-                                  onClick={() => setSidebarOpen(false)}
-                                  className={`
-                                    flex items-center gap-3 px-4 py-2 rounded-lg transition-colors text-sm
-                                    ${isActive 
-                                      ? 'bg-primary/10 text-primary border border-primary/20' 
-                                      : 'text-gray-600 hover:bg-gray-50'
-                                    }
-                                  `}
-                                >
-                                  <child.icon className={isActive ? 'text-primary' : 'text-gray-400'} />
-                                  <span className="flex-1 font-medium">{child.title}</span>
-                                </Link>
-                              )
-                            })}
-                        </div>
-                      )}
+                      <AnimatePresence initial={false}>
+                        {isExpanded && (
+                          <motion.div
+                            key={`${item.title}-children`}
+                            initial={{ height: 0, opacity: 0 }}
+                            animate={{ height: 'auto', opacity: 1 }}
+                            exit={{ height: 0, opacity: 0 }}
+                            transition={{ duration: 0.2 }}
+                            className="ml-4 mt-1 space-y-1 overflow-hidden"
+                          >
+                            {item.children
+                              .filter(child => child.visible)
+                              .map((child) => {
+                                const isActive = child.path && (activePath === child.path || activePath.startsWith(child.path))
+                                
+                                return (
+                                  <Link
+                                    key={child.path}
+                                    to={child.path}
+                                    onClick={() => setSidebarOpen(false)}
+                                    className={`
+                                      flex items-center gap-3 px-4 py-2 rounded-lg transition-colors text-sm
+                                      ${isActive 
+                                        ? 'bg-primary/10 text-primary border border-primary/20' 
+                                        : 'text-gray-600 hover:bg-gray-50'
+                                      }
+                                    `}
+                                  >
+                                    <child.icon className={isActive ? 'text-primary' : 'text-gray-400'} />
+                                    <span className="flex-1 font-medium">{child.title}</span>
+                                    {child.badge && (
+                                      <span className="text-xs px-2 py-0.5 bg-gradient-to-r from-primary to-secondary text-white rounded">
+                                        {child.badge}
+                                      </span>
+                                    )}
+                                  </Link>
+                                )
+                              })}
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
                     </div>
                   )
                 }
