@@ -332,155 +332,157 @@ const paginatedSuppliers = suppliers.slice(startIndex, startIndex + SUPPLIERS_PE
               <p className="text-gray-600">Aucun fournisseur trouvé.</p>
             </div>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nom</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Site web</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Téléphone</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Pays</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {paginatedSuppliers.map((supplier) => (
-                    <tr key={supplier.id} className="hover:bg-gray-50">
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        {editingSupplier?.id === supplier.id ? (
-                          <input
-                            type="text"
-                            value={editForm.name}
-                            onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
-                            className="w-full px-2 py-1 border border-gray-300 rounded"
-                          />
-                        ) : (
-                          <div className="text-sm font-medium text-gray-900">{supplier.name}</div>
-                        )}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        {editingSupplier?.id === supplier.id ? (
-                          <input
-                            type="url"
-                            value={editForm.website}
-                            onChange={(e) => setEditForm({ ...editForm, website: e.target.value })}
-                            className="w-full px-2 py-1 border border-gray-300 rounded"
-                          />
-                        ) : (
-                          supplier.website ? (
-                            <a
-                              href={supplier.website}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="text-sm text-primary hover:underline flex items-center gap-1"
-                            >
-                              {supplier.website}
-                              <FaExternalLinkAlt className="text-xs" />
-                            </a>
-                          ) : (
-                            <span className="text-sm text-gray-400">-</span>
-                          )
-                        )}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        {editingSupplier?.id === supplier.id ? (
-                          <input
-                            type="tel"
-                            value={editForm.phone}
-                            onChange={(e) => setEditForm({ ...editForm, phone: e.target.value })}
-                            className="w-full px-2 py-1 border border-gray-300 rounded"
-                          />
-                        ) : (
-                          <div className="text-sm text-gray-900">{supplier.phone || '-'}</div>
-                        )}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        {editingSupplier?.id === supplier.id ? (
-                          <input
-                            type="email"
-                            value={editForm.email}
-                            onChange={(e) => setEditForm({ ...editForm, email: e.target.value })}
-                            className="w-full px-2 py-1 border border-gray-300 rounded"
-                          />
-                        ) : (
-                          <div className="text-sm text-gray-900">{supplier.email || '-'}</div>
-                        )}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {supplier.country || '-'}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {supplier.supplier_type || '-'}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                        {isAdmin() && (
-                          editingSupplier?.id === supplier.id ? (
-                            <div className="flex gap-2">
-                              <button
-                                onClick={handleSaveEdit}
-                                className="text-green-600 hover:text-green-900"
-                              >
-                                <FaSave />
-                              </button>
-                              <button
-                                onClick={() => setEditingSupplier(null)}
-                                className="text-gray-600 hover:text-gray-900"
-                              >
-                                <FaTimes />
-                              </button>
-                            </div>
-                          ) : (
-                            <div className="flex gap-2">
-                              <button
-                                onClick={() => handleEdit(supplier)}
-                                className="text-primary hover:text-primary/80"
-                              >
-                                <FaEdit />
-                              </button>
-                              <button
-                                onClick={() => handleDelete(supplier.id)}
-                                className="text-red-600 hover:text-red-900"
-                              >
-                                <FaTrash />
-                              </button>
-                            </div>
-                          )
-                        )}
-                      </td>
+            <>
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nom</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Site web</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Téléphone</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Pays</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-
-            <div className="px-6 py-4 border-t border-gray-200 flex flex-col sm:flex-row items-center justify-between gap-3">
-              <p className="text-sm text-gray-600">
-                Affichage {startIndex + 1} - {Math.min(startIndex + SUPPLIERS_PER_PAGE, totalSuppliers)} sur {totalSuppliers}
-              </p>
-              <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
-                  disabled={safePage === 1}
-                  className="px-3 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  Précédent
-                </button>
-                <span className="text-sm text-gray-600">
-                  Page {safePage} / {totalPages}
-                </span>
-                <button
-                  type="button"
-                  onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
-                  disabled={safePage === totalPages}
-                  className="px-3 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  Suivant
-                </button>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {paginatedSuppliers.map((supplier) => (
+                      <tr key={supplier.id} className="hover:bg-gray-50">
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          {editingSupplier?.id === supplier.id ? (
+                            <input
+                              type="text"
+                              value={editForm.name}
+                              onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
+                              className="w-full px-2 py-1 border border-gray-300 rounded"
+                            />
+                          ) : (
+                            <div className="text-sm font-medium text-gray-900">{supplier.name}</div>
+                          )}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          {editingSupplier?.id === supplier.id ? (
+                            <input
+                              type="url"
+                              value={editForm.website}
+                              onChange={(e) => setEditForm({ ...editForm, website: e.target.value })}
+                              className="w-full px-2 py-1 border border-gray-300 rounded"
+                            />
+                          ) : (
+                            supplier.website ? (
+                              <a
+                                href={supplier.website}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-sm text-primary hover:underline flex items-center gap-1"
+                              >
+                                {supplier.website}
+                                <FaExternalLinkAlt className="text-xs" />
+                              </a>
+                            ) : (
+                              <span className="text-sm text-gray-400">-</span>
+                            )
+                          )}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          {editingSupplier?.id === supplier.id ? (
+                            <input
+                              type="tel"
+                              value={editForm.phone}
+                              onChange={(e) => setEditForm({ ...editForm, phone: e.target.value })}
+                              className="w-full px-2 py-1 border border-gray-300 rounded"
+                            />
+                          ) : (
+                            <div className="text-sm text-gray-900">{supplier.phone || '-'}</div>
+                          )}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          {editingSupplier?.id === supplier.id ? (
+                            <input
+                              type="email"
+                              value={editForm.email}
+                              onChange={(e) => setEditForm({ ...editForm, email: e.target.value })}
+                              className="w-full px-2 py-1 border border-gray-300 rounded"
+                            />
+                          ) : (
+                            <div className="text-sm text-gray-900">{supplier.email || '-'}</div>
+                          )}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          {supplier.country || '-'}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          {supplier.supplier_type || '-'}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                          {isAdmin() && (
+                            editingSupplier?.id === supplier.id ? (
+                              <div className="flex gap-2">
+                                <button
+                                  onClick={handleSaveEdit}
+                                  className="text-green-600 hover:text-green-900"
+                                >
+                                  <FaSave />
+                                </button>
+                                <button
+                                  onClick={() => setEditingSupplier(null)}
+                                  className="text-gray-600 hover:text-gray-900"
+                                >
+                                  <FaTimes />
+                                </button>
+                              </div>
+                            ) : (
+                              <div className="flex gap-2">
+                                <button
+                                  onClick={() => handleEdit(supplier)}
+                                  className="text-primary hover:text-primary/80"
+                                >
+                                  <FaEdit />
+                                </button>
+                                <button
+                                  onClick={() => handleDelete(supplier.id)}
+                                  className="text-red-600 hover:text-red-900"
+                                >
+                                  <FaTrash />
+                                </button>
+                              </div>
+                            )
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
-            </div>
+
+              <div className="px-6 py-4 border-t border-gray-200 flex flex-col sm:flex-row items-center justify-between gap-3">
+                <p className="text-sm text-gray-600">
+                  Affichage {startIndex + 1} - {Math.min(startIndex + SUPPLIERS_PER_PAGE, totalSuppliers)} sur {totalSuppliers}
+                </p>
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                    disabled={safePage === 1}
+                    className="px-3 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    Précédent
+                  </button>
+                  <span className="text-sm text-gray-600">
+                    Page {safePage} / {totalPages}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                    disabled={safePage === totalPages}
+                    className="px-3 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    Suivant
+                  </button>
+                </div>
+              </div>
+            </>
           )}
         </div>
       </div>
