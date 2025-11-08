@@ -276,15 +276,6 @@ const DashboardPack = () => {
     }
   }
 
-  useEffect(() => {
-    // Recharger les fournisseurs quand les filtres changent
-    if (productId && hasProductAccess(productId)) {
-      loadSuppliers()
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [supplierFilters])
-
-
   const loadSections = async () => {
     try {
       setLoading(true)
@@ -491,18 +482,7 @@ const DashboardPack = () => {
               section: section
             }
             
-            // Appliquer les filtres
-            let matchesFilter = true
-            if (supplierFilters.category && supplier.supplier_type !== supplierFilters.category) {
-              matchesFilter = false
-            }
-            if (supplierFilters.country && supplier.country !== supplierFilters.country) {
-              matchesFilter = false
-            }
-            
-            if (matchesFilter) {
-              publishedSuppliers.push(supplier)
-            }
+            publishedSuppliers.push(supplier)
           }
         }
       }
