@@ -5,7 +5,7 @@ import {
   FaDownload, FaExternalLinkAlt, FaFileAlt, FaSpinner,
   FaEye, FaTimes, FaChevronDown, FaChevronUp,
   FaBuilding, FaPhone, FaEnvelope, FaMapMarkerAlt, FaGlobe, FaFilter, FaStar,
-  FaExpand, FaCompress
+  FaTrash, FaExpand, FaCompress
 } from 'react-icons/fa'
 import { useAuth } from '../context/AuthContext'
 import { supabase } from '../config/supabase'
@@ -33,6 +33,7 @@ const DashboardPack = () => {
   const [selectedCategory, setSelectedCategory] = useState(null)
   const [availableSupplierTypes, setAvailableSupplierTypes] = useState([])
   const [favorites, setFavorites] = useState([])
+  const [supplierActionMessage, setSupplierActionMessage] = useState({ type: '', text: '' })
 
   // Catégories de base (celles que l'utilisateur veut afficher)
   const baseSupplierCategories = [
@@ -186,6 +187,13 @@ const DashboardPack = () => {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [productId])
+
+  useEffect(() => {
+    if (supplierActionMessage.text) {
+      const timer = setTimeout(() => setSupplierActionMessage({ type: '', text: '' }), 5000)
+      return () => clearTimeout(timer)
+    }
+  }, [supplierActionMessage])
 
   // Charger les favoris de l'utilisateur
   const loadFavorites = async () => {
@@ -492,6 +500,39 @@ const DashboardPack = () => {
       setAvailableSupplierTypes([])
     } finally {
       setLoadingSuppliers(false)
+    }
+  }
+
+  const handleDeleteSupplier = async (supplierId, supplierName) => {
+    if (typeof window !== 'undefined') {
+      const confirmed = window.confirm(
+        `Êtes-vous sûr de vouloir supprimer${supplierName ? ` "${supplierName}"` : ''} de la liste des fournisseurs ?`
+      )
+      if (!confirmed) {
+        return
+      }
+    }
+
+    try {
+      const { error } = await supabase
+        .from('pack_sections')
+        .delete()
+        .eq('id', supplierId)
+
+      if (error) throw error
+
+      setSupplierActionMessage({
+        type: 'success',
+        text: `Fournisseur${supplierName ? ` "${supplierName}"` : ''} supprimé avec succès.`
+      })
+      setFavorites(prev => prev.filter(id => id !== supplierId))
+      await loadSuppliers()
+    } catch (error) {
+      console.error('Erreur lors de la suppression du fournisseur:', error)
+      setSupplierActionMessage({
+        type: 'error',
+        text: 'Erreur lors de la suppression du fournisseur.'
+      })
     }
   }
   
@@ -847,6 +888,18 @@ const DashboardPack = () => {
               <h2 className="text-xl font-bold text-gray-900">Nos Fournisseurs</h2>
             </div>
 
+            {supplierActionMessage.text && (
+              <div
+                className={`p-4 rounded-lg border ${
+                  supplierActionMessage.type === 'success'
+                    ? 'bg-green-50 border-green-200 text-green-700'
+                    : 'bg-red-50 border-red-200 text-red-700'
+                }`}
+              >
+                {supplierActionMessage.text}
+              </div>
+            )}
+
             {!selectedCategory ? (
               /* Affichage des cards de catégories */
               <div>
@@ -1035,17 +1088,30 @@ const DashboardPack = () => {
                                 )}
                               </div>
                             </div>
-                            <button
-                              onClick={() => toggleFavorite(supplier.id)}
-                              className={`p-2 rounded-lg transition-colors ${
-                                favorites.includes(supplier.id)
-                                  ? 'text-yellow-500 bg-yellow-50'
-                                  : 'text-gray-400 hover:text-yellow-500 hover:bg-yellow-50/50'
-                              }`}
-                              title={favorites.includes(supplier.id) ? 'Retirer des favoris' : 'Ajouter aux favoris'}
-                            >
-                              <FaStar className={favorites.includes(supplier.id) ? 'fill-current' : ''} />
-                            </button>
+                            <div className="flex items-center gap-2">
+                              <button
+                                type="button"
+                                onClick={() => toggleFavorite(supplier.id)}
+                                className={`p-2 rounded-lg transition-colors ${
+                                  favorites.includes(supplier.id)
+                                    ? 'text-yellow-500 bg-yellow-50'
+                                    : 'text-gray-400 hover:text-yellow-500 hover:bg-yellow-50/50'
+                                }`}
+                                title={favorites.includes(supplier.id) ? 'Retirer des favoris' : 'Ajouter aux favoris'}
+                              >
+                                <FaStar className={favorites.includes(supplier.id) ? 'fill-current' : ''} />
+                              </button>
+                              {isAdmin() && (
+                                <button
+                                  type="button"
+                                  onClick={() => handleDeleteSupplier(supplier.id, supplier.name)}
+                                  className="p-2 rounded-lg text-red-600 hover:text-red-800 hover:bg-red-50 transition-colors"
+                                  title="Supprimer ce fournisseur"
+                                >
+                                  <FaTrash />
+                                </button>
+                              )}
+                            </div>
                           </div>
 
                           <div 
