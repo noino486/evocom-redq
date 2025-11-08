@@ -21,10 +21,10 @@ import DashboardStats from './pages/DashboardStats'
 import DashboardSettings from './pages/DashboardSettings'
 import DashboardAffiliates from './pages/DashboardAffiliates'
 import DashboardPdfSections from './pages/DashboardPdfSections'
+import DashboardLegal from './pages/DashboardLegal'
 import DashboardScraper from './pages/DashboardScraper'
 import DashboardSuppliers from './pages/DashboardSuppliers'
 import DashboardRedirect from './components/DashboardRedirect'
-import DashboardLegal from './pages/DashboardLegal'
 
 function AppContent() {
   const location = useLocation()

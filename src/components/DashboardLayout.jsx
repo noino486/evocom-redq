@@ -17,8 +17,7 @@ import {
   FaChevronDown,
   FaChevronRight,
   FaList,
-  FaShieldAlt,
-  FaFileSignature
+  FaGavel
 } from 'react-icons/fa'
 import { useAuth } from '../context/AuthContext'
 
@@ -39,7 +38,22 @@ const DashboardLayout = ({ children }) => {
     // Pack Global Business: visible si niveau >= 2
     const hasPackBusiness = profile?.is_active && profile?.access_level >= 2
     
-    const adminSectionChildren = [
+    return [
+      {
+        icon: FaGlobe,
+        title: 'Pack Global Sourcing',
+        path: '/dashboard/pack-global-sourcing',
+        visible: hasPackSourcing,
+        badge: null
+      },
+      // Pack Global Business
+      {
+        icon: FaStar,
+        title: 'Pack Global Business',
+        path: '/dashboard/pack-global-business',
+        visible: hasPackBusiness,
+        badge: null
+      },
       {
         icon: FaChartLine,
         title: 'Statistiques',
@@ -51,55 +65,37 @@ const DashboardLayout = ({ children }) => {
         icon: FaUsers,
         title: 'Utilisateurs',
         path: '/dashboard/users',
-        visible: adminCheck,
+        visible: adminCheck, // Seulement niveau 4 (Admin)
         badge: 'Admin'
       },
       {
         icon: FaUserTag,
         title: 'Influenceurs',
         path: '/dashboard/affiliates',
-        visible: adminCheck,
+        visible: adminCheck, // Seulement niveau 4 (Admin)
         badge: 'Admin'
       },
       {
         icon: FaList,
         title: 'PDFs par Section',
         path: '/dashboard/pdf-sections',
+        visible: adminCheck, // Seulement niveau 4 (Admin)
+        badge: 'Admin'
+      },
+      {
+        icon: FaGavel,
+        title: 'Mentions légales',
+        path: '/dashboard/legal',
         visible: adminCheck,
         badge: 'Admin'
       },
+      // Scraper (admin seulement)
       {
         icon: FaSearch,
         title: 'Scraper Fournisseurs',
         path: '/dashboard/scraper',
         visible: adminCheck,
         badge: 'Admin'
-      },
-      {
-        icon: FaFileSignature,
-        title: 'Mentions légales',
-        path: '/dashboard/legal',
-        visible: adminCheck,
-        badge: 'Admin'
-      }
-    ]
-
-    const administrationVisible = adminSectionChildren.some(child => child.visible)
-
-    const items = [
-      {
-        icon: FaGlobe,
-        title: 'Pack Global Sourcing',
-        path: '/dashboard/pack-global-sourcing',
-        visible: hasPackSourcing,
-        badge: null
-      },
-      {
-        icon: FaStar,
-        title: 'Pack Global Business',
-        path: '/dashboard/pack-global-business',
-        visible: hasPackBusiness,
-        badge: null
       },
       {
         icon: FaCog,
@@ -109,19 +105,6 @@ const DashboardLayout = ({ children }) => {
         badge: null
       }
     ]
-
-    if (administrationVisible) {
-      items.push({
-        icon: FaShieldAlt,
-        title: 'Administration',
-        type: 'section',
-        visible: true,
-        badge: 'Admin',
-        children: adminSectionChildren
-      })
-    }
-
-    return items
   }, [profile, isAdmin, isSupportOrAdmin])
 
   const handleSignOut = async () => {
@@ -130,28 +113,6 @@ const DashboardLayout = ({ children }) => {
   }
 
   const activePath = location.pathname
-
-  const activeTitle = useMemo(() => {
-    for (const item of menuItems) {
-      if (item.path) {
-        const matches = activePath === item.path || (item.path !== '/dashboard' && activePath.startsWith(item.path))
-        if (matches) {
-          return item.title
-        }
-      }
-
-      if (item.type === 'section' && item.children) {
-        const activeChild = item.children.find((child) => 
-          child.path && (activePath === child.path || activePath.startsWith(child.path))
-        )
-        if (activeChild) {
-          return activeChild.title
-        }
-      }
-    }
-
-    return 'Dashboard'
-  }, [menuItems, activePath])
 
   // Auto-expand les sections avec des enfants actifs
   useEffect(() => {
@@ -162,7 +123,7 @@ const DashboardLayout = ({ children }) => {
         )
         if (hasActiveChild) {
           setExpandedSections(prev => {
-            if (prev[item.title] !== true) {
+            if (!prev[item.title]) {
               return { ...prev, [item.title]: true }
             }
             return prev
@@ -207,7 +168,7 @@ const DashboardLayout = ({ children }) => {
               .map((item) => {
                 // Si c'est une section avec sous-menus
                 if (item.type === 'section' && item.children) {
-                  const isExpanded = expandedSections[item.title] ?? false
+                  const isExpanded = expandedSections[item.title] !== false
                   const hasActiveChild = item.children.some(child => 
                     child.path && (activePath === child.path || activePath.startsWith(child.path))
                   )
@@ -227,20 +188,17 @@ const DashboardLayout = ({ children }) => {
                           }
                         `}
                       >
-                        <motion.span
-                          initial={false}
-                          animate={{ rotate: isExpanded ? 180 : 0 }}
-                          transition={{ duration: 0.2 }}
-                          className="text-xs text-gray-400"
-                        >
-                          <FaChevronRight />
-                        </motion.span>
                         <item.icon className={hasActiveChild ? 'text-primary' : 'text-gray-500'} />
                         <span className="flex-1 font-medium text-left">{item.title}</span>
                         {item.badge && (
                           <span className="text-xs px-2 py-0.5 bg-gradient-to-r from-primary to-secondary text-white rounded">
                             {item.badge}
                           </span>
+                        )}
+                        {isExpanded ? (
+                          <FaChevronDown className="text-xs text-gray-400" />
+                        ) : (
+                          <FaChevronRight className="text-xs text-gray-400" />
                         )}
                       </button>
                       
@@ -267,11 +225,6 @@ const DashboardLayout = ({ children }) => {
                                 >
                                   <child.icon className={isActive ? 'text-primary' : 'text-gray-400'} />
                                   <span className="flex-1 font-medium">{child.title}</span>
-                                  {child.badge && (
-                                    <span className="text-xs px-2 py-0.5 bg-gradient-to-r from-primary to-secondary text-white rounded">
-                                      {child.badge}
-                                    </span>
-                                  )}
                                 </Link>
                               )
                             })}
@@ -355,7 +308,8 @@ const DashboardLayout = ({ children }) => {
             <FaBars className="text-xl" />
           </button>
           <h1 className="text-base sm:text-lg font-semibold text-gray-900 truncate">
-            {activeTitle}
+            {menuItems.find(item => activePath === item.path || 
+              (item.path !== '/dashboard' && activePath.startsWith(item.path)))?.title || 'Dashboard'}
           </h1>
         </header>
 
