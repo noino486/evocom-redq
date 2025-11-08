@@ -24,6 +24,7 @@ import DashboardPdfSections from './pages/DashboardPdfSections'
 import DashboardScraper from './pages/DashboardScraper'
 import DashboardSuppliers from './pages/DashboardSuppliers'
 import DashboardRedirect from './components/DashboardRedirect'
+import DashboardLegal from './pages/DashboardLegal'
 
 function AppContent() {
   const location = useLocation()
@@ -111,6 +112,14 @@ function AppContent() {
                     element={
                       <ProtectedRoute requireAuth={true} minAccessLevel={4}>
                         <DashboardPdfSections />
+                      </ProtectedRoute>
+                    } 
+                  />
+                  <Route 
+                    path="/dashboard/legal" 
+                    element={
+                      <ProtectedRoute requireAuth={true} minAccessLevel={4}>
+                        <DashboardLegal />
                       </ProtectedRoute>
                     } 
                   />

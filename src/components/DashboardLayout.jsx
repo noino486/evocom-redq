@@ -16,7 +16,9 @@ import {
   FaBuilding,
   FaChevronDown,
   FaChevronRight,
-  FaList
+  FaList,
+  FaShieldAlt,
+  FaFileSignature
 } from 'react-icons/fa'
 import { useAuth } from '../context/AuthContext'
 
@@ -37,22 +39,7 @@ const DashboardLayout = ({ children }) => {
     // Pack Global Business: visible si niveau >= 2
     const hasPackBusiness = profile?.is_active && profile?.access_level >= 2
     
-    return [
-      {
-        icon: FaGlobe,
-        title: 'Pack Global Sourcing',
-        path: '/dashboard/pack-global-sourcing',
-        visible: hasPackSourcing,
-        badge: null
-      },
-      // Pack Global Business
-      {
-        icon: FaStar,
-        title: 'Pack Global Business',
-        path: '/dashboard/pack-global-business',
-        visible: hasPackBusiness,
-        badge: null
-      },
+    const adminSectionChildren = [
       {
         icon: FaChartLine,
         title: 'Statistiques',
@@ -64,30 +51,55 @@ const DashboardLayout = ({ children }) => {
         icon: FaUsers,
         title: 'Utilisateurs',
         path: '/dashboard/users',
-        visible: adminCheck, // Seulement niveau 4 (Admin)
+        visible: adminCheck,
         badge: 'Admin'
       },
       {
         icon: FaUserTag,
         title: 'Influenceurs',
         path: '/dashboard/affiliates',
-        visible: adminCheck, // Seulement niveau 4 (Admin)
+        visible: adminCheck,
         badge: 'Admin'
       },
       {
         icon: FaList,
         title: 'PDFs par Section',
         path: '/dashboard/pdf-sections',
-        visible: adminCheck, // Seulement niveau 4 (Admin)
+        visible: adminCheck,
         badge: 'Admin'
       },
-      // Scraper (admin seulement)
       {
         icon: FaSearch,
         title: 'Scraper Fournisseurs',
         path: '/dashboard/scraper',
         visible: adminCheck,
         badge: 'Admin'
+      },
+      {
+        icon: FaFileSignature,
+        title: 'Mentions légales',
+        path: '/dashboard/legal',
+        visible: adminCheck,
+        badge: 'Admin'
+      }
+    ]
+
+    const administrationVisible = adminSectionChildren.some(child => child.visible)
+
+    const items = [
+      {
+        icon: FaGlobe,
+        title: 'Pack Global Sourcing',
+        path: '/dashboard/pack-global-sourcing',
+        visible: hasPackSourcing,
+        badge: null
+      },
+      {
+        icon: FaStar,
+        title: 'Pack Global Business',
+        path: '/dashboard/pack-global-business',
+        visible: hasPackBusiness,
+        badge: null
       },
       {
         icon: FaCog,
@@ -97,6 +109,19 @@ const DashboardLayout = ({ children }) => {
         badge: null
       }
     ]
+
+    if (administrationVisible) {
+      items.push({
+        icon: FaShieldAlt,
+        title: 'Administration',
+        type: 'section',
+        visible: true,
+        badge: 'Admin',
+        children: adminSectionChildren
+      })
+    }
+
+    return items
   }, [profile, isAdmin, isSupportOrAdmin])
 
   const handleSignOut = async () => {
@@ -105,6 +130,28 @@ const DashboardLayout = ({ children }) => {
   }
 
   const activePath = location.pathname
+
+  const activeTitle = useMemo(() => {
+    for (const item of menuItems) {
+      if (item.path) {
+        const matches = activePath === item.path || (item.path !== '/dashboard' && activePath.startsWith(item.path))
+        if (matches) {
+          return item.title
+        }
+      }
+
+      if (item.type === 'section' && item.children) {
+        const activeChild = item.children.find((child) => 
+          child.path && (activePath === child.path || activePath.startsWith(child.path))
+        )
+        if (activeChild) {
+          return activeChild.title
+        }
+      }
+    }
+
+    return 'Dashboard'
+  }, [menuItems, activePath])
 
   // Auto-expand les sections avec des enfants actifs
   useEffect(() => {
@@ -300,8 +347,7 @@ const DashboardLayout = ({ children }) => {
             <FaBars className="text-xl" />
           </button>
           <h1 className="text-base sm:text-lg font-semibold text-gray-900 truncate">
-            {menuItems.find(item => activePath === item.path || 
-              (item.path !== '/dashboard' && activePath.startsWith(item.path)))?.title || 'Dashboard'}
+            {activeTitle}
           </h1>
         </header>
 
