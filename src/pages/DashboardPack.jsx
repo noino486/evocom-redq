@@ -40,6 +40,7 @@ const DashboardPack = () => {
 
   const handleSelectCategory = (category) => {
     setSelectedCategory(category)
+  setSupplierFilters({ category, country: '' })
     setSupplierPage(1)
   }
 
