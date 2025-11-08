@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion } from 'framer-motion'
 import { 
   FaBox, 
   FaUsers, 
@@ -245,47 +245,38 @@ const DashboardLayout = ({ children }) => {
                       </button>
                       
                       {/* Sous-menus */}
-                      <AnimatePresence initial={false}>
-                        {isExpanded && (
-                          <motion.div
-                            key={`${item.title}-children`}
-                            initial={{ height: 0, opacity: 0 }}
-                            animate={{ height: 'auto', opacity: 1 }}
-                            exit={{ height: 0, opacity: 0 }}
-                            transition={{ duration: 0.2 }}
-                            className="ml-4 mt-1 space-y-1 overflow-hidden"
-                          >
-                            {item.children
-                              .filter(child => child.visible)
-                              .map((child) => {
-                                const isActive = child.path && (activePath === child.path || activePath.startsWith(child.path))
-                                
-                                return (
-                                  <Link
-                                    key={child.path}
-                                    to={child.path}
-                                    onClick={() => setSidebarOpen(false)}
-                                    className={`
-                                      flex items-center gap-3 px-4 py-2 rounded-lg transition-colors text-sm
-                                      ${isActive 
-                                        ? 'bg-primary/10 text-primary border border-primary/20' 
-                                        : 'text-gray-600 hover:bg-gray-50'
-                                      }
-                                    `}
-                                  >
-                                    <child.icon className={isActive ? 'text-primary' : 'text-gray-400'} />
-                                    <span className="flex-1 font-medium">{child.title}</span>
-                                    {child.badge && (
-                                      <span className="text-xs px-2 py-0.5 bg-gradient-to-r from-primary to-secondary text-white rounded">
-                                        {child.badge}
-                                      </span>
-                                    )}
-                                  </Link>
-                                )
-                              })}
-                          </motion.div>
-                        )}
-                      </AnimatePresence>
+                      {isExpanded && (
+                        <div className="ml-4 mt-1 space-y-1">
+                          {item.children
+                            .filter(child => child.visible)
+                            .map((child) => {
+                              const isActive = child.path && (activePath === child.path || activePath.startsWith(child.path))
+                              
+                              return (
+                                <Link
+                                  key={child.path}
+                                  to={child.path}
+                                  onClick={() => setSidebarOpen(false)}
+                                  className={`
+                                    flex items-center gap-3 px-4 py-2 rounded-lg transition-colors text-sm
+                                    ${isActive 
+                                      ? 'bg-primary/10 text-primary border border-primary/20' 
+                                      : 'text-gray-600 hover:bg-gray-50'
+                                    }
+                                  `}
+                                >
+                                  <child.icon className={isActive ? 'text-primary' : 'text-gray-400'} />
+                                  <span className="flex-1 font-medium">{child.title}</span>
+                                  {child.badge && (
+                                    <span className="text-xs px-2 py-0.5 bg-gradient-to-r from-primary to-secondary text-white rounded">
+                                      {child.badge}
+                                    </span>
+                                  )}
+                                </Link>
+                              )
+                            })}
+                        </div>
+                      )}
                     </div>
                   )
                 }
