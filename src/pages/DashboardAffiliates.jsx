@@ -277,14 +277,14 @@ const DashboardAffiliates = () => {
             <div className="flex gap-3">
               <button
                 onClick={handleAdd}
-                className="px-4 py-2 bg-gradient-to-r from-primary via-secondary to-accent text-white rounded-lg hover:opacity-90 transition-opacity font-medium flex items-center gap-2"
+                className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors font-medium flex items-center gap-2 shadow-sm"
               >
                 <FaPlus />
                 Ajouter un influenceur
               </button>
               <button
                 onClick={handleAddPayment}
-                className="px-4 py-2 bg-gradient-to-r from-secondary to-accent text-white rounded-lg hover:opacity-90 transition-opacity font-medium flex items-center gap-2"
+                className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors font-medium flex items-center gap-2 shadow-sm"
               >
                 <FaCreditCard />
                 Ajouter une page de paiement
@@ -336,7 +336,7 @@ const DashboardAffiliates = () => {
                 <button
                   onClick={handleSavePayment}
                   disabled={!paymentForm.product || !paymentForm.url || saving}
-                  className="flex-1 px-4 py-2 bg-gradient-to-r from-primary via-secondary to-accent text-white rounded-lg hover:opacity-90 transition-opacity font-medium disabled:opacity-50 flex items-center justify-center gap-2"
+                  className="flex-1 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors font-medium disabled:opacity-50 flex items-center justify-center gap-2 shadow-sm"
                 >
                   {saving ? (
                     <>
@@ -353,7 +353,7 @@ const DashboardAffiliates = () => {
                 <button
                   onClick={handleCancel}
                   disabled={saving}
-                  className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium disabled:opacity-50 flex items-center gap-2"
+                  className="px-4 py-2 border border-primary text-primary rounded-lg hover:bg-primary/10 transition-colors font-medium disabled:opacity-50 flex items-center gap-2"
                 >
                   <FaTimes />
                   Annuler
@@ -415,7 +415,7 @@ const DashboardAffiliates = () => {
                 <button
                   onClick={handleSaveEdit}
                   disabled={!editForm.code || !editForm.stfour || !editForm.glbns || saving}
-                  className="flex-1 px-4 py-2 bg-gradient-to-r from-primary via-secondary to-accent text-white rounded-lg hover:opacity-90 transition-opacity font-medium disabled:opacity-50 flex items-center justify-center gap-2"
+                  className="flex-1 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors font-medium disabled:opacity-50 flex items-center justify-center gap-2 shadow-sm"
                 >
                   {saving ? (
                     <>
@@ -432,7 +432,7 @@ const DashboardAffiliates = () => {
                 <button
                   onClick={handleCancel}
                   disabled={saving}
-                  className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium disabled:opacity-50 flex items-center gap-2"
+                  className="px-4 py-2 border border-primary text-primary rounded-lg hover:bg-primary/10 transition-colors font-medium disabled:opacity-50 flex items-center gap-2"
                 >
                   <FaTimes />
                   Annuler

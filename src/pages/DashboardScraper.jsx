@@ -522,7 +522,7 @@ const DashboardScraper = () => {
                     is_featured: false
                   })
                 }}
-                className="text-gray-500 hover:text-gray-700 flex-shrink-0"
+                className="text-primary hover:text-primary/80 transition-colors flex-shrink-0"
               >
                 <FaTimes className="text-lg sm:text-xl" />
               </button>
@@ -684,7 +684,7 @@ const DashboardScraper = () => {
                     setMessage({ type: 'error', text: error.message || 'Erreur lors de l\'ajout du fournisseur' })
                   }
                 }}
-                className="px-6 py-3 bg-gradient-to-r from-primary via-secondary to-accent text-white rounded-lg hover:opacity-90 transition-opacity font-medium flex items-center gap-2"
+                className="px-6 py-3 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors font-medium flex items-center gap-2 shadow-sm"
               >
                 <FaCheck />
                 Ajouter le fournisseur
@@ -703,7 +703,7 @@ const DashboardScraper = () => {
                     is_featured: false
                   })
                 }}
-                className="px-6 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors font-medium"
+                className="px-6 py-3 border border-primary text-primary rounded-lg hover:bg-primary/10 transition-colors font-medium"
               >
                 Annuler
               </button>
@@ -768,7 +768,7 @@ const DashboardScraper = () => {
             {!isScraping ? (
               <button
                 onClick={startScraping}
-                className="px-6 py-3 bg-gradient-to-r from-primary via-secondary to-accent text-white rounded-lg hover:opacity-90 transition-opacity font-medium flex items-center gap-2"
+                className="px-6 py-3 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors font-medium flex items-center gap-2 shadow-sm"
               >
                 <FaPlay />
                 Lancer le scraping
@@ -777,7 +777,7 @@ const DashboardScraper = () => {
               <>
                 <button
                   onClick={stopScraping}
-                  className="px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium flex items-center gap-2"
+                  className="px-6 py-3 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors font-medium flex items-center gap-2 shadow-sm"
                 >
                   <FaStop />
                   Arrêter le scraping
@@ -809,7 +809,7 @@ const DashboardScraper = () => {
                 <button
                   onClick={pushToPackBusiness}
                   disabled={isPushing}
-                  className="px-4 py-2 bg-gradient-to-r from-primary via-secondary to-accent text-white rounded-lg hover:opacity-90 transition-opacity font-medium flex items-center gap-2 disabled:opacity-50"
+                  className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors font-medium flex items-center gap-2 disabled:opacity-50 shadow-sm"
                 >
                   {isPushing ? (
                     <>

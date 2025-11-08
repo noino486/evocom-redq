@@ -358,7 +358,7 @@ const DashboardUsers = () => {
           {!showCreateForm && (
             <button
               onClick={() => setShowCreateForm(true)}
-              className="px-4 py-2 bg-gradient-to-r from-primary via-secondary to-accent text-white rounded-lg hover:opacity-90 transition-opacity font-medium flex items-center gap-2"
+              className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors font-medium flex items-center gap-2 shadow-sm"
             >
               <FaPlus />
               Créer un utilisateur
@@ -473,7 +473,7 @@ const DashboardUsers = () => {
                 <button
                   type="submit"
                   disabled={actionLoading === 'create' || !createForm.email}
-                  className="flex-1 px-4 py-2 bg-gradient-to-r from-primary via-secondary to-accent text-white rounded-lg hover:opacity-90 transition-opacity font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  className="flex-1 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-sm"
                 >
                   {actionLoading === 'create' ? (
                     <>
@@ -499,7 +499,7 @@ const DashboardUsers = () => {
                     setMessage({ type: '', text: '' })
                   }}
                   disabled={actionLoading === 'create'}
-                  className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium disabled:opacity-50 flex items-center gap-2"
+                  className="px-4 py-2 border border-primary text-primary rounded-lg hover:bg-primary/10 transition-colors font-medium disabled:opacity-50 flex items-center gap-2"
                 >
                   <FaTimes />
                   Annuler

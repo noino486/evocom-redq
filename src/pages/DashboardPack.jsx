@@ -12,6 +12,8 @@ import { supabase } from '../config/supabase'
 import DashboardLayout from '../components/DashboardLayout'
 import * as Icons from 'react-icons/fa'
 
+const SUPPLIERS_PER_PAGE = 25
+
 const DashboardPack = () => {
   const location = useLocation()
   const { profile, hasProductAccess, isAdmin } = useAuth()
@@ -34,6 +36,22 @@ const DashboardPack = () => {
   const [availableSupplierTypes, setAvailableSupplierTypes] = useState([])
   const [favorites, setFavorites] = useState([])
   const [supplierActionMessage, setSupplierActionMessage] = useState({ type: '', text: '' })
+  const [supplierPage, setSupplierPage] = useState(1)
+
+  const handleSelectCategory = (category) => {
+    setSelectedCategory(category)
+    setSupplierPage(1)
+  }
+
+  const handleSupplierCountryChange = (value) => {
+    setSupplierFilters(prev => ({ ...prev, country: value }))
+    setSupplierPage(1)
+  }
+
+  const handleResetSupplierFilters = () => {
+    setSupplierFilters({ category: '', country: '' })
+    setSupplierPage(1)
+  }
 
   // Catégories de base (celles que l'utilisateur veut afficher)
   const baseSupplierCategories = [
@@ -623,6 +641,22 @@ const DashboardPack = () => {
     return suppliers.filter(s => matchesCategory(s.supplier_type, categoryName))
   }
 
+useEffect(() => {
+  if (!selectedCategory) {
+    return
+  }
+
+  const categorySuppliers = getSuppliersByCategory(selectedCategory).filter(supplier => {
+    const matchesCountry = !supplierFilters.country || supplier.country === supplierFilters.country
+    return matchesCountry
+  })
+
+  const maxPage = Math.max(1, Math.ceil(categorySuppliers.length / SUPPLIERS_PER_PAGE))
+  if (supplierPage > maxPage) {
+    setSupplierPage(maxPage)
+  }
+}, [selectedCategory, supplierFilters.country, suppliers, supplierPage])
+
   // Grouper les fournisseurs par catégorie
   const suppliersByCategory = useMemo(() => {
     const grouped = {}
@@ -726,7 +760,7 @@ const DashboardPack = () => {
               {/* Bouton retour */}
               <button
                 onClick={() => setSelectedPdfCategory(null)}
-                className="flex items-center gap-2 text-primary hover:text-primary/80 font-medium mb-4"
+                className="inline-flex items-center gap-2 px-3 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors font-medium mb-4"
               >
                 <FaTimes className="text-sm" />
                 Retour aux catégories
@@ -809,7 +843,7 @@ const DashboardPack = () => {
                             <div className="flex gap-2 mt-4">
                               <button
                                 onClick={() => setExpandedPdf(expandedPdf === pdf.id ? null : pdf.id)}
-                                className="w-full px-3 sm:px-4 py-2 bg-primary/10 text-primary rounded-lg hover:bg-primary/20 transition-colors font-medium text-xs sm:text-sm flex items-center justify-center gap-2"
+                                className="w-full px-3 sm:px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors font-medium text-xs sm:text-sm flex items-center justify-center gap-2"
                               >
                                 {isExpanded ? (
                                   <>
@@ -840,7 +874,7 @@ const DashboardPack = () => {
                                     <div className="absolute top-2 right-2 z-10 flex gap-2">
                                       <button
                                         onClick={() => setFullscreenPdf(pdf.id)}
-                                        className="px-3 py-2 bg-white text-gray-700 rounded-lg shadow-md hover:bg-gray-50 transition-colors text-sm font-medium flex items-center gap-2"
+                                        className="px-3 py-2 bg-primary text-white rounded-lg shadow-md hover:bg-primary/90 transition-colors text-sm font-medium flex items-center gap-2"
                                         title="Plein écran"
                                       >
                                         <FaExpand />
@@ -917,7 +951,7 @@ const DashboardPack = () => {
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: index * 0.05 }}
-                        onClick={() => setSelectedCategory(category)}
+                        onClick={() => handleSelectCategory(category)}
                         className="relative rounded-lg border-2 border-gray-200 hover:border-primary shadow-sm hover:shadow-md transition-all cursor-pointer overflow-hidden group h-32 sm:h-40"
                         style={{
                           backgroundImage: getCategoryImage(category) 
@@ -959,9 +993,9 @@ const DashboardPack = () => {
                 <button
                   onClick={() => {
                     setSelectedCategory(null)
-                    setSupplierFilters({ category: '', country: '' })
+                    handleResetSupplierFilters()
                   }}
-                  className="flex items-center gap-2 text-primary hover:text-primary/80 font-medium mb-4"
+                  className="inline-flex items-center gap-2 px-3 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors font-medium mb-4"
                 >
                   <FaTimes className="text-sm" />
                   Retour aux catégories
@@ -973,7 +1007,10 @@ const DashboardPack = () => {
                   <h3 className="text-xl font-bold text-gray-900">{selectedCategory}</h3>
                   <span className="px-3 py-1 bg-primary/10 text-primary text-xs font-medium rounded-full">
                     {(() => {
-                      const count = getSuppliersByCategory(selectedCategory).length
+                      const count = getSuppliersByCategory(selectedCategory).filter(supplier => {
+                        const matchesCountry = !supplierFilters.country || supplier.country === supplierFilters.country
+                        return matchesCountry
+                      }).length
                       return `${count} fournisseur${count !== 1 ? 's' : ''}`
                     })()}
                   </span>
@@ -993,7 +1030,7 @@ const DashboardPack = () => {
                         </label>
                         <select
                           value={supplierFilters.country}
-                          onChange={(e) => setSupplierFilters({ ...supplierFilters, country: e.target.value })}
+                          onChange={(e) => handleSupplierCountryChange(e.target.value)}
                           className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
                         >
                           <option value="">Tous les pays</option>
@@ -1004,8 +1041,8 @@ const DashboardPack = () => {
                       </div>
                       <div className="flex items-end">
                         <button
-                          onClick={() => setSupplierFilters({ category: '', country: '' })}
-                          className="w-full px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors font-medium"
+                          onClick={handleResetSupplierFilters}
+                          className="w-full px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors font-medium"
                         >
                           Réinitialiser
                         </button>
@@ -1041,7 +1078,16 @@ const DashboardPack = () => {
                     return a.name.localeCompare(b.name)
                   })
 
-                  return categorySuppliers.length === 0 ? (
+                  const totalSuppliersInCategory = categorySuppliers.length
+                  const totalPages = Math.max(1, Math.ceil(totalSuppliersInCategory / SUPPLIERS_PER_PAGE))
+                  const safePage = Math.min(supplierPage, totalPages)
+                  const startIndex = (safePage - 1) * SUPPLIERS_PER_PAGE
+                  const paginatedSuppliers = categorySuppliers.slice(
+                    startIndex,
+                    startIndex + SUPPLIERS_PER_PAGE
+                  )
+
+                  return totalSuppliersInCategory === 0 ? (
                     <div className="bg-white rounded-lg p-8 text-center border border-gray-200">
                       <p className="text-gray-600">
                         {supplierFilters.country 
@@ -1050,13 +1096,14 @@ const DashboardPack = () => {
                       </p>
                     </div>
                   ) : (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-                      {categorySuppliers.map((supplier, index) => (
+                    <div className="space-y-4">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+                        {paginatedSuppliers.map((supplier, index) => (
                         <motion.div
                           key={supplier.id}
                           initial={{ opacity: 0, y: 20 }}
                           animate={{ opacity: 1, y: 0 }}
-                          transition={{ delay: index * 0.05 }}
+                            transition={{ delay: index * 0.05 }}
                           className={`bg-white rounded-lg border-2 shadow-sm hover:shadow-md transition-shadow p-4 sm:p-6 select-none ${
                             supplier.is_featured 
                               ? 'border-yellow-400 bg-gradient-to-br from-yellow-50/50 to-white' 
@@ -1171,7 +1218,35 @@ const DashboardPack = () => {
                             )}
                           </div>
                         </motion.div>
-                      ))}
+                        ))}
+                      </div>
+
+                      <div className="flex flex-col sm:flex-row items-center justify-between gap-3 border border-gray-200 rounded-lg p-3 sm:p-4">
+                        <p className="text-sm text-gray-600">
+                          Affichage {startIndex + 1} - {Math.min(startIndex + SUPPLIERS_PER_PAGE, totalSuppliersInCategory)} sur {totalSuppliersInCategory}
+                        </p>
+                        <div className="flex items-center gap-2">
+                          <button
+                            type="button"
+                            onClick={() => setSupplierPage(prev => Math.max(1, prev - 1))}
+                            disabled={safePage === 1}
+                            className="px-3 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                          >
+                            Précédent
+                          </button>
+                          <span className="text-sm text-gray-600">
+                            Page {safePage} / {totalPages}
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => setSupplierPage(prev => Math.min(totalPages, prev + 1))}
+                            disabled={safePage === totalPages}
+                            className="px-3 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                          >
+                            Suivant
+                          </button>
+                        </div>
+                      </div>
                     </div>
                   )
                 })()}
@@ -1200,7 +1275,7 @@ const DashboardPack = () => {
               <div className="relative w-full h-full">
                 <button
                   onClick={() => setFullscreenPdf(null)}
-                  className="absolute top-2 right-2 sm:top-4 sm:right-4 z-10 px-3 sm:px-4 py-2 bg-white text-gray-700 rounded-lg shadow-lg hover:bg-gray-50 transition-colors text-sm sm:text-base font-medium flex items-center gap-1 sm:gap-2"
+                  className="absolute top-2 right-2 sm:top-4 sm:right-4 z-10 px-3 sm:px-4 py-2 bg-primary text-white rounded-lg shadow-lg hover:bg-primary/90 transition-colors text-sm sm:text-base font-medium flex items-center gap-1 sm:gap-2"
                 >
                   <FaCompress className="text-sm sm:text-base" />
                   <span className="hidden sm:inline">Quitter le plein écran</span>

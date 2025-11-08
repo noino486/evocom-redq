@@ -177,7 +177,7 @@ const DashboardPdfSections = () => {
           </div>
           <button
             onClick={() => setShowForm(true)}
-            className="px-4 py-2 bg-gradient-to-r from-primary via-secondary to-accent text-white rounded-lg hover:opacity-90 transition-opacity font-medium flex items-center gap-2"
+            className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors font-medium flex items-center gap-2 shadow-sm"
           >
             <FaPlus />
             Ajouter un PDF
@@ -197,10 +197,10 @@ const DashboardPdfSections = () => {
                   setSelectedSection(section.id)
                   setFormData(prev => ({ ...prev, section_type: section.id }))
                 }}
-                className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                className={`px-4 py-2 rounded-lg font-medium transition-colors border ${
                   selectedSection === section.id
-                    ? 'bg-primary text-white'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    ? 'bg-primary text-white border-primary shadow-sm'
+                    : 'border-primary text-primary hover:bg-primary/10'
                 }`}
               >
                 {section.name}
@@ -236,7 +236,7 @@ const DashboardPdfSections = () => {
               </h2>
               <button
                 onClick={resetForm}
-                className="text-gray-500 hover:text-gray-700"
+                className="text-primary hover:text-primary/80 transition-colors"
               >
                 <FaTimes />
               </button>
@@ -333,7 +333,7 @@ const DashboardPdfSections = () => {
               <div className="flex gap-3">
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-gradient-to-r from-primary via-secondary to-accent text-white rounded-lg hover:opacity-90 transition-opacity font-medium flex items-center gap-2"
+                  className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors font-medium flex items-center gap-2 shadow-sm"
                 >
                   <FaSave />
                   {editingPdf ? 'Mettre à jour' : 'Créer'}
@@ -341,7 +341,7 @@ const DashboardPdfSections = () => {
                 <button
                   type="button"
                   onClick={resetForm}
-                  className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors font-medium flex items-center gap-2"
+                  className="px-4 py-2 border border-primary text-primary rounded-lg hover:bg-primary/10 transition-colors font-medium flex items-center gap-2"
                 >
                   <FaTimes />
                   Annuler
@@ -410,14 +410,14 @@ const DashboardPdfSections = () => {
                 <div className="flex gap-2">
                   <button
                     onClick={() => handleEdit(pdf)}
-                    className="flex-1 px-3 py-2 bg-primary/10 text-primary rounded-lg hover:bg-primary/20 transition-colors text-sm font-medium flex items-center justify-center gap-2"
+                    className="flex-1 px-3 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors text-sm font-medium flex items-center justify-center gap-2 shadow-sm"
                   >
                     <FaEdit />
                     Modifier
                   </button>
                   <button
                     onClick={() => handleDelete(pdf.id)}
-                    className="px-3 py-2 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition-colors text-sm font-medium flex items-center justify-center gap-2"
+                    className="px-3 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors text-sm font-medium flex items-center justify-center gap-2 shadow-sm"
                   >
                     <FaTrash />
                   </button>

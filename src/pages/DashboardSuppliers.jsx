@@ -9,6 +9,8 @@ import { useAuth } from '../context/AuthContext'
 import { supabase } from '../config/supabase'
 import DashboardLayout from '../components/DashboardLayout'
 
+const SUPPLIERS_PER_PAGE = 25
+
 const DashboardSuppliers = () => {
   const { isAdmin, profile, hasAccessLevel } = useAuth()
   const [suppliers, setSuppliers] = useState([])
@@ -29,6 +31,7 @@ const DashboardSuppliers = () => {
     country: '',
     supplier_type: ''
   })
+  const [currentPage, setCurrentPage] = useState(1)
 
   // Accessible si niveau >= 2 (Pack Global Business) ou admin
   const hasAccess = profile?.is_active && (profile?.access_level >= 2 || isAdmin())
@@ -131,6 +134,23 @@ const DashboardSuppliers = () => {
     }
   }
 
+  useEffect(() => {
+    const maxPage = Math.max(1, Math.ceil((suppliers?.length || 0) / SUPPLIERS_PER_PAGE))
+    if (currentPage > maxPage) {
+      setCurrentPage(maxPage)
+    }
+  }, [suppliers, currentPage])
+
+  const handleFilterChange = (key, value) => {
+    setFilters(prev => ({ ...prev, [key]: value }))
+    setCurrentPage(1)
+  }
+
+  const resetFilters = () => {
+    setFilters({ country: '', supplier_type: '' })
+    setCurrentPage(1)
+  }
+
   const handleDelete = async (id) => {
     if (!confirm('Êtes-vous sûr de vouloir supprimer ce fournisseur de la liste publiée ?')) return
 
@@ -218,6 +238,11 @@ const DashboardSuppliers = () => {
   // Obtenir les pays et types uniques pour les filtres
   const countries = [...new Set(suppliers.map(s => s.country).filter(Boolean))].sort()
   const types = [...new Set(suppliers.map(s => s.supplier_type).filter(Boolean))].sort()
+const totalSuppliers = suppliers.length
+const totalPages = Math.max(1, Math.ceil(totalSuppliers / SUPPLIERS_PER_PAGE))
+const safePage = Math.min(currentPage, totalPages)
+const startIndex = (safePage - 1) * SUPPLIERS_PER_PAGE
+const paginatedSuppliers = suppliers.slice(startIndex, startIndex + SUPPLIERS_PER_PAGE)
 
   return (
     <DashboardLayout>
@@ -254,7 +279,7 @@ const DashboardSuppliers = () => {
               </label>
               <select
                 value={filters.country}
-                onChange={(e) => setFilters({ ...filters, country: e.target.value })}
+                onChange={(e) => handleFilterChange('country', e.target.value)}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
               >
                 <option value="">Tous les pays</option>
@@ -269,7 +294,7 @@ const DashboardSuppliers = () => {
               </label>
               <select
                 value={filters.supplier_type}
-                onChange={(e) => setFilters({ ...filters, supplier_type: e.target.value })}
+                onChange={(e) => handleFilterChange('supplier_type', e.target.value)}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
               >
                 <option value="">Tous les types</option>
@@ -280,8 +305,8 @@ const DashboardSuppliers = () => {
             </div>
             <div className="flex items-end">
               <button
-                onClick={() => setFilters({ country: '', supplier_type: '' })}
-                className="w-full px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors font-medium"
+                onClick={resetFilters}
+                className="w-full px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors font-medium"
               >
                 Réinitialiser les filtres
               </button>
@@ -321,7 +346,7 @@ const DashboardSuppliers = () => {
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
-                  {suppliers.map((supplier) => (
+                  {paginatedSuppliers.map((supplier) => (
                     <tr key={supplier.id} className="hover:bg-gray-50">
                       <td className="px-6 py-4 whitespace-nowrap">
                         {editingSupplier?.id === supplier.id ? (
@@ -428,6 +453,33 @@ const DashboardSuppliers = () => {
                   ))}
                 </tbody>
               </table>
+            </div>
+
+            <div className="px-6 py-4 border-t border-gray-200 flex flex-col sm:flex-row items-center justify-between gap-3">
+              <p className="text-sm text-gray-600">
+                Affichage {startIndex + 1} - {Math.min(startIndex + SUPPLIERS_PER_PAGE, totalSuppliers)} sur {totalSuppliers}
+              </p>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                  disabled={safePage === 1}
+                  className="px-3 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Précédent
+                </button>
+                <span className="text-sm text-gray-600">
+                  Page {safePage} / {totalPages}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                  disabled={safePage === totalPages}
+                  className="px-3 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Suivant
+                </button>
+              </div>
             </div>
           )}
         </div>

@@ -269,7 +269,7 @@ const DashboardSettings = () => {
                   alert('Erreur: ' + err.message)
                 }
               }}
-              className="text-sm text-primary hover:underline flex items-center gap-1"
+              className="px-3 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors text-sm font-medium flex items-center gap-1 shadow-sm"
             >
               <FaEnvelope />
               Réinitialiser via email
@@ -296,7 +296,7 @@ const DashboardSettings = () => {
                 <button
                   type="button"
                   onClick={() => setShowOldPassword(!showOldPassword)}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-primary hover:text-primary/80 transition-colors"
                 >
                   {showOldPassword ? <FaEyeSlash /> : <FaEye />}
                 </button>
@@ -323,7 +323,7 @@ const DashboardSettings = () => {
                 <button
                   type="button"
                   onClick={() => setShowNewPassword(!showNewPassword)}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-primary hover:text-primary/80 transition-colors"
                 >
                   {showNewPassword ? <FaEyeSlash /> : <FaEye />}
                 </button>
@@ -359,7 +359,7 @@ const DashboardSettings = () => {
                 <button
                   type="button"
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-primary hover:text-primary/80 transition-colors"
                 >
                   {showConfirmPassword ? <FaEyeSlash /> : <FaEye />}
                 </button>
@@ -396,7 +396,7 @@ const DashboardSettings = () => {
             <button
               type="submit"
               disabled={loading}
-              className="w-full px-4 py-2 bg-gradient-to-r from-primary via-secondary to-accent text-white rounded-lg hover:opacity-90 transition-opacity font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              className="w-full px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-sm"
             >
               {loading ? (
                 <>
