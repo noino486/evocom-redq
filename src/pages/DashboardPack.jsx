@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { useLocation, Navigate } from 'react-router-dom'
+import { useLocation, useNavigate, Navigate } from 'react-router-dom'
 import { 
   FaDownload, FaExternalLinkAlt, FaFileAlt, FaSpinner,
   FaEye, FaTimes, FaChevronDown, FaChevronUp,
@@ -14,8 +14,9 @@ import * as Icons from 'react-icons/fa'
 
 const SUPPLIERS_PER_PAGE = 25
 
-const DashboardPack = () => {
+const DashboardPack = ({ initialSection }) => {
   const location = useLocation()
+  const navigate = useNavigate()
   const { profile, hasProductAccess, isAdmin } = useAuth()
   const [sections, setSections] = useState([])
   const [pdfSections, setPdfSections] = useState({})
@@ -37,7 +38,7 @@ const DashboardPack = () => {
   const [favorites, setFavorites] = useState([])
   const [supplierActionMessage, setSupplierActionMessage] = useState({ type: '', text: '' })
   const [supplierPage, setSupplierPage] = useState(1)
-  const [activeSection, setActiveSection] = useState('pdfs')
+  const [activeSection, setActiveSection] = useState(initialSection === 'suppliers' ? 'suppliers' : 'pdfs')
 
   const handleSelectCategory = (category) => {
     setSelectedCategory(category)
@@ -60,9 +61,15 @@ const DashboardPack = () => {
     if (section === 'pdfs') {
       setSelectedCategory(null)
       handleResetSupplierFilters()
+      if (productId === 'GLBNS') {
+        navigate('/dashboard/pack-global-business/pdfs')
+      }
     } else if (section === 'suppliers') {
       setSelectedPdfCategory(null)
       setExpandedPdf(null)
+      if (productId === 'GLBNS') {
+        navigate('/dashboard/pack-global-business/suppliers')
+      }
     }
   }
 
@@ -159,13 +166,17 @@ const DashboardPack = () => {
   // Mapper les chemins de route vers les IDs de produits
   const packMapping = {
     '/dashboard/pack-global-sourcing': 'STFOUR',
-    '/dashboard/pack-global-business': 'GLBNS'
+    '/dashboard/pack-global-business': 'GLBNS',
+    '/dashboard/pack-global-business/pdfs': 'GLBNS',
+    '/dashboard/pack-global-business/suppliers': 'GLBNS'
   }
 
   const productId = packMapping[location.pathname]
 
   const renderPdfCategoryCard = (categoryId, label) => {
-    const image = getPdfCategoryImage(categoryId)
+    const pdfsInCategory = pdfSections[categoryId] || []
+    const customCover = pdfsInCategory.find(pdf => pdf.cover_url)?.cover_url
+    const image = customCover || getPdfCategoryImage(categoryId)
     const count = pdfSections[categoryId]?.length || 0
     const displayLabel = categoryId === 'EXPATRIATION' ? 'Expatriation' : label
 
@@ -618,6 +629,21 @@ const DashboardPack = () => {
     }
   }, [hasPdfSection, activeSection])
 
+useEffect(() => {
+  if (productId === 'GLBNS') {
+    if (location.pathname === '/dashboard/pack-global-business/pdfs' && activeSection !== 'pdfs') {
+      setActiveSection('pdfs')
+      setSelectedCategory(null)
+      handleResetSupplierFilters()
+    } else if (location.pathname === '/dashboard/pack-global-business/suppliers' && activeSection !== 'suppliers') {
+      setActiveSection('suppliers')
+      setSelectedPdfCategory(null)
+      setExpandedPdf(null)
+    }
+  }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+}, [location.pathname, productId])
+
   const toggleSection = (sectionId) => {
     setExpandedSection(expandedSection === sectionId ? null : sectionId)
   }
@@ -835,7 +861,7 @@ useEffect(() => {
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                     {categoryPdfs.map((pdf, index) => {
                       const isExpanded = expandedPdf === pdf.id
-                      const categoryImage = getPdfCategoryImage(selectedPdfCategory)
+                      const coverImage = pdf.cover_url || getPdfCategoryImage(selectedPdfCategory)
                       return (
                         <motion.div
                           key={pdf.id}
@@ -844,11 +870,11 @@ useEffect(() => {
                           transition={{ delay: index * 0.05 }}
                           className="relative rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-shadow overflow-hidden"
                         >
-                          {categoryImage && (
+                          {coverImage && (
                             <div
                               className="absolute inset-0"
                               style={{
-                                backgroundImage: `url(${categoryImage})`,
+                                backgroundImage: `url(${coverImage})`,
                                 backgroundSize: 'cover',
                                 backgroundPosition: 'center',
                                 backgroundRepeat: 'no-repeat'
@@ -856,6 +882,11 @@ useEffect(() => {
                             ></div>
                           )}
                           {/* Pas d'overlay pour laisser l'image visible */}
+                          {!coverImage && (
+                            <div className="absolute inset-0 bg-primary/10 flex items-center justify-center">
+                              <FaFileAlt className="text-4xl text-primary opacity-40" />
+                            </div>
+                          )}
 
                           <div className="relative p-4 sm:p-6">
                             <div className="flex items-start gap-3 sm:gap-4 mb-3">
@@ -1338,6 +1369,10 @@ useEffect(() => {
       </AnimatePresence>
     </DashboardLayout>
   )
+}
+
+DashboardPack.defaultProps = {
+  initialSection: undefined
 }
 
 export default React.memo(DashboardPack)

@@ -26,6 +26,7 @@ const DashboardPdfSections = () => {
     title: '',
     description: '',
     pdf_url: '',
+    cover_url: '',
     section_type: 'EXPATRIATION',
     display_order: 0,
     is_active: true
@@ -74,6 +75,7 @@ useEffect(() => {
     try {
       const pdfData = {
         ...formData,
+        cover_url: formData.cover_url?.trim() ? formData.cover_url.trim() : null,
         updated_by: user?.id
       }
 
@@ -110,6 +112,7 @@ useEffect(() => {
       title: pdf.title,
       description: pdf.description || '',
       pdf_url: pdf.pdf_url || '',
+      cover_url: pdf.cover_url || '',
       section_type: pdf.section_type || selectedSection,
       display_order: pdf.display_order || 0,
       is_active: pdf.is_active !== false
@@ -141,6 +144,7 @@ useEffect(() => {
       title: '',
       description: '',
       pdf_url: '',
+      cover_url: '',
       section_type: selectedSection,
       display_order: pdfs.length,
       is_active: true
@@ -303,6 +307,22 @@ useEffect(() => {
                 />
               </div>
 
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Image de couverture (optionnel)
+                </label>
+                <input
+                  type="url"
+                  value={formData.cover_url || ''}
+                  onChange={(e) => setFormData({ ...formData, cover_url: e.target.value })}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                  placeholder="https://example.com/cover.jpg"
+                />
+                <p className="mt-1 text-xs text-gray-500">
+                  Laissez vide pour garder l'image par défaut.
+                </p>
+              </div>
+
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -372,6 +392,17 @@ useEffect(() => {
                   pdf.is_active ? 'border-gray-200' : 'border-gray-300 opacity-60'
                 }`}
               >
+                {pdf.cover_url && (
+                  <div className="relative w-full h-32 mb-3 rounded-lg overflow-hidden border border-gray-200">
+                    <img
+                      src={pdf.cover_url}
+                      alt={`Couverture ${pdf.title}`}
+                      className="w-full h-full object-cover"
+                      loading="lazy"
+                    />
+                  </div>
+                )}
+
                 <div className="flex items-start justify-between mb-3">
                   <div className="flex items-center gap-3">
                     <div className={`p-2 rounded-lg ${

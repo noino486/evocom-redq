@@ -17,7 +17,8 @@ import {
   FaChevronDown,
   FaChevronRight,
   FaList,
-  FaGavel
+  FaGavel,
+  FaFileAlt
 } from 'react-icons/fa'
 import { useAuth } from '../context/AuthContext'
 
@@ -51,6 +52,26 @@ const DashboardLayout = ({ children }) => {
         title: 'Pack Global Business',
         path: '/dashboard/pack-global-business',
         visible: hasPackBusiness
+      },
+      {
+        type: 'section',
+        icon: FaStar,
+        title: 'Ressources Global Business',
+        visible: hasPackBusiness,
+        children: [
+          {
+            icon: FaFileAlt,
+            title: 'PDFs',
+            path: '/dashboard/pack-global-business/pdfs',
+            visible: true
+          },
+          {
+            icon: FaBuilding,
+            title: 'Fournisseurs',
+            path: '/dashboard/pack-global-business/suppliers',
+            visible: true
+          }
+        ]
       },
       {
         icon: FaChartLine,

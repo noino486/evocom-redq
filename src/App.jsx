@@ -66,6 +66,22 @@ function AppContent() {
                       </ProtectedRoute>
                     } 
                   />
+                  <Route
+                    path="/dashboard/pack-global-business/pdfs"
+                    element={
+                      <ProtectedRoute requireAuth={true}>
+                        <DashboardPack initialSection="pdfs" />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/dashboard/pack-global-business/suppliers"
+                    element={
+                      <ProtectedRoute requireAuth={true}>
+                        <DashboardPack initialSection="suppliers" />
+                      </ProtectedRoute>
+                    }
+                  />
                   {/* Route produits gardée pour compatibilité */}
                   <Route 
                     path="/dashboard/products" 
