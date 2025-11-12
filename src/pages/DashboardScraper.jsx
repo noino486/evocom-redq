@@ -56,7 +56,7 @@ const COUNTRIES = [
 ]
 
 const DashboardScraper = () => {
-  const { isAdmin, user } = useAuth()
+  const { isAdmin, isSupportOrAdmin, user } = useAuth()
   const [isScraping, setIsScraping] = useState(false)
   const [currentJob, setCurrentJob] = useState(null)
   const [suppliers, setSuppliers] = useState([])
@@ -77,6 +77,7 @@ const DashboardScraper = () => {
   })
   const [selectedSuppliers, setSelectedSuppliers] = useState([])
   const [isPushing, setIsPushing] = useState(false)
+  const [isDeletingSelected, setIsDeletingSelected] = useState(false)
   const [showAddForm, setShowAddForm] = useState(false)
   const [manualSupplierForm, setManualSupplierForm] = useState({
     name: '',
@@ -89,12 +90,12 @@ const DashboardScraper = () => {
     is_featured: false
   })
 
-  useEffect(() => {
-    if (isAdmin()) {
-      loadSuppliers()
-      checkActiveJob()
-    }
-  }, [isAdmin])
+useEffect(() => {
+  if (isSupportOrAdmin()) {
+    loadSuppliers()
+    checkActiveJob()
+  }
+}, [isSupportOrAdmin])
 
   useEffect(() => {
     if (message.text) {
@@ -166,6 +167,7 @@ const DashboardScraper = () => {
       const { data, error } = await supabase
         .from('suppliers')
         .select('*')
+        .neq('status', 'published')
         .order('scraped_at', { ascending: false })
         .limit(100)
 
@@ -382,6 +384,30 @@ const DashboardScraper = () => {
     }
   }
 
+  const handleDeleteSelected = async () => {
+    if (selectedSuppliers.length === 0) return
+    if (!confirm(`Êtes-vous sûr de vouloir supprimer ${selectedSuppliers.length} fournisseur(s) ?`)) return
+
+    try {
+      setIsDeletingSelected(true)
+      const { error } = await supabase
+        .from('suppliers')
+        .delete()
+        .in('id', selectedSuppliers)
+
+      if (error) throw error
+
+      setMessage({ type: 'success', text: `${selectedSuppliers.length} fournisseur(s) supprimé(s)` })
+      setSelectedSuppliers([])
+      loadSuppliers()
+    } catch (error) {
+      console.error('Erreur lors de la suppression groupée:', error)
+      setMessage({ type: 'error', text: 'Erreur lors de la suppression des fournisseurs sélectionnés' })
+    } finally {
+      setIsDeletingSelected(false)
+    }
+  }
+
   const pushToPackBusiness = async () => {
     if (selectedSuppliers.length === 0) {
       setMessage({ type: 'error', text: 'Veuillez sélectionner au moins un fournisseur' })
@@ -452,8 +478,14 @@ const DashboardScraper = () => {
         text: `${selectedSuppliers.length} fournisseur(s) publié(s) vers le Pack Global Business avec succès` 
       })
       
+      await supabase
+        .from('suppliers')
+        .update({ status: 'published' })
+        .in('id', selectedSuppliers)
+
       // Réinitialiser la sélection
       setSelectedSuppliers([])
+      loadSuppliers()
       
     } catch (error) {
       console.error('Erreur lors de la publication:', error)
@@ -463,7 +495,7 @@ const DashboardScraper = () => {
     }
   }
 
-  if (!isAdmin()) {
+  if (!isSupportOrAdmin()) {
     return (
       <DashboardLayout>
         <div className="bg-white rounded-lg p-8 text-center border border-gray-200">
@@ -471,7 +503,7 @@ const DashboardScraper = () => {
             Accès non autorisé
           </h2>
           <p className="text-gray-600">
-            Seuls les administrateurs peuvent accéder à cette page.
+            Seuls les membres du support ou les administrateurs peuvent accéder à cette page.
           </p>
         </div>
       </DashboardLayout>
@@ -806,6 +838,23 @@ const DashboardScraper = () => {
                 <span className="text-sm text-gray-600">
                   {selectedSuppliers.length} sélectionné(s)
                 </span>
+                <button
+                  onClick={handleDeleteSelected}
+                  disabled={isDeletingSelected || isPushing}
+                  className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium flex items-center gap-2 disabled:opacity-50"
+                >
+                  {isDeletingSelected ? (
+                    <>
+                      <FaSpinner className="animate-spin" />
+                      Suppression...
+                    </>
+                  ) : (
+                    <>
+                      <FaTrash />
+                      Supprimer
+                    </>
+                  )}
+                </button>
                 <button
                   onClick={pushToPackBusiness}
                   disabled={isPushing}

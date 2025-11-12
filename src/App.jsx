@@ -110,7 +110,7 @@ function AppContent() {
                   <Route 
                     path="/dashboard/pdf-sections" 
                     element={
-                      <ProtectedRoute requireAuth={true} minAccessLevel={4}>
+                      <ProtectedRoute requireAuth={true} minAccessLevel={3}>
                         <DashboardPdfSections />
                       </ProtectedRoute>
                     } 
@@ -126,7 +126,7 @@ function AppContent() {
                   <Route 
                     path="/dashboard/scraper" 
                     element={
-                      <ProtectedRoute requireAuth={true} minAccessLevel={4}>
+                      <ProtectedRoute requireAuth={true} minAccessLevel={3}>
                         <DashboardScraper />
                       </ProtectedRoute>
                     } 

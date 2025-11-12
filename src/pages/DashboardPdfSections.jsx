@@ -16,7 +16,7 @@ const PDF_SECTIONS = [
 ]
 
 const DashboardPdfSections = () => {
-  const { isAdmin, user } = useAuth()
+  const { isAdmin, isSupportOrAdmin, user } = useAuth()
   const [pdfs, setPdfs] = useState([])
   const [loading, setLoading] = useState(true)
   const [selectedSection, setSelectedSection] = useState('EXPATRIATION')
@@ -32,11 +32,11 @@ const DashboardPdfSections = () => {
   })
   const [message, setMessage] = useState({ type: '', text: '' })
 
-  useEffect(() => {
-    if (isAdmin()) {
-      loadPdfs()
-    }
-  }, [selectedSection, isAdmin])
+useEffect(() => {
+  if (isSupportOrAdmin()) {
+    loadPdfs()
+  }
+}, [selectedSection, isSupportOrAdmin])
 
   useEffect(() => {
     if (message.text) {
@@ -148,7 +148,7 @@ const DashboardPdfSections = () => {
     setShowForm(false)
   }
 
-  if (!isAdmin()) {
+  if (!isSupportOrAdmin()) {
     return (
       <DashboardLayout>
         <div className="bg-white rounded-lg p-8 text-center border border-gray-200">
@@ -156,7 +156,7 @@ const DashboardPdfSections = () => {
             Accès non autorisé
           </h2>
           <p className="text-gray-600">
-            Seuls les administrateurs peuvent accéder à cette page.
+            Seuls les membres du support ou les administrateurs peuvent gérer ces PDFs.
           </p>
         </div>
       </DashboardLayout>
