@@ -38,7 +38,6 @@ const DashboardPack = ({ initialSection }) => {
   const [favorites, setFavorites] = useState([])
   const [supplierActionMessage, setSupplierActionMessage] = useState({ type: '', text: '' })
   const [supplierPage, setSupplierPage] = useState(1)
-  const [activeSection, setActiveSection] = useState(initialSection === 'suppliers' ? 'suppliers' : 'pdfs')
 
   const handleSelectCategory = (category) => {
     setSelectedCategory(category)
@@ -53,24 +52,6 @@ const DashboardPack = ({ initialSection }) => {
   const handleResetSupplierFilters = () => {
     setSupplierFilters({ category: '', country: '' })
     setSupplierPage(1)
-  }
-
-  const handleActiveSectionChange = (section) => {
-    setActiveSection(section)
-
-    if (section === 'pdfs') {
-      setSelectedCategory(null)
-      handleResetSupplierFilters()
-      if (productId === 'GLBNS') {
-        navigate('/dashboard/pack-global-business/pdfs')
-      }
-    } else if (section === 'suppliers') {
-      setSelectedPdfCategory(null)
-      setExpandedPdf(null)
-      if (productId === 'GLBNS') {
-        navigate('/dashboard/pack-global-business/suppliers')
-      }
-    }
   }
 
   // Catégories de base (celles que l'utilisateur veut afficher)
@@ -172,11 +153,31 @@ const DashboardPack = ({ initialSection }) => {
   }
 
   const productId = packMapping[location.pathname]
+  const activeSection = useMemo(() => {
+    if (productId === 'GLBNS') {
+      if (location.pathname === '/dashboard/pack-global-business/suppliers') {
+        return 'suppliers'
+      }
+      if (location.pathname === '/dashboard/pack-global-business/pdfs') {
+        return 'pdfs'
+      }
+      return initialSection === 'suppliers' ? 'suppliers' : 'pdfs'
+    }
+    return 'suppliers'
+  }, [productId, location.pathname, initialSection])
+
+  useEffect(() => {
+    if (productId === 'GLBNS') {
+      if (location.pathname === '/dashboard/pack-global-business' && initialSection === 'suppliers') {
+        navigate('/dashboard/pack-global-business/suppliers', { replace: true })
+      } else if (location.pathname === '/dashboard/pack-global-business' && initialSection !== 'suppliers') {
+        navigate('/dashboard/pack-global-business/pdfs', { replace: true })
+      }
+    }
+  }, [productId, location.pathname, initialSection, navigate])
 
   const renderPdfCategoryCard = (categoryId, label) => {
-    const pdfsInCategory = pdfSections[categoryId] || []
-    const customCover = pdfsInCategory.find(pdf => pdf.cover_url)?.cover_url
-    const image = customCover || getPdfCategoryImage(categoryId)
+    const image = getPdfCategoryImage(categoryId)
     const count = pdfSections[categoryId]?.length || 0
     const displayLabel = categoryId === 'EXPATRIATION' ? 'Expatriation' : label
 
@@ -736,6 +737,17 @@ useEffect(() => {
     return () => document.removeEventListener('keydown', handleKeyDown)
   }, [])
 
+  useEffect(() => {
+    if (activeSection === 'pdfs') {
+      setSelectedCategory(null)
+      handleResetSupplierFilters()
+    } else {
+      setSelectedPdfCategory(null)
+      setExpandedPdf(null)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeSection])
+
   return (
     <DashboardLayout>
       <div className="space-y-4 sm:space-y-6">
@@ -746,40 +758,6 @@ useEffect(() => {
           <p className="text-sm sm:text-base text-gray-600">
             {product.description}
           </p>
-        </div>
-
-        <div className="bg-white border border-gray-200 rounded-lg p-3 sm:p-4">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-            <span className="text-sm font-medium text-gray-700">
-              Sections disponibles
-            </span>
-            <div className="flex flex-wrap items-center gap-2">
-              {hasPdfSection && (
-                <button
-                  type="button"
-                  onClick={() => handleActiveSectionChange('pdfs')}
-                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                    activeSection === 'pdfs'
-                      ? 'bg-primary text-white shadow-sm'
-                      : 'border border-primary text-primary hover:bg-primary/10'
-                  }`}
-                >
-                  Ressources PDF
-                </button>
-              )}
-              <button
-                type="button"
-                onClick={() => handleActiveSectionChange('suppliers')}
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                  activeSection === 'suppliers'
-                    ? 'bg-primary text-white shadow-sm'
-                    : 'border border-primary text-primary hover:bg-primary/10'
-                }`}
-              >
-                Fournisseurs
-              </button>
-            </div>
-          </div>
         </div>
 
         {/* Sections PDF par catégorie (EXPATRIATION, Revenue Actif, Revenue Passif) */}

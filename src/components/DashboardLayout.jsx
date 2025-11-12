@@ -46,19 +46,19 @@ const DashboardLayout = ({ children }) => {
         path: '/dashboard/pack-global-sourcing',
         visible: hasPackSourcing
       },
-      // Pack Global Business
-      {
-        icon: FaStar,
-        title: 'Pack Global Business',
-        path: '/dashboard/pack-global-business',
-        visible: hasPackBusiness
-      },
       {
         type: 'section',
         icon: FaStar,
-        title: 'Ressources Global Business',
+        title: 'Pack Global Business',
+        path: '/dashboard/pack-global-business',
         visible: hasPackBusiness,
         children: [
+          {
+            icon: FaStar,
+            title: 'Vue générale',
+            path: '/dashboard/pack-global-business',
+            visible: true
+          },
           {
             icon: FaFileAlt,
             title: 'PDFs',
