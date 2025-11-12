@@ -50,15 +50,8 @@ const DashboardLayout = ({ children }) => {
         type: 'section',
         icon: FaStar,
         title: 'Pack Global Business',
-        path: '/dashboard/pack-global-business',
         visible: hasPackBusiness,
         children: [
-          {
-            icon: FaStar,
-            title: 'Vue générale',
-            path: '/dashboard/pack-global-business',
-            visible: true
-          },
           {
             icon: FaFileAlt,
             title: 'PDFs',
