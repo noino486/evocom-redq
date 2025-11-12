@@ -119,43 +119,43 @@ const DashboardLayout = ({ children }) => {
 
   const activePath = location.pathname
 
-  // Auto-expand les sections avec des enfants actifs
   useEffect(() => {
+    setSidebarOpen(false)
+  }, [activePath])
+
+  // Auto-expand uniquement la section active
+  useEffect(() => {
+    const newExpanded = {}
     menuItems.forEach((item) => {
       if (item.type === 'section' && item.children) {
-        const hasActiveChild = item.children.some(child => 
+        const hasActiveChild = item.children.some(child =>
           child.path && (activePath === child.path || activePath.startsWith(child.path))
         )
         if (hasActiveChild) {
-          setExpandedSections(prev => {
-            if (!prev[item.title]) {
-              return { ...prev, [item.title]: true }
-            }
-            return prev
-          })
+          newExpanded[item.title] = true
         }
       }
     })
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activePath])
+    setExpandedSections(newExpanded)
+  }, [activePath, menuItems])
 
   return (
     <div className="min-h-screen bg-slate-50">
       {/* Sidebar */}
       <aside
         className={`
-          fixed top-0 left-0 h-full w-64 bg-white/95 backdrop-blur border-r border-slate-200 z-50 shadow-lg
+          fixed top-0 left-0 h-full w-72 bg-white/70 backdrop-blur-xl border-r border-slate-200/70 z-50 shadow-2xl
           transform transition-transform duration-300 ease-in-out
           lg:translate-x-0
           ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
         `}
       >
         {/* Logo */}
-        <div className="flex items-center justify-between h-16 px-5 sm:px-6 border-b border-slate-200 bg-white/90 backdrop-blur">
+        <div className="flex items-center justify-between h-20 px-6 border-b border-slate-200/70 bg-white/80 backdrop-blur">
           <img 
             src="/logo.-evo-banniere.svg" 
             alt="EvoEcom Logo" 
-            className="h-7 sm:h-8 w-auto"
+            className="h-8 sm:h-9 w-auto drop-shadow-sm"
           />
           <button
             onClick={() => setSidebarOpen(false)}
@@ -166,8 +166,8 @@ const DashboardLayout = ({ children }) => {
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 overflow-y-auto py-5">
-          <div className="px-3 sm:px-5 space-y-1.5">
+        <nav className="flex-1 overflow-y-auto py-6 custom-scrollbar">
+          <div className="px-4 space-y-2">
             {menuItems
               .filter(item => item.visible)
               .map((item) => {
@@ -186,30 +186,25 @@ const DashboardLayout = ({ children }) => {
                           [item.title]: !prev[item.title]
                         }))}
                         className={`
-                          group w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all border
+                          group w-full flex items-center gap-3 px-4 py-3 rounded-2xl transition-all border
                           ${hasActiveChild 
-                            ? 'bg-primary/10 text-primary border-primary/30 shadow-sm' 
-                            : 'text-slate-600 border-transparent hover:border-slate-200 hover:bg-slate-100/60'
+                            ? 'bg-gradient-to-r from-primary to-secondary text-white shadow-lg border-transparent' 
+                            : 'text-slate-600 border-transparent hover:border-primary/30 hover:bg-primary/5'
                           }
                         `}
                       >
-                        <item.icon className={`text-base ${hasActiveChild ? 'text-primary' : 'text-slate-500 group-hover:text-primary'}`} />
-                        <span className="flex-1 font-medium text-left text-sm">{item.title}</span>
-                        {item.badge && (
-                          <span className="text-xs px-2 py-0.5 bg-gradient-to-r from-primary to-secondary text-white rounded">
-                            {item.badge}
-                          </span>
-                        )}
+                        <item.icon className={`text-base ${hasActiveChild ? 'text-white' : 'text-primary/70 group-hover:text-primary'}`} />
+                        <span className={`flex-1 font-semibold text-left text-sm ${hasActiveChild ? 'text-white' : ''}`}>{item.title}</span>
                         {isExpanded ? (
-                          <FaChevronDown className="text-xs text-slate-400" />
+                          <FaChevronDown className={`text-xs ${hasActiveChild ? 'text-white/80' : 'text-slate-400'}`} />
                         ) : (
-                          <FaChevronRight className="text-xs text-slate-400" />
+                          <FaChevronRight className={`text-xs ${hasActiveChild ? 'text-white/80' : 'text-slate-400'}`} />
                         )}
                       </button>
                       
                       {/* Sous-menus */}
                       {isExpanded && (
-                        <div className="ml-4 mt-1 space-y-1">
+                        <div className="ml-4 mt-2 space-y-1 border-l-2 border-primary/20 pl-4">
                           {item.children
                             .filter(child => child.visible)
                             .map((child) => {
@@ -221,15 +216,15 @@ const DashboardLayout = ({ children }) => {
                                   to={child.path}
                                   onClick={() => setSidebarOpen(false)}
                                 className={`
-                                  flex items-center gap-3 px-4 py-2.5 rounded-lg transition-all text-sm
+                                  flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all text-sm border
                                   ${isActive 
-                                    ? 'bg-primary/10 text-primary border border-primary/20 shadow-sm' 
-                                    : 'text-slate-500 hover:bg-slate-100/60 hover:text-slate-700'
+                                    ? 'bg-primary text-white shadow-lg border-transparent' 
+                                    : 'text-slate-500 border-transparent hover:border-primary/30 hover:bg-primary/5'
                                   }
                                 `}
                                 >
-                                <child.icon className={`text-sm ${isActive ? 'text-primary' : 'text-slate-400'}`} />
-                                <span className="flex-1 font-medium text-sm">{child.title}</span>
+                                <child.icon className={`text-sm ${isActive ? 'text-white' : 'text-primary/60 group-hover:text-primary'}`} />
+                                <span className={`flex-1 font-medium text-sm ${isActive ? 'text-white' : ''}`}>{child.title}</span>
                                 </Link>
                               )
                             })}
@@ -251,15 +246,15 @@ const DashboardLayout = ({ children }) => {
                     to={item.path}
                     onClick={() => setSidebarOpen(false)}
                     className={`
-                      group flex items-center gap-3 px-4 py-3 rounded-xl transition-all border
+                      group flex items-center gap-3 px-4 py-3 rounded-2xl transition-all border
                       ${isActive 
-                        ? 'bg-primary/10 text-primary border-primary/30 shadow-sm' 
-                        : 'text-slate-600 border-transparent hover:border-slate-200 hover:bg-slate-100/60'
+                        ? 'bg-gradient-to-r from-primary to-secondary text-white shadow-lg border-transparent' 
+                        : 'text-slate-600 border-transparent hover:border-primary/30 hover:bg-primary/5'
                       }
                     `}
                   >
-                    <item.icon className={`text-base ${isActive ? 'text-primary' : 'text-slate-500 group-hover:text-primary'}`} />
-                    <span className="flex-1 font-medium text-sm tracking-wide">{item.title}</span>
+                    <item.icon className={`text-base ${isActive ? 'text-white' : 'text-primary/70 group-hover:text-primary'}`} />
+                    <span className={`flex-1 font-semibold text-sm tracking-wide ${isActive ? 'text-white' : ''}`}>{item.title}</span>
                   </Link>
                 )
               })}
