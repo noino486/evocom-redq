@@ -482,6 +482,7 @@ useEffect(() => {
         .from('suppliers')
         .update({ status: 'published' })
         .in('id', selectedSuppliers)
+        .eq('status', 'pending')
 
       // Réinitialiser la sélection
       setSelectedSuppliers([])

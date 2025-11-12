@@ -37,6 +37,7 @@ const DashboardPack = () => {
   const [favorites, setFavorites] = useState([])
   const [supplierActionMessage, setSupplierActionMessage] = useState({ type: '', text: '' })
   const [supplierPage, setSupplierPage] = useState(1)
+  const [activeSection, setActiveSection] = useState('pdfs')
 
   const handleSelectCategory = (category) => {
     setSelectedCategory(category)
@@ -51,6 +52,18 @@ const DashboardPack = () => {
   const handleResetSupplierFilters = () => {
     setSupplierFilters({ category: '', country: '' })
     setSupplierPage(1)
+  }
+
+  const handleActiveSectionChange = (section) => {
+    setActiveSection(section)
+
+    if (section === 'pdfs') {
+      setSelectedCategory(null)
+      handleResetSupplierFilters()
+    } else if (section === 'suppliers') {
+      setSelectedPdfCategory(null)
+      setExpandedPdf(null)
+    }
   }
 
   // Catégories de base (celles que l'utilisateur veut afficher)
@@ -576,6 +589,7 @@ const DashboardPack = () => {
   }
 
   const product = products.find(p => p.id === productId)
+  const hasPdfSection = productId === 'GLBNS'
 
   // Si le produit n'existe pas, rediriger
   if (!product) {
@@ -597,6 +611,12 @@ const DashboardPack = () => {
       </DashboardLayout>
     )
   }
+
+  useEffect(() => {
+    if (!hasPdfSection && activeSection === 'pdfs') {
+      setActiveSection('suppliers')
+    }
+  }, [hasPdfSection, activeSection])
 
   const toggleSection = (sectionId) => {
     setExpandedSection(expandedSection === sectionId ? null : sectionId)
@@ -702,8 +722,42 @@ useEffect(() => {
           </p>
         </div>
 
-        {/* Sections PDF par catégorie (EXPATRIATION, Revenue Actif, Revenue Passif) - Uniquement pour Pack 2 */}
-        {productId === 'GLBNS' && (
+        <div className="bg-white border border-gray-200 rounded-lg p-3 sm:p-4">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <span className="text-sm font-medium text-gray-700">
+              Sections disponibles
+            </span>
+            <div className="flex flex-wrap items-center gap-2">
+              {hasPdfSection && (
+                <button
+                  type="button"
+                  onClick={() => handleActiveSectionChange('pdfs')}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                    activeSection === 'pdfs'
+                      ? 'bg-primary text-white shadow-sm'
+                      : 'border border-primary text-primary hover:bg-primary/10'
+                  }`}
+                >
+                  Ressources PDF
+                </button>
+              )}
+              <button
+                type="button"
+                onClick={() => handleActiveSectionChange('suppliers')}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  activeSection === 'suppliers'
+                    ? 'bg-primary text-white shadow-sm'
+                    : 'border border-primary text-primary hover:bg-primary/10'
+                }`}
+              >
+                Fournisseurs
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Sections PDF par catégorie (EXPATRIATION, Revenue Actif, Revenue Passif) */}
+        {hasPdfSection && activeSection === 'pdfs' && (
         <div className="space-y-6">
             <div className="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-6">
               <div className="p-2 bg-primary/10 rounded-lg">
@@ -893,7 +947,7 @@ useEffect(() => {
         )}
 
         {/* Section Fournisseurs - Pour les deux packs */}
-        {(productId === 'GLBNS' || productId === 'STFOUR') && (
+        {activeSection === 'suppliers' && (productId === 'GLBNS' || productId === 'STFOUR') && (
           <div className="space-y-4 mt-8" data-supplier-section>
             <div className="flex items-center gap-3 mb-6">
               <div className="p-2 bg-primary/10 rounded-lg">
