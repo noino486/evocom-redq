@@ -25,6 +25,7 @@ import DashboardLegal from './pages/DashboardLegal'
 import DashboardScraper from './pages/DashboardScraper'
 import DashboardSuppliers from './pages/DashboardSuppliers'
 import DashboardRedirect from './components/DashboardRedirect'
+import DashboardCommunity from './pages/DashboardCommunity'
 
 function AppContent() {
   const location = useLocation()
@@ -174,6 +175,14 @@ function AppContent() {
                         <DashboardSuppliers />
                       </ProtectedRoute>
                     } 
+                  />
+                  <Route
+                    path="/dashboard/community"
+                    element={
+                      <ProtectedRoute requireAuth={true} minAccessLevel={2}>
+                        <DashboardCommunity />
+                      </ProtectedRoute>
+                    }
                   />
                 </Routes>
       {!isDashboardRoute && <Footer />}
