@@ -1,24 +1,88 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
-import { FaLock, FaEye, FaEyeSlash, FaCheck, FaTimes, FaEnvelope } from 'react-icons/fa'
+import {
+  FaLock,
+  FaEye,
+  FaEyeSlash,
+  FaCheck,
+  FaTimes,
+  FaEnvelope,
+  FaDiscord,
+  FaUndo
+} from 'react-icons/fa'
 import { useAuth } from '../context/AuthContext'
 import { supabase } from '../config/supabase'
 import DashboardLayout from '../components/DashboardLayout'
 
+const DEFAULT_DISCORD_INVITE = 'https://discord.gg/Hhvme4gN'
+
 const DashboardSettings = () => {
-  const { user, profile } = useAuth()
+  const { user, profile, isAdmin } = useAuth()
   const [showOldPassword, setShowOldPassword] = useState(false)
   const [showNewPassword, setShowNewPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState(null)
   const [error, setError] = useState(null)
-  
+  const [discordLink, setDiscordLink] = useState(DEFAULT_DISCORD_INVITE)
+  const [discordLoading, setDiscordLoading] = useState(false)
+  const [discordMessage, setDiscordMessage] = useState(null)
+
   const [formData, setFormData] = useState({
     oldPassword: '',
     newPassword: '',
     confirmPassword: ''
   })
+
+  useEffect(() => {
+    let isMounted = true
+
+    const fetchDiscordLink = async () => {
+      if (!isAdmin()) return
+      try {
+        setDiscordLoading(true)
+        const { data, error } = await supabase
+          .from('settings')
+          .select('value')
+          .eq('key', 'discord_link')
+          .maybeSingle()
+
+        if (error && error.code !== '42P01') {
+          throw error
+        }
+
+        if (isMounted) {
+          setDiscordLink(data?.value || DEFAULT_DISCORD_INVITE)
+        }
+      } catch (err) {
+        console.error('Erreur chargement lien Discord:', err)
+        if (isMounted) {
+          setDiscordMessage({
+            type: 'error',
+            text: err.message || 'Impossible de charger le lien Discord.'
+          })
+          setDiscordLink(DEFAULT_DISCORD_INVITE)
+        }
+      } finally {
+        if (isMounted) {
+          setDiscordLoading(false)
+        }
+      }
+    }
+
+    fetchDiscordLink()
+
+    return () => {
+      isMounted = false
+    }
+  }, [isAdmin])
+
+  useEffect(() => {
+    if (discordMessage?.text) {
+      const timer = setTimeout(() => setDiscordMessage(null), 4000)
+      return () => clearTimeout(timer)
+    }
+  }, [discordMessage])
 
   const handleChange = (e) => {
     setFormData({
@@ -36,13 +100,56 @@ const DashboardSettings = () => {
     return null
   }
 
+  const handleSaveDiscordLink = async () => {
+    if (!isAdmin()) return
+
+    const trimmed = (discordLink || '').trim()
+    if (!trimmed) {
+      setDiscordMessage({ type: 'error', text: 'Le lien Discord ne peut pas être vide.' })
+      return
+    }
+
+    try {
+      setDiscordLoading(true)
+      setDiscordMessage(null)
+      const { error } = await supabase
+        .from('settings')
+        .upsert(
+          {
+            key: 'discord_link',
+            value: trimmed,
+            updated_at: new Date().toISOString(),
+            updated_by: user?.id || null
+          },
+          { onConflict: 'key' }
+        )
+
+      if (error) throw error
+
+      setDiscordMessage({ type: 'success', text: 'Lien Discord mis à jour avec succès.' })
+      setDiscordLink(trimmed)
+    } catch (err) {
+      console.error('Erreur mise à jour lien Discord:', err)
+      setDiscordMessage({
+        type: 'error',
+        text: err.message || 'Erreur lors de l\'enregistrement du lien Discord.'
+      })
+    } finally {
+      setDiscordLoading(false)
+    }
+  }
+
+  const handleResetDiscordLink = () => {
+    setDiscordLink(DEFAULT_DISCORD_INVITE)
+    setDiscordMessage(null)
+  }
+
   const handleSubmit = async (e) => {
     e.preventDefault()
     setError(null)
     setMessage(null)
     setLoading(true)
 
-    // Validation
     if (!formData.oldPassword) {
       setError('Veuillez entrer votre mot de passe actuel')
       setLoading(false)
@@ -75,7 +182,6 @@ const DashboardSettings = () => {
     }
 
     try {
-      // Vérifier que l'utilisateur existe dans user_profiles et est actif
       if (!profile) {
         setError('Votre profil n\'existe pas dans notre système. Veuillez contacter le support.')
         setLoading(false)
@@ -88,14 +194,12 @@ const DashboardSettings = () => {
         return
       }
 
-      // Vérifier que l'email correspond toujours
       if (user?.email !== profile.email) {
         setError('L\'email de votre compte ne correspond pas. Veuillez vous reconnecter.')
         setLoading(false)
         return
       }
 
-      // Vérifier l'ancien mot de passe en essayant de se connecter
       const { error: signInError } = await supabase.auth.signInWithPassword({
         email: user.email,
         password: formData.oldPassword
@@ -107,7 +211,6 @@ const DashboardSettings = () => {
         return
       }
 
-      // Double vérification : s'assurer que le profil existe toujours
       const { data: profileCheck, error: profileCheckError } = await supabase
         .from('user_profiles')
         .select('id, email, is_active')
@@ -126,7 +229,6 @@ const DashboardSettings = () => {
         return
       }
 
-      // Mettre à jour le mot de passe
       const { error: updateError } = await supabase.auth.updateUser({
         password: formData.newPassword
       })
@@ -137,7 +239,6 @@ const DashboardSettings = () => {
         return
       }
 
-      // Succès
       setMessage('Mot de passe modifié avec succès !')
       setFormData({
         oldPassword: '',
@@ -163,14 +264,89 @@ const DashboardSettings = () => {
           </p>
         </div>
 
-        {/* Informations du compte */}
+        {isAdmin() && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="bg-white rounded-lg p-6 border border-gray-200 shadow-sm space-y-4"
+          >
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-primary/10 rounded-lg text-primary">
+                <FaDiscord className="text-xl" />
+              </div>
+              <div>
+                <h2 className="text-lg font-semibold text-gray-900">
+                  Configuration de la communauté
+                </h2>
+                <p className="text-sm text-gray-500">
+                  Modifiez le lien d&apos;invitation Discord visible par les utilisateurs.
+                </p>
+              </div>
+            </div>
+
+            <div className="space-y-3">
+              <label className="block text-sm font-medium text-gray-700">
+                Lien d&apos;invitation Discord
+              </label>
+              <input
+                type="url"
+                value={discordLink}
+                onChange={(e) => setDiscordLink(e.target.value)}
+                placeholder={DEFAULT_DISCORD_INVITE}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                disabled={discordLoading}
+              />
+              <div className="flex flex-wrap items-center gap-2">
+                <button
+                  type="button"
+                  onClick={handleSaveDiscordLink}
+                  disabled={discordLoading}
+                  className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {discordLoading ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-white" />
+                      Sauvegarde...
+                    </>
+                  ) : (
+                    <>
+                      <FaCheck />
+                      Sauvegarder
+                    </>
+                  )}
+                </button>
+                <button
+                  type="button"
+                  onClick={handleResetDiscordLink}
+                  disabled={discordLoading}
+                  className="inline-flex items-center gap-2 px-4 py-2 border border-gray-300 text-gray-600 rounded-lg hover:bg-gray-50 transition-colors font-medium"
+                >
+                  <FaUndo />
+                  Valeur par défaut
+                </button>
+              </div>
+              {discordMessage && (
+                <div
+                  className={`px-3 py-2 rounded-lg text-sm ${
+                    discordMessage.type === 'error'
+                      ? 'bg-red-50 border border-red-200 text-red-700'
+                      : 'bg-green-50 border border-green-200 text-green-700'
+                  }`}
+                >
+                  {discordMessage.text}
+                </div>
+              )}
+            </div>
+          </motion.div>
+        )}
+
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           className="bg-white rounded-lg p-6 border border-gray-200 shadow-sm"
         >
           <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-            <span className="w-2 h-2 bg-primary rounded-full"></span>
+            <span className="w-2 h-2 bg-primary rounded-full" />
             Informations du compte
           </h2>
           <div className="space-y-3">
@@ -196,7 +372,6 @@ const DashboardSettings = () => {
           </div>
         </motion.div>
 
-        {/* Changement de mot de passe */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -215,30 +390,27 @@ const DashboardSettings = () => {
                   alert('Email non disponible')
                   return
                 }
-                
-                // Vérifier que le profil existe et est actif
+
                 if (!profile) {
                   alert('Erreur : votre profil n\'existe pas dans notre système. Veuillez contacter le support.')
                   return
                 }
-                
+
                 if (!profile.is_active) {
                   alert('Votre compte est désactivé. Veuillez contacter le support.')
                   return
                 }
-                
-                // Vérifier que l'email correspond
+
                 if (user.email !== profile.email) {
                   alert('Erreur : l\'email ne correspond pas. Veuillez vous reconnecter.')
                   return
                 }
-                
+
                 if (!confirm(`Envoyer un email de réinitialisation à ${user.email} ?`)) {
                   return
                 }
-                
+
                 try {
-                  // Double vérification avant envoi
                   const { data: profileCheck, error: profileCheckError } = await supabase
                     .from('user_profiles')
                     .select('id, email, is_active')
@@ -254,11 +426,11 @@ const DashboardSettings = () => {
                     alert('Votre compte a été désactivé. Veuillez contacter le support.')
                     return
                   }
-                  
+
                   const siteUrl = window.location.origin
                   const redirectTo = `${siteUrl}/login?recovery=true`
                   const { error } = await supabase.auth.resetPasswordForEmail(user.email, {
-                    redirectTo: redirectTo
+                    redirectTo
                   })
                   if (error) {
                     alert('Erreur: ' + error.message)
@@ -277,7 +449,6 @@ const DashboardSettings = () => {
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
-            {/* Ancien mot de passe */}
             <div>
               <label htmlFor="oldPassword" className="block text-sm font-medium text-gray-700 mb-2">
                 Mot de passe actuel
@@ -303,7 +474,6 @@ const DashboardSettings = () => {
               </div>
             </div>
 
-            {/* Nouveau mot de passe */}
             <div>
               <label htmlFor="newPassword" className="block text-sm font-medium text-gray-700 mb-2">
                 Nouveau mot de passe
@@ -339,7 +509,6 @@ const DashboardSettings = () => {
               )}
             </div>
 
-            {/* Confirmation */}
             <div>
               <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-2">
                 Confirmer le nouveau mot de passe
@@ -379,7 +548,6 @@ const DashboardSettings = () => {
               )}
             </div>
 
-            {/* Messages */}
             {error && (
               <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
                 {error}
@@ -392,7 +560,6 @@ const DashboardSettings = () => {
               </div>
             )}
 
-            {/* Bouton de soumission */}
             <button
               type="submit"
               disabled={loading}
@@ -400,7 +567,7 @@ const DashboardSettings = () => {
             >
               {loading ? (
                 <>
-                  <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-white"></div>
+                  <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-white" />
                   Modification en cours...
                 </>
               ) : (

@@ -1,10 +1,48 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { FaDiscord, FaUsers, FaComments } from 'react-icons/fa'
+import { supabase } from '../config/supabase'
 import DashboardLayout from '../components/DashboardLayout'
 
-const DISCORD_INVITE = 'https://discord.gg/Hhvme4gN'
+const DEFAULT_DISCORD_INVITE = 'https://discord.gg/Hhvme4gN'
 
 const DashboardCommunity = () => {
+  const [discordLink, setDiscordLink] = useState(DEFAULT_DISCORD_INVITE)
+  const [loadingLink, setLoadingLink] = useState(true)
+
+  useEffect(() => {
+    let isMounted = true
+
+    const fetchDiscordLink = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('settings')
+          .select('value')
+          .eq('key', 'discord_link')
+          .maybeSingle()
+
+        if (error && error.code !== '42P01') {
+          throw error
+        }
+
+        if (data?.value && isMounted) {
+          setDiscordLink(data.value)
+        }
+      } catch (err) {
+        console.error('Erreur lors du chargement du lien Discord:', err)
+      } finally {
+        if (isMounted) {
+          setLoadingLink(false)
+        }
+      }
+    }
+
+    fetchDiscordLink()
+
+    return () => {
+      isMounted = false
+    }
+  }, [])
+
   return (
     <DashboardLayout>
       <div className="space-y-6">
@@ -23,13 +61,20 @@ const DashboardCommunity = () => {
             </div>
           </div>
           <a
-            href={DISCORD_INVITE}
+            href={discordLink}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-white font-semibold rounded-xl shadow hover:bg-primary/90 transition-colors"
+            className={`inline-flex items-center gap-2 px-6 py-3 bg-primary text-white font-semibold rounded-xl shadow transition-colors ${
+              loadingLink ? 'opacity-70 cursor-wait' : 'hover:bg-primary/90'
+            }`}
+            onClick={(event) => {
+              if (loadingLink) {
+                event.preventDefault()
+              }
+            }}
           >
             <FaDiscord className="text-lg" />
-            Rejoindre la communauté
+            {loadingLink ? 'Chargement...' : 'Rejoindre la communauté'}
           </a>
         </div>
 
