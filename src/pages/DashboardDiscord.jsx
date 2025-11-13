@@ -11,7 +11,6 @@ import DashboardLayout from '../components/DashboardLayout'
 import { useAuth } from '../context/AuthContext'
 
 const DISCORD_INVITE_URL = import.meta.env.VITE_DISCORD_INVITE_URL || null
-const DISCORD_WIDGET_ID = import.meta.env.VITE_DISCORD_WIDGET_ID || null
 const hasDiscordInvite = Boolean(DISCORD_INVITE_URL)
 
 const featureCards = [
@@ -170,29 +169,20 @@ const DashboardDiscord = () => {
             </div>
           </div>
 
-          <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
-            <h2 className="text-xl font-semibold text-slate-900 mb-4">
-              Aperçu du serveur
+          <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm space-y-5">
+            <h2 className="text-xl font-semibold text-slate-900">
+              Comment se passe l’onboarding ?
             </h2>
-            {DISCORD_WIDGET_ID ? (
-              <iframe
-                title="Discord Widget"
-                src={`https://discord.com/widget?id=${DISCORD_WIDGET_ID}&theme=dark`}
-                width="100%"
-                height="380"
-                allowTransparency
-                frameBorder="0"
-                sandbox="allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts"
-                className="rounded-xl border border-slate-200"
-              />
-            ) : (
-              <div className="flex h-72 items-center justify-center rounded-xl border-2 border-dashed border-slate-200 bg-slate-50 text-center px-6">
-                <p className="text-sm text-slate-500">
-                  Ajoutez la variable <code className="font-mono text-slate-700">VITE_DISCORD_WIDGET_ID</code> pour
-                  afficher l’aperçu du serveur directement ici.
-                </p>
-              </div>
-            )}
+            <ol className="space-y-3 text-sm text-slate-600 list-decimal list-inside">
+              <li>Utilisez le bouton de cette page pour ouvrir l’invitation privée.</li>
+              <li>Validez votre accès via le canal <span className="font-medium text-slate-800">#welcome</span>.</li>
+              <li>Présentez votre activité dans <span className="font-medium text-slate-800">#introductions</span> afin que l’équipe puisse vous orienter.</li>
+              <li>Rejoignez les canaux thématiques qui correspondent à vos objectifs (sourcing, marketing, finance, etc.).</li>
+            </ol>
+            <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">
+              Besoin d’aide ? Ouvrez un ticket dans <span className="font-medium text-slate-800">#support-prioritaire</span>,
+              l’équipe vous répond en priorité dans les 24&nbsp;heures.
+            </div>
           </div>
         </motion.div>
       </div>
