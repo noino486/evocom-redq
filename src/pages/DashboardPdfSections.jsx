@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
 import { motion } from 'framer-motion'
 import { 
   FaPlus, FaEdit, FaTrash, FaSave, FaTimes, FaSpinner,
@@ -14,6 +14,8 @@ const PDF_SECTIONS = [
   { id: 'REVENUE_ACTIF', name: 'Revenue Actif', allowedPacks: ['STFOUR', 'GLBNS'] },
   { id: 'REVENUE_PASSIF', name: 'Revenue Passif', allowedPacks: ['STFOUR', 'GLBNS'] }
 ]
+
+const PDF_COVER_BUCKET = 'pdf-covers'
 
 const DashboardPdfSections = () => {
   const { isAdmin, isSupportOrAdmin, user } = useAuth()
@@ -32,12 +34,19 @@ const DashboardPdfSections = () => {
     is_active: true
   })
   const [message, setMessage] = useState({ type: '', text: '' })
+  const [coverUploadState, setCoverUploadState] = useState({ status: 'idle', error: '' })
+  const [isCoverDragActive, setIsCoverDragActive] = useState(false)
 
-useEffect(() => {
-  if (isSupportOrAdmin()) {
-    loadPdfs()
-  }
-}, [selectedSection, isSupportOrAdmin])
+  const currentSectionFolder = useMemo(
+    () => (formData.section_type || selectedSection || 'misc').toLowerCase(),
+    [formData.section_type, selectedSection]
+  )
+
+  useEffect(() => {
+    if (isSupportOrAdmin()) {
+      loadPdfs()
+    }
+  }, [selectedSection, isSupportOrAdmin])
 
   useEffect(() => {
     if (message.text) {
@@ -150,6 +159,84 @@ useEffect(() => {
       is_active: true
     })
     setShowForm(false)
+    setCoverUploadState({ status: 'idle', error: '' })
+    setIsCoverDragActive(false)
+  }
+
+  const handleCoverUpload = async (file) => {
+    if (!file) return
+
+    if (!file.type.startsWith('image/')) {
+      setMessage({ type: 'error', text: 'Merci de sélectionner une image (jpg, png, webp, ...).' })
+      return
+    }
+
+    try {
+      setCoverUploadState({ status: 'uploading', error: '' })
+
+      const sanitizedName = file.name
+        .toLowerCase()
+        .replace(/\s+/g, '-')
+        .replace(/[^a-z0-9.-]/g, '')
+
+      const fileExt = sanitizedName.split('.').pop() || 'jpg'
+      const uniqueSuffix = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
+      const fileName = `${uniqueSuffix}.${fileExt}`
+      const path = `${currentSectionFolder}/${fileName}`
+
+      const { error: uploadError } = await supabase.storage
+        .from(PDF_COVER_BUCKET)
+        .upload(path, file, {
+          upsert: true,
+          contentType: file.type || 'image/jpeg'
+        })
+
+      if (uploadError) {
+        throw uploadError
+      }
+
+      const { data: publicData, error: publicError } = supabase.storage
+        .from(PDF_COVER_BUCKET)
+        .getPublicUrl(path)
+
+      if (publicError) {
+        throw publicError
+      }
+
+      if (!publicData?.publicUrl) {
+        throw new Error('Impossible de récupérer l’URL publique du fichier.')
+      }
+
+      setFormData((prev) => ({ ...prev, cover_url: publicData.publicUrl }))
+      setCoverUploadState({ status: 'success', error: '' })
+      setMessage({ type: 'success', text: 'Image importée avec succès.' })
+    } catch (error) {
+      console.error('Erreur upload cover:', error)
+      setCoverUploadState({ status: 'error', error: error.message || 'Échec de l’upload de l’image.' })
+      setMessage({ type: 'error', text: error.message || 'Erreur lors de l’upload de l’image.' })
+    } finally {
+      setIsCoverDragActive(false)
+    }
+  }
+
+  const handleCoverInputChange = async (event) => {
+    const file = event.target.files?.[0]
+    if (file) {
+      await handleCoverUpload(file)
+    }
+  }
+
+  const handleCoverDrop = async (event) => {
+    event.preventDefault()
+    const file = event.dataTransfer?.files?.[0]
+    if (file) {
+      await handleCoverUpload(file)
+    }
+  }
+
+  const handleRemoveCover = () => {
+    setFormData((prev) => ({ ...prev, cover_url: '' }))
+    setCoverUploadState({ status: 'idle', error: '' })
   }
 
   if (!isSupportOrAdmin()) {
@@ -311,16 +398,81 @@ useEffect(() => {
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Image de couverture (optionnel)
                 </label>
-                <input
-                  type="url"
-                  value={formData.cover_url || ''}
-                  onChange={(e) => setFormData({ ...formData, cover_url: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-                  placeholder="https://example.com/cover.jpg"
-                />
-                <p className="mt-1 text-xs text-gray-500">
-                  Laissez vide pour garder l'image par défaut.
-                </p>
+
+                <div
+                  onDragOver={(e) => {
+                    e.preventDefault()
+                    setIsCoverDragActive(true)
+                  }}
+                  onDragLeave={() => setIsCoverDragActive(false)}
+                  onDrop={handleCoverDrop}
+                  className={`relative flex flex-col items-center justify-center gap-3 px-4 py-10 border-2 border-dashed rounded-xl transition ${
+                    isCoverDragActive
+                      ? 'border-primary bg-primary/5'
+                      : 'border-gray-300 hover:border-primary/60'
+                  } ${coverUploadState.status === 'uploading' ? 'opacity-70 pointer-events-none' : ''}`}
+                >
+                  {formData.cover_url ? (
+                    <div className="w-full">
+                      <img
+                        src={formData.cover_url}
+                        alt="Aperçu de la couverture"
+                        className="w-full h-40 object-cover rounded-lg border border-gray-200"
+                        loading="lazy"
+                      />
+                    </div>
+                  ) : (
+                    <p className="text-sm text-gray-600 text-center">
+                      Glissez-déposez une image ou cliquez pour en sélectionner une.
+                    </p>
+                  )}
+
+                  <label
+                    htmlFor="pdf-cover-input"
+                    className="px-4 py-2 bg-primary text-white rounded-lg text-sm font-medium cursor-pointer hover:bg-primary/90 transition-colors"
+                  >
+                    Choisir une image
+                  </label>
+                  <input
+                    id="pdf-cover-input"
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={handleCoverInputChange}
+                  />
+
+                  {coverUploadState.status === 'uploading' && (
+                    <div className="text-xs text-gray-500 flex items-center gap-2">
+                      <FaSpinner className="animate-spin" />
+                      Téléchargement en cours...
+                    </div>
+                  )}
+
+                  {coverUploadState.status === 'error' && (
+                    <p className="text-xs text-red-500">{coverUploadState.error}</p>
+                  )}
+                </div>
+
+                {formData.cover_url && (
+                  <div className="flex items-center gap-2 mt-3">
+                    <button
+                      type="button"
+                      onClick={handleRemoveCover}
+                      className="text-sm text-red-600 hover:text-red-700 transition-colors"
+                    >
+                      Retirer l’image
+                    </button>
+                    <span className="text-xs text-gray-500">
+                      Le fichier est stocké dans Supabase (bucket&nbsp;: {PDF_COVER_BUCKET}).
+                    </span>
+                  </div>
+                )}
+
+                {!formData.cover_url && (
+                  <p className="mt-2 text-xs text-gray-500">
+                    Laissez vide pour garder l’image par défaut de la catégorie.
+                  </p>
+                )}
               </div>
 
               <div className="grid grid-cols-2 gap-4">

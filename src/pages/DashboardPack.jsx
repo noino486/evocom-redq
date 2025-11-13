@@ -137,10 +137,6 @@ const DashboardPack = ({ initialSection, initialPdfCategory }) => {
     return pdfImageMap[categoryId] || null
   }
 
-  const pdfTextStyle = useMemo(() => ({
-    color: '#111827'
-  }), [])
-
   const products = useMemo(() => [
     {
       id: 'STFOUR',
@@ -826,16 +822,16 @@ useEffect(() => {
                           )}
 
                           <div className="relative p-4 sm:p-6">
-                            <div className="flex items-start gap-3 sm:gap-4 mb-3">
-                              <div className="p-2 sm:p-3 bg-primary/10 rounded-lg text-primary flex-shrink-0">
-                                <FaFileAlt className="text-lg sm:text-xl" />
+                            <div className="flex items-start gap-4 mb-4">
+                              <div className="p-3 bg-primary/10 rounded-lg text-primary flex-shrink-0">
+                                <FaFileAlt className="text-xl" />
                               </div>
                               <div className="flex-1 min-w-0">
-                                <h4 className="text-base sm:text-lg font-bold mb-1 break-words" style={pdfTextStyle}>
+                                <h4 className="text-lg font-semibold text-gray-900 mb-2 break-words">
                                   {pdf.title}
                                 </h4>
                                 {pdf.description && (
-                                  <p className="text-xs sm:text-sm line-clamp-2" style={pdfTextStyle}>
+                                  <p className="text-sm text-gray-600 line-clamp-2">
                                     {pdf.description}
                                   </p>
                                 )}
