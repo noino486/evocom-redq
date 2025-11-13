@@ -10,9 +10,9 @@ import {
 import DashboardLayout from '../components/DashboardLayout'
 import { useAuth } from '../context/AuthContext'
 
-const DISCORD_INVITE_URL =
-  import.meta.env.VITE_DISCORD_INVITE_URL || 'https://discord.com/invite/votre-serveur'
-const DISCORD_WIDGET_ID = import.meta.env.VITE_DISCORD_WIDGET_ID
+const DISCORD_INVITE_URL = import.meta.env.VITE_DISCORD_INVITE_URL || null
+const DISCORD_WIDGET_ID = import.meta.env.VITE_DISCORD_WIDGET_ID || null
+const hasDiscordInvite = Boolean(DISCORD_INVITE_URL)
 
 const featureCards = [
   {
@@ -88,19 +88,26 @@ const DashboardDiscord = () => {
                 et profitez d’un accompagnement continu pour accélérer votre croissance.
               </p>
             </div>
-            <div className="flex flex-col sm:flex-row lg:flex-col items-center gap-4">
-              <a
-                href={DISCORD_INVITE_URL}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="px-6 py-3 bg-indigo-500 hover:bg-indigo-400 transition-colors rounded-xl font-semibold text-white shadow-lg shadow-indigo-500/30 focus:outline-none focus:ring-2 focus:ring-indigo-300"
-              >
-                Rejoindre le serveur Discord
-              </a>
-              <p className="text-xs text-slate-300 text-center max-w-xs">
-                L’invitation est strictement réservée aux membres actifs du Pack Global Business.
-              </p>
-            </div>
+            {hasDiscordInvite ? (
+              <div className="flex flex-col sm:flex-row lg:flex-col items-center gap-4">
+                <a
+                  href={DISCORD_INVITE_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="px-6 py-3 bg-indigo-500 hover:bg-indigo-400 transition-colors rounded-xl font-semibold text-white shadow-lg shadow-indigo-500/30 focus:outline-none focus:ring-2 focus:ring-indigo-300"
+                >
+                  Rejoindre le serveur Discord
+                </a>
+                <p className="text-xs text-slate-300 text-center max-w-xs">
+                  L’invitation est strictement réservée aux membres actifs du Pack Global Business.
+                </p>
+              </div>
+            ) : (
+              <div className="rounded-xl border border-white/20 bg-white/10 px-5 py-4 text-center text-sm text-indigo-100">
+                Configurez la variable <code className="font-mono text-indigo-50">VITE_DISCORD_INVITE_URL</code> pour
+                activer le bouton d’invitation.
+              </div>
+            )}
           </div>
         </motion.div>
 

@@ -29,6 +29,7 @@ const DashboardLayout = ({ children }) => {
   const navigate = useNavigate()
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [expandedSections, setExpandedSections] = useState({})
+  const hasDiscordCommunity = Boolean(import.meta.env.VITE_DISCORD_INVITE_URL)
 
   const menuItems = useMemo(() => {
     // S'assurer que isAdmin retourne bien false pour les niveaux 1, 2 et 3
@@ -69,7 +70,7 @@ const DashboardLayout = ({ children }) => {
             icon: FaDiscord,
             title: 'Communauté Discord',
             path: '/dashboard/pack-global-business/discord',
-            visible: true
+            visible: hasDiscordCommunity
           }
         ]
       },
@@ -117,7 +118,7 @@ const DashboardLayout = ({ children }) => {
         visible: true
       }
     ]
-  }, [profile, isAdmin, isSupportOrAdmin])
+  }, [profile, isAdmin, isSupportOrAdmin, hasDiscordCommunity])
 
   const handleSignOut = async () => {
     await signOut()
