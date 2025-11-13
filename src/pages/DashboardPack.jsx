@@ -845,15 +845,22 @@ useEffect(() => {
                             <div className="flex gap-2 mt-4">
                               <button
                                 onClick={() => {
-                                  if (typeof window !== 'undefined') {
-                                    const currentPath = `${window.location.pathname}${window.location.search ?? ''}`
-                                    const viewerUrl = `/dashboard/pdf-viewer?url=${encodeURIComponent(
-                                      pdf.pdf_url
-                                    )}&title=${encodeURIComponent(pdf.title || '')}&from=${encodeURIComponent(currentPath)}`
-                                    window.open(viewerUrl, '_blank', 'noopener,noreferrer')
-                                  }
+                                  const currentPath = `${window.location.pathname}${window.location.search ?? ''}`
+                                  const viewerUrl = `/dashboard/pdf-viewer?url=${encodeURIComponent(
+                                    pdf.pdf_url
+                                  )}&title=${encodeURIComponent(pdf.title || '')}&from=${encodeURIComponent(currentPath)}`
+
+                                  navigate(viewerUrl, {
+                                    state: {
+                                      pdfUrl: pdf.pdf_url,
+                                      title: pdf.title || '',
+                                      from: currentPath
+                                    },
+                                    replace: false
+                                  })
+
                                   if (!pdf.pdf_url.includes('gamma.app')) {
-                                    setExpandedPdf(expandedPdf === pdf.id ? null : pdf.id)
+                                    setExpandedPdf(null)
                                   }
                                 }}
                                 className="w-full px-3 sm:px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors font-medium text-xs sm:text-sm flex items-center justify-center gap-2"

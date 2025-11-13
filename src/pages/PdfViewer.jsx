@@ -19,11 +19,16 @@ function useQueryParams() {
 
 const PdfViewer = () => {
   const navigate = useNavigate()
+  const location = useLocation()
   const params = useQueryParams()
 
-  const pdfUrl = params.url ? decodeURIComponent(params.url) : null
-  const title = params.title ? decodeURIComponent(params.title) : 'Document'
-  const from = params.from ? decodeURIComponent(params.from) : null
+  const state = (location && location.state) || {}
+  const pdfUrl =
+    state.pdfUrl || (params.url ? decodeURIComponent(params.url) : null)
+  const title =
+    state.title || (params.title ? decodeURIComponent(params.title) : 'Document')
+  const from =
+    state.from || (params.from ? decodeURIComponent(params.from) : null)
 
   const isEmbeddable = pdfUrl ? !pdfUrl.includes('gamma.app') : false
   const handleBack = () => {
