@@ -54,8 +54,20 @@ const DashboardLayout = ({ children }) => {
         children: [
           {
             icon: FaFileAlt,
-            title: 'PDFs',
-            path: '/dashboard/pack-global-business/pdfs',
+            title: 'Expatriation',
+            path: '/dashboard/pack-global-business/expatriation',
+            visible: true
+          },
+          {
+            icon: FaFileAlt,
+            title: 'Revenus Actifs',
+            path: '/dashboard/pack-global-business/revenus-actifs',
+            visible: true
+          },
+          {
+            icon: FaFileAlt,
+            title: 'Revenus Passifs',
+            path: '/dashboard/pack-global-business/revenus-passifs',
             visible: true
           },
           {

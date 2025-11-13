@@ -68,9 +68,29 @@ function AppContent() {
                   />
                   <Route
                     path="/dashboard/pack-global-business/pdfs"
+                    element={<Navigate to="/dashboard/pack-global-business/expatriation" replace />}
+                  />
+                  <Route
+                    path="/dashboard/pack-global-business/expatriation"
                     element={
                       <ProtectedRoute requireAuth={true}>
-                        <DashboardPack initialSection="pdfs" />
+                        <DashboardPack initialSection="pdfs" initialPdfCategory="EXPATRIATION" />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/dashboard/pack-global-business/revenus-actifs"
+                    element={
+                      <ProtectedRoute requireAuth={true}>
+                        <DashboardPack initialSection="pdfs" initialPdfCategory="REVENUE_ACTIF" />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/dashboard/pack-global-business/revenus-passifs"
+                    element={
+                      <ProtectedRoute requireAuth={true}>
+                        <DashboardPack initialSection="pdfs" initialPdfCategory="REVENUE_PASSIF" />
                       </ProtectedRoute>
                     }
                   />

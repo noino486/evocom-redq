@@ -14,7 +14,19 @@ import * as Icons from 'react-icons/fa'
 
 const SUPPLIERS_PER_PAGE = 25
 
-const DashboardPack = ({ initialSection }) => {
+const PDF_CATEGORY_ROUTE_MAP = {
+  EXPATRIATION: '/dashboard/pack-global-business/expatriation',
+  REVENUE_ACTIF: '/dashboard/pack-global-business/revenus-actifs',
+  REVENUE_PASSIF: '/dashboard/pack-global-business/revenus-passifs'
+}
+
+const ROUTE_PDF_CATEGORY_MAP = {
+  '/dashboard/pack-global-business/expatriation': 'EXPATRIATION',
+  '/dashboard/pack-global-business/revenus-actifs': 'REVENUE_ACTIF',
+  '/dashboard/pack-global-business/revenus-passifs': 'REVENUE_PASSIF'
+}
+
+const DashboardPack = ({ initialSection, initialPdfCategory }) => {
   const location = useLocation()
   const navigate = useNavigate()
   const { profile, hasProductAccess, isAdmin } = useAuth()
@@ -27,7 +39,9 @@ const DashboardPack = ({ initialSection }) => {
   const [expandedSection, setExpandedSection] = useState(null)
   const [expandedPdf, setExpandedPdf] = useState(null)
   const [fullscreenPdf, setFullscreenPdf] = useState(null)
-  const [selectedPdfCategory, setSelectedPdfCategory] = useState(null)
+  const [selectedPdfCategory, setSelectedPdfCategory] = useState(() => 
+    initialPdfCategory || ROUTE_PDF_CATEGORY_MAP[location.pathname] || null
+  )
   const [iframeErrors, setIframeErrors] = useState({})
   const [supplierFilters, setSupplierFilters] = useState({
     category: '',
@@ -149,6 +163,9 @@ const DashboardPack = ({ initialSection }) => {
     '/dashboard/pack-global-sourcing': 'STFOUR',
     '/dashboard/pack-global-business': 'GLBNS',
     '/dashboard/pack-global-business/pdfs': 'GLBNS',
+    '/dashboard/pack-global-business/expatriation': 'GLBNS',
+    '/dashboard/pack-global-business/revenus-actifs': 'GLBNS',
+    '/dashboard/pack-global-business/revenus-passifs': 'GLBNS',
     '/dashboard/pack-global-business/suppliers': 'GLBNS'
   }
 
@@ -158,7 +175,10 @@ const DashboardPack = ({ initialSection }) => {
       if (location.pathname === '/dashboard/pack-global-business/suppliers') {
         return 'suppliers'
       }
-      if (location.pathname === '/dashboard/pack-global-business/pdfs') {
+      if (
+        location.pathname === '/dashboard/pack-global-business/pdfs' ||
+        ROUTE_PDF_CATEGORY_MAP[location.pathname]
+      ) {
         return 'pdfs'
       }
       return initialSection === 'suppliers' ? 'suppliers' : 'pdfs'
@@ -170,23 +190,38 @@ const DashboardPack = ({ initialSection }) => {
     if (productId === 'GLBNS') {
       if (location.pathname === '/dashboard/pack-global-business' && initialSection === 'suppliers') {
         navigate('/dashboard/pack-global-business/suppliers', { replace: true })
-      } else if (location.pathname === '/dashboard/pack-global-business' && initialSection !== 'suppliers') {
-        navigate('/dashboard/pack-global-business/pdfs', { replace: true })
+      } else if (location.pathname === '/dashboard/pack-global-business') {
+        const targetRoute =
+          PDF_CATEGORY_ROUTE_MAP[initialPdfCategory] || PDF_CATEGORY_ROUTE_MAP.EXPATRIATION
+        navigate(targetRoute, { replace: true })
       }
     }
-  }, [productId, location.pathname, initialSection, navigate])
+  }, [productId, location.pathname, initialSection, initialPdfCategory, navigate])
+
+  useEffect(() => {
+    const matchedCategory = ROUTE_PDF_CATEGORY_MAP[location.pathname]
+    if (matchedCategory) {
+      setSelectedPdfCategory(matchedCategory)
+    }
+  }, [location.pathname])
 
   const renderPdfCategoryCard = (categoryId, label) => {
     const image = getPdfCategoryImage(categoryId)
     const count = pdfSections[categoryId]?.length || 0
-    const displayLabel = categoryId === 'EXPATRIATION' ? 'Expatriation' : label
+    const displayLabel = label
 
     return (
       <motion.div
         key={categoryId}
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        onClick={() => setSelectedPdfCategory(categoryId)}
+        onClick={() => {
+          setSelectedPdfCategory(categoryId)
+          const targetRoute = PDF_CATEGORY_ROUTE_MAP[categoryId]
+          if (targetRoute && targetRoute !== location.pathname) {
+            navigate(targetRoute)
+          }
+        }}
         className="relative rounded-lg border-2 border-gray-200 hover:border-primary shadow-sm hover:shadow-md transition-all cursor-pointer overflow-hidden group h-32 sm:h-40 flex items-end"
       >
         <div
@@ -783,13 +818,13 @@ useEffect(() => {
               </p>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                 {/* Card EXPATRIATION */}
-                {productId === 'GLBNS' && renderPdfCategoryCard('EXPATRIATION', 'EXPATRIATION')}
+                {productId === 'GLBNS' && renderPdfCategoryCard('EXPATRIATION', 'Expatriation')}
 
-                {/* Card Revenue Actif */}
-                {(productId === 'STFOUR' || productId === 'GLBNS') && renderPdfCategoryCard('REVENUE_ACTIF', 'Revenue Actif')}
+                {/* Card Revenus Actifs */}
+                {(productId === 'STFOUR' || productId === 'GLBNS') && renderPdfCategoryCard('REVENUE_ACTIF', 'Revenus Actifs')}
 
-                {/* Card Revenue Passif */}
-                {(productId === 'STFOUR' || productId === 'GLBNS') && renderPdfCategoryCard('REVENUE_PASSIF', 'Revenue Passif')}
+                {/* Card Revenus Passifs */}
+                {(productId === 'STFOUR' || productId === 'GLBNS') && renderPdfCategoryCard('REVENUE_PASSIF', 'Revenus Passifs')}
               </div>
               </div>
             ) : (
@@ -809,8 +844,8 @@ useEffect(() => {
                 <div className="h-1 w-8 bg-gradient-to-r from-primary to-secondary rounded-full"></div>
                 <h3 className="text-xl font-bold text-gray-900">
                   {selectedPdfCategory === 'EXPATRIATION' && 'Expatriation'}
-                  {selectedPdfCategory === 'REVENUE_ACTIF' && 'Revenue Actif'}
-                  {selectedPdfCategory === 'REVENUE_PASSIF' && 'Revenue Passif'}
+                  {selectedPdfCategory === 'REVENUE_ACTIF' && 'Revenus Actifs'}
+                  {selectedPdfCategory === 'REVENUE_PASSIF' && 'Revenus Passifs'}
                 </h3>
                 <span className="px-3 py-1 bg-primary/10 text-primary text-xs font-medium rounded-full">
                   {(() => {
@@ -1354,4 +1389,5 @@ DashboardPack.defaultProps = {
 }
 
 export default React.memo(DashboardPack)
+
 
