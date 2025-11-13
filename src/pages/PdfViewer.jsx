@@ -23,15 +23,27 @@ const PdfViewer = () => {
 
   const pdfUrl = params.url ? decodeURIComponent(params.url) : null
   const title = params.title ? decodeURIComponent(params.title) : 'Document'
+  const from = params.from ? decodeURIComponent(params.from) : null
 
   const isEmbeddable = pdfUrl ? !pdfUrl.includes('gamma.app') : false
+  const handleBack = () => {
+    if (from && from.startsWith('/')) {
+      navigate(from, { replace: true })
+      return
+    }
+    if (window.history.length > 1) {
+      navigate(-1)
+    } else {
+      navigate('/dashboard')
+    }
+  }
 
   return (
     <div className="min-h-screen bg-gray-100">
       <div className="max-w-6xl mx-auto px-4 py-6">
         <div className="flex items-center justify-between gap-4 mb-6">
           <button
-            onClick={() => navigate(-1)}
+            onClick={handleBack}
             className="flex items-center gap-2 text-sm font-medium text-gray-700 hover:text-primary transition-colors"
           >
             <FaArrowLeft />
@@ -55,9 +67,6 @@ const PdfViewer = () => {
               <FaFilePdf className="text-primary" />
               {title}
             </h1>
-            {pdfUrl && (
-              <p className="text-sm text-gray-500 mt-1 break-all">{pdfUrl}</p>
-            )}
           </div>
 
           <div className="h-[85vh] bg-gray-50">

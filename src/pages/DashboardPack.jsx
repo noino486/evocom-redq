@@ -846,9 +846,10 @@ useEffect(() => {
                               <button
                                 onClick={() => {
                                   if (typeof window !== 'undefined') {
+                                    const currentPath = `${window.location.pathname}${window.location.search ?? ''}`
                                     const viewerUrl = `/dashboard/pdf-viewer?url=${encodeURIComponent(
                                       pdf.pdf_url
-                                    )}&title=${encodeURIComponent(pdf.title || '')}`
+                                    )}&title=${encodeURIComponent(pdf.title || '')}&from=${encodeURIComponent(currentPath)}`
                                     window.open(viewerUrl, '_blank', 'noopener,noreferrer')
                                   }
                                   if (!pdf.pdf_url.includes('gamma.app')) {
