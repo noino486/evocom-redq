@@ -54,6 +54,12 @@ const DashboardLayout = ({ children }) => {
         visible: hasPackBusiness,
         children: [
           {
+            icon: FaBuilding,
+            title: 'Fournisseurs',
+            path: '/dashboard/pack-global-business/suppliers',
+            visible: true
+          },
+          {
             icon: FaFileAlt,
             title: 'Expatriation',
             path: '/dashboard/pack-global-business/expatriation',
@@ -72,14 +78,8 @@ const DashboardLayout = ({ children }) => {
             visible: true
           },
           {
-            icon: FaBuilding,
-            title: 'Fournisseurs',
-            path: '/dashboard/pack-global-business/suppliers',
-            visible: true
-          },
-          {
             icon: FaDiscord,
-            title: 'Notre Communauté',
+            title: 'Notre Discord',
             path: '/dashboard/pack-global-business/community',
             visible: true
           }
