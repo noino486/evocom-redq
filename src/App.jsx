@@ -177,7 +177,7 @@ function AppContent() {
                     } 
                   />
                   <Route
-                    path="/dashboard/community"
+                    path="/dashboard/pack-global-business/community"
                     element={
                       <ProtectedRoute requireAuth={true} minAccessLevel={2}>
                         <DashboardCommunity />

@@ -39,7 +39,6 @@ const DashboardLayout = ({ children }) => {
     const hasPackSourcing = profile?.is_active && (profile?.access_level === 1 || profile?.access_level >= 3)
     // Pack Global Business: visible si niveau >= 2
     const hasPackBusiness = profile?.is_active && profile?.access_level >= 2
-    const hasProduct2 = profile?.is_active && profile?.access_level >= 2
     
     return [
       {
@@ -76,6 +75,12 @@ const DashboardLayout = ({ children }) => {
             icon: FaBuilding,
             title: 'Fournisseurs',
             path: '/dashboard/pack-global-business/suppliers',
+            visible: true
+          },
+          {
+            icon: FaDiscord,
+            title: 'Notre Communauté',
+            path: '/dashboard/pack-global-business/community',
             visible: true
           }
         ]
@@ -123,12 +128,6 @@ const DashboardLayout = ({ children }) => {
         path: '/dashboard/settings',
         visible: true
       },
-      {
-        icon: FaDiscord,
-        title: 'Notre Communauté',
-        path: '/dashboard/community',
-        visible: hasProduct2
-      }
     ]
   }, [profile, isAdmin, isSupportOrAdmin])
 
