@@ -844,7 +844,14 @@ useEffect(() => {
 
                             <div className="flex gap-2 mt-4">
                               <button
-                                onClick={() => setExpandedPdf(expandedPdf === pdf.id ? null : pdf.id)}
+                                onClick={() => {
+                                  if (typeof window !== 'undefined') {
+                                    window.open(pdf.pdf_url, '_blank', 'noopener,noreferrer');
+                                  }
+                                  if (!pdf.pdf_url.includes('gamma.app')) {
+                                    setExpandedPdf(expandedPdf === pdf.id ? null : pdf.id);
+                                  }
+                                }}
                                 className="w-full px-3 sm:px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors font-medium text-xs sm:text-sm flex items-center justify-center gap-2"
                               >
                                 {isExpanded ? (
@@ -862,8 +869,9 @@ useEffect(() => {
                             </div>
                           </div>
 
-                          <AnimatePresence>
-                            {isExpanded && (
+                          {!pdf.pdf_url.includes('gamma.app') && (
+                            <AnimatePresence>
+                              {isExpanded && (
                               <motion.div
                                 initial={{ height: 0, opacity: 0 }}
                                 animate={{ height: 'auto', opacity: 1 }}
@@ -882,27 +890,18 @@ useEffect(() => {
                                         <FaExpand />
                                       </button>
                                     </div>
-                                    {pdf.pdf_url.includes('gamma.app') ? (
-                                      <iframe
-                                        src={pdf.pdf_url}
-                                        className="w-full h-full border-0 rounded-lg"
-                                        title={pdf.title}
-                                        style={{ minHeight: '600px' }}
-                                        allow="fullscreen"
-                                      />
-                                    ) : (
-                                      <iframe
-                                        src={pdf.pdf_url}
-                                        className="w-full h-full border-0 rounded-lg"
-                                        title={pdf.title}
-                                        style={{ minHeight: '600px' }}
-                                      />
-                                    )}
+                                    <iframe
+                                      src={pdf.pdf_url}
+                                      className="w-full h-full border-0 rounded-lg"
+                                      title={pdf.title}
+                                      style={{ minHeight: '600px' }}
+                                    />
                                   </div>
                                 </div>
                               </motion.div>
                             )}
                           </AnimatePresence>
+                          )}
                         </motion.div>
                       )
                     })}
