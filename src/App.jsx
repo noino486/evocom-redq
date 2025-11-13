@@ -24,6 +24,7 @@ import DashboardPdfSections from './pages/DashboardPdfSections'
 import DashboardLegal from './pages/DashboardLegal'
 import DashboardScraper from './pages/DashboardScraper'
 import DashboardSuppliers from './pages/DashboardSuppliers'
+import DashboardDiscord from './pages/DashboardDiscord'
 import DashboardRedirect from './components/DashboardRedirect'
 
 function AppContent() {
@@ -79,6 +80,14 @@ function AppContent() {
                     element={
                       <ProtectedRoute requireAuth={true}>
                         <DashboardPack initialSection="suppliers" />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/dashboard/pack-global-business/discord"
+                    element={
+                      <ProtectedRoute requireAuth={true} minAccessLevel={2}>
+                        <DashboardDiscord />
                       </ProtectedRoute>
                     }
                   />

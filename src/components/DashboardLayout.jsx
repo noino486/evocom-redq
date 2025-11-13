@@ -18,7 +18,8 @@ import {
   FaChevronRight,
   FaList,
   FaGavel,
-  FaFileAlt
+  FaFileAlt,
+  FaDiscord
 } from 'react-icons/fa'
 import { useAuth } from '../context/AuthContext'
 
@@ -62,6 +63,12 @@ const DashboardLayout = ({ children }) => {
             icon: FaBuilding,
             title: 'Fournisseurs',
             path: '/dashboard/pack-global-business/suppliers',
+            visible: true
+          },
+          {
+            icon: FaDiscord,
+            title: 'Communauté Discord',
+            path: '/dashboard/pack-global-business/discord',
             visible: true
           }
         ]
@@ -173,7 +180,10 @@ const DashboardLayout = ({ children }) => {
               .map((item) => {
                 // Si c'est une section avec sous-menus
                 if (item.type === 'section' && item.children) {
-                  const isExpanded = expandedSections[item.title] !== false
+                  const manualExpansion = expandedSections[item.title]
+                  const isExpanded = manualExpansion !== undefined 
+                    ? manualExpansion 
+                    : hasActiveChild
                   const hasActiveChild = item.children.some(child => 
                     child.path && (activePath === child.path || activePath.startsWith(child.path))
                   )
@@ -181,10 +191,13 @@ const DashboardLayout = ({ children }) => {
                   return (
                     <div key={item.title}>
                       <button
-                        onClick={() => setExpandedSections(prev => ({
-                          ...prev,
-                          [item.title]: !prev[item.title]
-                        }))}
+                        onClick={() => setExpandedSections(prev => {
+                          const current = prev[item.title] ?? hasActiveChild
+                          return {
+                            ...prev,
+                            [item.title]: !current
+                          }
+                        })}
                         className={`
                           group w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all border
                           ${hasActiveChild 

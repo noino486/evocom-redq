@@ -12,7 +12,7 @@ import DashboardLayout from '../components/DashboardLayout'
 const SUPPLIERS_PER_PAGE = 25
 
 const DashboardSuppliers = () => {
-  const { isAdmin, profile, hasAccessLevel } = useAuth()
+  const { isAdmin, isSupportOrAdmin, profile } = useAuth()
   const [suppliers, setSuppliers] = useState([])
   const [loading, setLoading] = useState(true)
   const [editingSupplier, setEditingSupplier] = useState(null)
@@ -151,7 +151,13 @@ const DashboardSuppliers = () => {
     setCurrentPage(1)
   }
 
+  const canManageSuppliers = isSupportOrAdmin()
+
   const handleDelete = async (id) => {
+    if (!canManageSuppliers) {
+      setMessage({ type: 'error', text: 'Vous n\'avez pas les permissions pour modifier ce contenu.' })
+      return
+    }
     if (!confirm('Êtes-vous sûr de vouloir supprimer ce fournisseur de la liste publiée ?')) return
 
     try {
@@ -171,6 +177,10 @@ const DashboardSuppliers = () => {
   }
 
   const handleEdit = (supplier) => {
+    if (!canManageSuppliers) {
+      setMessage({ type: 'error', text: 'Vous n\'avez pas les permissions pour modifier ce contenu.' })
+      return
+    }
     setEditingSupplier(supplier)
     setEditForm({
       name: supplier.name || '',
@@ -185,7 +195,14 @@ const DashboardSuppliers = () => {
   }
 
   const handleSaveEdit = async () => {
-    if (!editingSupplier) return
+    if (!editingSupplier) {
+      return
+    }
+
+    if (!canManageSuppliers) {
+      setMessage({ type: 'error', text: 'Vous n\'avez pas les permissions pour modifier ce contenu.' })
+      return
+    }
 
     try {
       // Reconstruire le titre et la description depuis les données éditées
@@ -416,7 +433,7 @@ const paginatedSuppliers = suppliers.slice(startIndex, startIndex + SUPPLIERS_PE
                           {supplier.supplier_type || '-'}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                          {isAdmin() && (
+                          {canManageSuppliers && (
                             editingSupplier?.id === supplier.id ? (
                               <div className="flex gap-2">
                                 <button
