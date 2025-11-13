@@ -173,13 +173,13 @@ const DashboardLayout = ({ children }) => {
               .map((item) => {
                 // Si c'est une section avec sous-menus
                 if (item.type === 'section' && item.children) {
+                  const hasActiveChild = item.children.some(child => 
+                    child.path && (activePath === child.path || activePath.startsWith(child.path))
+                  )
                   const manualExpansion = expandedSections[item.title]
                   const isExpanded = manualExpansion !== undefined 
                     ? manualExpansion 
                     : hasActiveChild
-                  const hasActiveChild = item.children.some(child => 
-                    child.path && (activePath === child.path || activePath.startsWith(child.path))
-                  )
                   
                   return (
                     <div key={item.title}>
