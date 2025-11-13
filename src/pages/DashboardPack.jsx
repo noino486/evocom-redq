@@ -205,55 +205,6 @@ const DashboardPack = ({ initialSection, initialPdfCategory }) => {
     }
   }, [location.pathname])
 
-  const renderPdfCategoryCard = (categoryId, label) => {
-    const image = getPdfCategoryImage(categoryId)
-    const count = pdfSections[categoryId]?.length || 0
-    const displayLabel = label
-
-    return (
-      <motion.div
-        key={categoryId}
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        onClick={() => {
-          setSelectedPdfCategory(categoryId)
-          const targetRoute = PDF_CATEGORY_ROUTE_MAP[categoryId]
-          if (targetRoute && targetRoute !== location.pathname) {
-            navigate(targetRoute)
-          }
-        }}
-        className="relative rounded-lg border-2 border-gray-200 hover:border-primary shadow-sm hover:shadow-md transition-all cursor-pointer overflow-hidden group h-32 sm:h-40 flex items-end"
-      >
-        <div
-          className="absolute inset-0"
-          style={{
-            backgroundImage: image ? `url(${image})` : 'none',
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
-            backgroundRepeat: 'no-repeat'
-          }}
-        ></div>
-        {!image && (
-          <div className="absolute inset-0 bg-primary/10 flex items-center justify-center">
-            <FaFileAlt className="text-5xl text-primary opacity-50" />
-          </div>
-        )}
-
-        <div className="relative w-full p-4 sm:p-5 text-white">
-          <div className="inline-flex items-center justify-center p-3 bg-white/20 rounded-lg mb-3 backdrop-blur-sm">
-            <FaFileAlt className="text-xl" />
-          </div>
-          <h3 className="text-base font-bold mb-1" style={pdfTextStyle}>
-            {displayLabel}
-          </h3>
-          <span className="text-sm font-bold" style={pdfTextStyle}>
-            {count} PDF{count !== 1 ? 's' : ''}
-          </span>
-        </div>
-      </motion.div>
-    )
-  }
-
   useEffect(() => {
     if (productId && hasProductAccess(productId)) {
       loadSections()
@@ -806,39 +757,12 @@ useEffect(() => {
             </div>
 
           {loadingPdfSections ? (
-              <div className="text-center py-12">
-                <FaSpinner className="animate-spin text-4xl text-primary mx-auto mb-4" />
+            <div className="text-center py-12">
+              <FaSpinner className="animate-spin text-4xl text-primary mx-auto mb-4" />
               <p className="text-gray-600">Chargement des PDFs...</p>
-              </div>
-          ) : !selectedPdfCategory ? (
-            /* Affichage des cards de catégories */
-            <div>
-              <p className="text-gray-600 mb-6">
-                Sélectionnez une catégorie pour voir les PDFs disponibles
-              </p>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-                {/* Card EXPATRIATION */}
-                {productId === 'GLBNS' && renderPdfCategoryCard('EXPATRIATION', 'Expatriation')}
-
-                {/* Card Revenus Actifs */}
-                {(productId === 'STFOUR' || productId === 'GLBNS') && renderPdfCategoryCard('REVENUE_ACTIF', 'Revenus Actifs')}
-
-                {/* Card Revenus Passifs */}
-                {(productId === 'STFOUR' || productId === 'GLBNS') && renderPdfCategoryCard('REVENUE_PASSIF', 'Revenus Passifs')}
-              </div>
-              </div>
-            ) : (
-            /* Affichage des PDFs de la catégorie sélectionnée */
+            </div>
+          ) : selectedPdfCategory ? (
             <div className="space-y-4">
-              {/* Bouton retour */}
-              <button
-                onClick={() => setSelectedPdfCategory(null)}
-                className="inline-flex items-center gap-2 px-3 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors font-medium mb-4"
-              >
-                <FaTimes className="text-sm" />
-                Retour aux catégories
-              </button>
-
               {/* Titre de la catégorie */}
               <div className="flex items-center gap-3 mb-6">
                 <div className="h-1 w-8 bg-gradient-to-r from-primary to-secondary rounded-full"></div>
@@ -986,7 +910,13 @@ useEffect(() => {
                 )
               })()}
               </div>
-            )}
+          ) : (
+            <div className="bg-white rounded-lg p-8 text-center border border-gray-200">
+              <p className="text-gray-600">
+                Sélectionnez une section via la barre latérale pour consulter les PDFs.
+              </p>
+            </div>
+          )}
           </div>
         )}
 
