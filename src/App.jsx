@@ -24,13 +24,11 @@ import DashboardPdfSections from './pages/DashboardPdfSections'
 import DashboardLegal from './pages/DashboardLegal'
 import DashboardScraper from './pages/DashboardScraper'
 import DashboardSuppliers from './pages/DashboardSuppliers'
-import DashboardDiscord from './pages/DashboardDiscord'
 import DashboardRedirect from './components/DashboardRedirect'
 
 function AppContent() {
   const location = useLocation()
   const isDashboardRoute = location.pathname.startsWith('/dashboard')
-  const hasDiscordCommunity = Boolean(import.meta.env.VITE_DISCORD_INVITE_URL)
 
   return (
     <div className="min-h-screen">
@@ -84,16 +82,6 @@ function AppContent() {
                       </ProtectedRoute>
                     }
                   />
-                  {hasDiscordCommunity && (
-                    <Route
-                      path="/dashboard/pack-global-business/discord"
-                      element={
-                        <ProtectedRoute requireAuth={true} minAccessLevel={2}>
-                          <DashboardDiscord />
-                        </ProtectedRoute>
-                      }
-                    />
-                  )}
                   {/* Route produits gardée pour compatibilité */}
                   <Route 
                     path="/dashboard/products" 
