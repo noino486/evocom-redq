@@ -846,10 +846,13 @@ useEffect(() => {
                               <button
                                 onClick={() => {
                                   if (typeof window !== 'undefined') {
-                                    window.open(pdf.pdf_url, '_blank', 'noopener,noreferrer');
+                                    const viewerUrl = `/dashboard/pdf-viewer?url=${encodeURIComponent(
+                                      pdf.pdf_url
+                                    )}&title=${encodeURIComponent(pdf.title || '')}`
+                                    window.open(viewerUrl, '_blank', 'noopener,noreferrer')
                                   }
                                   if (!pdf.pdf_url.includes('gamma.app')) {
-                                    setExpandedPdf(expandedPdf === pdf.id ? null : pdf.id);
+                                    setExpandedPdf(expandedPdf === pdf.id ? null : pdf.id)
                                   }
                                 }}
                                 className="w-full px-3 sm:px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors font-medium text-xs sm:text-sm flex items-center justify-center gap-2"

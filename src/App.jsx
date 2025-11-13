@@ -26,6 +26,7 @@ import DashboardScraper from './pages/DashboardScraper'
 import DashboardSuppliers from './pages/DashboardSuppliers'
 import DashboardRedirect from './components/DashboardRedirect'
 import DashboardCommunity from './pages/DashboardCommunity'
+import PdfViewer from './pages/PdfViewer'
 
 function AppContent() {
   const location = useLocation()
@@ -175,6 +176,14 @@ function AppContent() {
                         <DashboardSuppliers />
                       </ProtectedRoute>
                     } 
+                  />
+                  <Route
+                    path="/dashboard/pdf-viewer"
+                    element={
+                      <ProtectedRoute requireAuth={true}>
+                        <PdfViewer />
+                      </ProtectedRoute>
+                    }
                   />
                   <Route
                     path="/dashboard/pack-global-business/community"
