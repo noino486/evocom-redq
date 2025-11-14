@@ -833,7 +833,7 @@ useEffect(() => {
                                   </h4>
                                 </div>
                                 {pdf.description && (
-                                  <p className="text-xs text-white/80 leading-relaxed line-clamp-3">
+                                  <p className="text-xs text-white leading-relaxed line-clamp-3">
                                     {pdf.description}
                                   </p>
                                 )}
