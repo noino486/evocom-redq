@@ -1261,7 +1261,7 @@ useEffect(() => {
                           onCut={(e) => e.preventDefault()}
                           onDragStart={(e) => e.preventDefault()}
                         >
-                          <div className="flex items-start gap-4 mb-4">
+                          <div className="flex items-center gap-4 mb-4">
                             <div className={`p-3 rounded-lg ${supplier.is_featured ? 'bg-yellow-100' : 'bg-primary/10'} text-primary`}>
                               <FaBuilding className="text-xl" />
                             </div>
@@ -1282,7 +1282,7 @@ useEffect(() => {
                                 )}
                               </div>
                             </div>
-                            <div className="flex items-center gap-1.5">
+                            <div className="flex items-center gap-1.5 self-center">
                               <button
                                 type="button"
                                 onClick={() => toggleFavorite(supplier.id)}
