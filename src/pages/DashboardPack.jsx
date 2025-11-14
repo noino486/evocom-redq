@@ -5,7 +5,7 @@ import {
   FaDownload, FaExternalLinkAlt, FaFileAlt, FaSpinner,
   FaEye, FaTimes, FaChevronDown, FaChevronUp,
   FaBuilding, FaPhone, FaEnvelope, FaMapMarkerAlt, FaGlobe, FaFilter, FaStar,
-  FaTrash, FaExpand, FaCompress
+  FaTrash, FaExpand, FaCompress, FaEdit
 } from 'react-icons/fa'
 import { useAuth } from '../context/AuthContext'
 import { supabase } from '../config/supabase'
@@ -61,6 +61,17 @@ const DashboardPack = ({ initialSection, initialPdfCategory }) => {
   const [favorites, setFavorites] = useState([])
   const [supplierActionMessage, setSupplierActionMessage] = useState({ type: '', text: '' })
   const [supplierPage, setSupplierPage] = useState(1)
+  const [editingSupplier, setEditingSupplier] = useState(null)
+  const [editingSupplierForm, setEditingSupplierForm] = useState({
+    name: '',
+    supplier_type: '',
+    country: '',
+    phone: '',
+    email: '',
+    address: '',
+    website: ''
+  })
+  const [isSavingSupplier, setIsSavingSupplier] = useState(false)
 
   const handleSelectCategory = (category) => {
     setSelectedCategory(category)
@@ -550,6 +561,100 @@ const DashboardPack = ({ initialSection, initialPdfCategory }) => {
     }
   }
   
+  const handleStartEditSupplier = (supplier) => {
+    setEditingSupplier(supplier)
+    setEditingSupplierForm({
+      name: supplier.name || '',
+      supplier_type: supplier.supplier_type || '',
+      country: supplier.country || '',
+      phone: supplier.phone || '',
+      email: supplier.email || '',
+      address: supplier.address || '',
+      website: supplier.website || ''
+    })
+  }
+
+  const handleChangeSupplierField = (field, value) => {
+    setEditingSupplierForm((prev) => ({
+      ...prev,
+      [field]: value
+    }))
+  }
+
+  const handleCancelEditSupplier = () => {
+    setEditingSupplier(null)
+    setIsSavingSupplier(false)
+  }
+
+  const handleSaveSupplier = async () => {
+    if (!editingSupplier) return
+
+    if (!editingSupplierForm.name.trim()) {
+      setSupplierActionMessage({
+        type: 'error',
+        text: 'Le nom du fournisseur est requis.'
+      })
+      return
+    }
+
+    setIsSavingSupplier(true)
+
+    try {
+      const supplierType = editingSupplierForm.supplier_type?.trim() || 'Fournisseur'
+      const title = `${editingSupplierForm.name.trim()} - ${supplierType}`
+
+      const descriptionParts = []
+      if (editingSupplier.is_featured) {
+        descriptionParts.push('⭐')
+      }
+      if (editingSupplierForm.country?.trim()) {
+        descriptionParts.push(`📍 ${editingSupplierForm.country.trim()}`)
+      }
+      if (editingSupplierForm.phone?.trim()) {
+        descriptionParts.push(`📞 ${editingSupplierForm.phone.trim()}`)
+      }
+      if (editingSupplierForm.email?.trim()) {
+        descriptionParts.push(`✉️ ${editingSupplierForm.email.trim()}`)
+      }
+      if (editingSupplierForm.address?.trim()) {
+        descriptionParts.push(`🏢 ${editingSupplierForm.address.trim()}`)
+      }
+
+      const description =
+        descriptionParts.join('\n') ||
+        editingSupplier.section?.description ||
+        `Fournisseur ${supplierType}`
+
+      const { error } = await supabase
+        .from('pack_sections')
+        .update({
+          title,
+          description,
+          pdf_url: editingSupplierForm.website?.trim() || editingSupplier.website || null,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', editingSupplier.id)
+
+      if (error) throw error
+
+      setSupplierActionMessage({
+        type: 'success',
+        text: 'Fournisseur mis à jour avec succès.'
+      })
+
+      setEditingSupplier(null)
+      await loadSuppliers()
+    } catch (error) {
+      console.error('Erreur lors de la mise à jour du fournisseur:', error)
+      setSupplierActionMessage({
+        type: 'error',
+        text: 'Erreur lors de la mise à jour du fournisseur.'
+      })
+    } finally {
+      setIsSavingSupplier(false)
+    }
+  }
+
   // Fonction pour obtenir les catégories à afficher
   // Combine les catégories de base avec les types réels de la base de données
   const supplierCategories = useMemo(() => {
@@ -1193,6 +1298,16 @@ useEffect(() => {
                               {isAdmin() && (
                                 <button
                                   type="button"
+                                  onClick={() => handleStartEditSupplier(supplier)}
+                                  className="p-2 rounded-lg text-blue-600 hover:text-blue-700 hover:bg-blue-50 transition-colors"
+                                  title="Modifier ce fournisseur"
+                                >
+                                  <FaEdit />
+                                </button>
+                              )}
+                              {isAdmin() && (
+                                <button
+                                  type="button"
                                   onClick={() => handleDeleteSupplier(supplier.id, supplier.name)}
                                   className="p-2 rounded-lg text-red-600 hover:text-red-800 hover:bg-red-50 transition-colors"
                                   title="Supprimer ce fournisseur"
@@ -1297,6 +1412,144 @@ useEffect(() => {
           </div>
         )}
       </div>
+
+      {editingSupplier && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4 py-6">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-xl">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900">Modifier le fournisseur</h3>
+                <p className="text-sm text-gray-500">
+                  Mettez à jour les informations visibles par les membres.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={handleCancelEditSupplier}
+                className="text-gray-400 hover:text-gray-600 transition-colors"
+                title="Fermer"
+              >
+                <FaTimes />
+              </button>
+            </div>
+
+            <div className="px-6 py-5 space-y-5">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="col-span-1 sm:col-span-2">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Nom du fournisseur *
+                  </label>
+                  <input
+                    type="text"
+                    value={editingSupplierForm.name}
+                    onChange={(e) => handleChangeSupplierField('name', e.target.value)}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                    placeholder="Nom du fournisseur"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Catégorie / Type
+                  </label>
+                  <input
+                    type="text"
+                    value={editingSupplierForm.supplier_type}
+                    onChange={(e) => handleChangeSupplierField('supplier_type', e.target.value)}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                    placeholder="Ex: Textiles, Cosmétiques..."
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Pays
+                  </label>
+                  <input
+                    type="text"
+                    value={editingSupplierForm.country}
+                    onChange={(e) => handleChangeSupplierField('country', e.target.value)}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                    placeholder="Pays"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Téléphone
+                  </label>
+                  <input
+                    type="text"
+                    value={editingSupplierForm.phone}
+                    onChange={(e) => handleChangeSupplierField('phone', e.target.value)}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                    placeholder="+33 ..."
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Email
+                  </label>
+                  <input
+                    type="email"
+                    value={editingSupplierForm.email}
+                    onChange={(e) => handleChangeSupplierField('email', e.target.value)}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                    placeholder="contact@entreprise.com"
+                  />
+                </div>
+
+                <div className="col-span-1 sm:col-span-2">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Adresse
+                  </label>
+                  <input
+                    type="text"
+                    value={editingSupplierForm.address}
+                    onChange={(e) => handleChangeSupplierField('address', e.target.value)}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                    placeholder="Adresse du fournisseur"
+                  />
+                </div>
+
+                <div className="col-span-1 sm:col-span-2">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Site internet / Lien
+                  </label>
+                  <input
+                    type="url"
+                    value={editingSupplierForm.website}
+                    onChange={(e) => handleChangeSupplierField('website', e.target.value)}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                    placeholder="https://example.com"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="px-6 py-4 border-t border-gray-200 flex items-center justify-end gap-3">
+              <button
+                type="button"
+                className="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors"
+                onClick={handleCancelEditSupplier}
+                disabled={isSavingSupplier}
+              >
+                Annuler
+              </button>
+              <button
+                type="button"
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-primary text-white font-semibold hover:bg-primary/90 transition-colors disabled:opacity-70"
+                onClick={handleSaveSupplier}
+                disabled={isSavingSupplier}
+              >
+                {isSavingSupplier && <FaSpinner className="animate-spin" />}
+                Enregistrer
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Modal plein écran pour le PDF */}
       <AnimatePresence>
