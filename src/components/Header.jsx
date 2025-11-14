@@ -51,7 +51,6 @@ const Header = () => {
     { name: 'Accueil', id: 'hero' },
     { name: 'Produits', id: 'products' },
     { name: 'Témoignages', id: 'testimonials' },
-    { name: 'Connexion', path: '/login' },
     { name: 'Contact', id: 'footer' }
   ]
 
