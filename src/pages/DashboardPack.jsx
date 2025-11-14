@@ -801,11 +801,11 @@ useEffect(() => {
                           initial={{ opacity: 0, y: 20 }}
                           animate={{ opacity: 1, y: 0 }}
                           transition={{ delay: index * 0.05 }}
-                          className="relative rounded-lg border-2 border-gray-200 shadow-sm hover:shadow-md transition-shadow overflow-hidden bg-white"
+                          className="relative rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-shadow overflow-hidden"
                         >
                           {coverImage && (
                             <div
-                              className="absolute inset-0 opacity-20"
+                              className="absolute inset-0"
                               style={{
                                 backgroundImage: `url(${coverImage})`,
                                 backgroundSize: 'cover',
@@ -821,17 +821,19 @@ useEffect(() => {
                             </div>
                           )}
 
-                          <div className="relative z-10 p-4 sm:p-6">
+                          <div className="relative p-4 sm:p-6">
                             <div className="flex items-start gap-4 mb-4">
                               <div className="p-3 bg-primary/10 rounded-lg text-primary flex-shrink-0">
                                 <FaFileAlt className="text-xl" />
                               </div>
                               <div className="flex-1 min-w-0">
-                                <h4 className="text-lg font-semibold text-gray-900 mb-2 break-words select-none">
-                                  {pdf.title}
-                                </h4>
+                                <div className="flex items-center gap-2 mb-2">
+                                  <h4 className="text-lg font-semibold text-gray-900 select-none break-words">
+                                    {pdf.title}
+                                  </h4>
+                                </div>
                                 {pdf.description && (
-                                  <p className="text-sm text-gray-600 line-clamp-2">
+                                  <p className="text-sm text-gray-600 leading-relaxed line-clamp-2">
                                     {pdf.description}
                                   </p>
                                 )}
