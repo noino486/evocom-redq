@@ -828,12 +828,18 @@ useEffect(() => {
                               </div>
                               <div className="flex-1 min-w-0">
                                 <div className="flex items-center gap-2 mb-1">
-                                  <h4 className="text-base font-semibold text-white select-none break-words">
+                                  <h4
+                                    className="text-base font-semibold text-white select-none break-words"
+                                    style={{ textShadow: '0 0 10px rgba(0, 0, 0, 0.45)' }}
+                                  >
                                     {pdf.title}
                                   </h4>
                                 </div>
                                 {pdf.description && (
-                                  <p className="text-xs text-white leading-relaxed line-clamp-3">
+                                  <p
+                                    className="text-xs text-white leading-relaxed line-clamp-3"
+                                    style={{ textShadow: '0 0 10px rgba(0, 0, 0, 0.35)' }}
+                                  >
                                     {pdf.description}
                                   </p>
                                 )}
