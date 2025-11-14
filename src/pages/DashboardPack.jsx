@@ -1282,37 +1282,37 @@ useEffect(() => {
                                 )}
                               </div>
                             </div>
-                            <div className="flex items-center gap-2">
+                            <div className="flex items-center gap-1.5">
                               <button
                                 type="button"
                                 onClick={() => toggleFavorite(supplier.id)}
-                                className={`p-2 rounded-lg transition-colors ${
+                                className={`flex items-center justify-center w-9 h-9 rounded-lg transition-colors ${
                                   favorites.includes(supplier.id)
                                     ? 'text-yellow-500 bg-yellow-50'
                                     : 'text-gray-400 hover:text-yellow-500 hover:bg-yellow-50/50'
                                 }`}
                                 title={favorites.includes(supplier.id) ? 'Retirer des favoris' : 'Ajouter aux favoris'}
                               >
-                                <FaStar className={favorites.includes(supplier.id) ? 'fill-current' : ''} />
+                                <FaStar className={`text-base ${favorites.includes(supplier.id) ? 'fill-current' : ''}`} />
                               </button>
                               {isAdmin() && (
                                 <button
                                   type="button"
                                   onClick={() => handleStartEditSupplier(supplier)}
-                                  className="p-2 rounded-lg text-blue-600 hover:text-blue-700 hover:bg-blue-50 transition-colors"
+                                  className="flex items-center justify-center w-9 h-9 rounded-lg text-blue-600 hover:text-blue-700 hover:bg-blue-50 transition-colors"
                                   title="Modifier ce fournisseur"
                                 >
-                                  <FaEdit />
+                                  <FaEdit className="text-base" />
                                 </button>
                               )}
                               {isAdmin() && (
                                 <button
                                   type="button"
                                   onClick={() => handleDeleteSupplier(supplier.id, supplier.name)}
-                                  className="p-2 rounded-lg text-red-600 hover:text-red-800 hover:bg-red-50 transition-colors"
+                                  className="flex items-center justify-center w-9 h-9 rounded-lg text-red-600 hover:text-red-700 hover:bg-red-50 transition-colors"
                                   title="Supprimer ce fournisseur"
                                 >
-                                  <FaTrash />
+                                  <FaTrash className="text-base" />
                                 </button>
                               )}
                             </div>
