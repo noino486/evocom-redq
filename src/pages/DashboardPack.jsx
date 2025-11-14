@@ -823,7 +823,7 @@ useEffect(() => {
 
                           <div className="relative p-4 sm:p-6">
                             <div className="flex items-start gap-4 mb-4">
-                              <div className="p-3 bg-primary/10 rounded-lg text-primary flex-shrink-0">
+                              <div className="p-3 bg-white/30 rounded-lg text-white flex-shrink-0 backdrop-blur-sm">
                                 <FaFileAlt className="text-xl" />
                               </div>
                               <div className="flex-1 min-w-0">
