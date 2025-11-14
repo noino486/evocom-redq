@@ -26,6 +26,15 @@ const ROUTE_PDF_CATEGORY_MAP = {
   '/dashboard/pack-global-business/revenus-passifs': 'REVENUE_PASSIF'
 }
 
+const PDF_CATEGORY_DESCRIPTIONS = {
+  EXPATRIATION:
+    "Consultez le guide PDF Expatriation et les ressources associées directement dans la plateforme. Parcourez les sections par étape — visas, fiscalité, logement, assurance, scolarité — et utilisez les checklists à l’écran pour planifier sereinement votre départ.",
+  REVENUE_ACTIF:
+    "Découvrez le guide PDF Revenus Actif, qui explique simplement comment lancer et développer des activités qui rapportent en travaillant (freelancing, consulting, e-commerce, services locaux, etc.). Chaque fiche vous guide pas à pas : description du business, compétences nécessaires, estimation du budget de départ, actions concrètes pour trouver et convertir vos premiers clients, outils et modèles pratiques (pitch, devis, page produit) et indicateurs à suivre pour améliorer la rentabilité et faire évoluer l’activité.",
+  REVENUE_PASSIF:
+    "Découvrez le guide PDF Revenus Passif, qui explique comment créer des sources de revenus récurrentes et automatisées (produits numériques, abonnements, affiliation, investissements, revenus publicitaires, etc.). Chaque fiche vous accompagne pas à pas : définition du modèle, validation d’idée, estimation du budget de départ, étapes concrètes pour concevoir et lancer l’offre, méthodes pour automatiser la distribution et les paiements, outils et plateformes recommandés, ainsi que les indicateurs à suivre pour stabiliser et faire croître vos revenus sur le long terme."
+}
+
 const DashboardPack = ({ initialSection, initialPdfCategory }) => {
   const location = useLocation()
   const navigate = useNavigate()
@@ -774,6 +783,11 @@ useEffect(() => {
                   })()}
                 </span>
               </div>
+              {PDF_CATEGORY_DESCRIPTIONS[selectedPdfCategory] && (
+                <p className="text-sm text-gray-600 leading-relaxed mb-6">
+                  {PDF_CATEGORY_DESCRIPTIONS[selectedPdfCategory]}
+                </p>
+              )}
 
               {/* Liste des PDFs de la catégorie */}
               {(() => {
@@ -804,15 +818,18 @@ useEffect(() => {
                           className="relative rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-shadow overflow-hidden flex flex-col"
                         >
                           {coverImage && (
-                            <div
-                              className="absolute inset-0"
-                              style={{
-                                backgroundImage: `url(${coverImage})`,
-                                backgroundSize: 'cover',
-                                backgroundPosition: 'center',
-                                backgroundRepeat: 'no-repeat'
-                              }}
-                            ></div>
+                            <div className="absolute inset-0">
+                              <div
+                                className="absolute inset-0"
+                                style={{
+                                  backgroundImage: `url(${coverImage})`,
+                                  backgroundSize: 'cover',
+                                  backgroundPosition: 'center',
+                                  backgroundRepeat: 'no-repeat'
+                                }}
+                              ></div>
+                              <div className="absolute inset-0 backdrop-blur-[12px] bg-black/10"></div>
+                            </div>
                           )}
                           {/* Pas d'overlay pour laisser l'image visible */}
                           {!coverImage && (
