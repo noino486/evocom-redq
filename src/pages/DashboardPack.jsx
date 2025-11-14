@@ -960,6 +960,9 @@ useEffect(() => {
               </div>
               <h2 className="text-xl font-bold text-gray-900">Nos Fournisseurs</h2>
             </div>
+            <p className="text-sm text-gray-600 leading-relaxed">
+              C’est ici que vous consultez la fiche fournisseur. Retrouvez les coordonnées vérifiées, classées par catégorie, ainsi que les informations essentielles : nom, adresse, pays, téléphone, site internet et tous les documents utiles. Contactez le fournisseur directement depuis la fiche ou ajoutez‑le à vos favoris pour y revenir plus tard.
+            </p>
 
             {supplierActionMessage.text && (
               <div
