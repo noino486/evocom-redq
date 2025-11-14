@@ -827,13 +827,13 @@ useEffect(() => {
                                 <FaFileAlt className="text-xl" />
                               </div>
                               <div className="flex-1 min-w-0">
-                                <div className="flex items-center gap-2 mb-2">
-                                  <h4 className="text-lg font-semibold text-gray-900 select-none break-words">
+                                <div className="flex items-center gap-2 mb-1">
+                                  <h4 className="text-base font-semibold text-white select-none break-words">
                                     {pdf.title}
                                   </h4>
                                 </div>
                                 {pdf.description && (
-                                  <p className="text-sm text-gray-600 leading-relaxed line-clamp-2">
+                                  <p className="text-xs text-white/80 leading-relaxed line-clamp-2">
                                     {pdf.description}
                                   </p>
                                 )}
