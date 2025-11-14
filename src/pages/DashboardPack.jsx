@@ -1261,64 +1261,58 @@ useEffect(() => {
                           onCut={(e) => e.preventDefault()}
                           onDragStart={(e) => e.preventDefault()}
                         >
-                          <div className="flex items-start gap-4 mb-4">
-                            <div className={`p-3 rounded-lg ${supplier.is_featured ? 'bg-yellow-100' : 'bg-primary/10'} text-primary`}>
+                          <div className="flex flex-col items-center text-center mb-4">
+                            <div className={`p-3 rounded-lg ${supplier.is_featured ? 'bg-yellow-100' : 'bg-primary/10'} text-primary mb-3`}>
                               <FaBuilding className="text-xl" />
                             </div>
-                            <div className="flex-1">
-                              <div className="flex flex-col gap-2">
-                                <div className="flex items-start justify-between gap-3">
-                                  <div className="flex items-center gap-2">
-                                    <h4 
-                                      className="text-lg font-semibold text-gray-900 select-none"
-                                      onContextMenu={(e) => e.preventDefault()}
-                                      onCopy={(e) => e.preventDefault()}
-                                    >
-                                      {supplier.name}
-                                    </h4>
-                                    {supplier.is_featured && (
-                                      <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-yellow-100 text-yellow-700 text-xs font-medium rounded-full">
-                                        <FaStar className="text-xs" />
-                                        Vedette
-                                      </span>
-                                    )}
-                                  </div>
-                                  <div className="flex items-center gap-1.5">
-                                    <button
-                                      type="button"
-                                      onClick={() => toggleFavorite(supplier.id)}
-                                      className={`flex items-center justify-center w-9 h-9 rounded-lg transition-colors ${
-                                        favorites.includes(supplier.id)
-                                          ? 'text-yellow-500 bg-yellow-50'
-                                          : 'text-gray-400 hover:text-yellow-500 hover:bg-yellow-50/50'
-                                      }`}
-                                      title={favorites.includes(supplier.id) ? 'Retirer des favoris' : 'Ajouter aux favoris'}
-                                    >
-                                      <FaStar className={`text-base ${favorites.includes(supplier.id) ? 'fill-current' : ''}`} />
-                                    </button>
-                                    {isAdmin() && (
-                                      <button
-                                        type="button"
-                                        onClick={() => handleStartEditSupplier(supplier)}
-                                        className="flex items-center justify-center w-9 h-9 rounded-lg text-blue-600 hover:text-blue-700 hover:bg-blue-50 transition-colors"
-                                        title="Modifier ce fournisseur"
-                                      >
-                                        <FaEdit className="text-base" />
-                                      </button>
-                                    )}
-                                    {isAdmin() && (
-                                      <button
-                                        type="button"
-                                        onClick={() => handleDeleteSupplier(supplier.id, supplier.name)}
-                                        className="flex items-center justify-center w-9 h-9 rounded-lg text-red-600 hover:text-red-700 hover:bg-red-50 transition-colors"
-                                        title="Supprimer ce fournisseur"
-                                      >
-                                        <FaTrash className="text-base" />
-                                      </button>
-                                    )}
-                                  </div>
-                                </div>
-                              </div>
+                            <div className="flex items-center justify-center gap-2 mb-2">
+                              <h4 
+                                className="text-lg font-semibold text-gray-900 select-none"
+                                onContextMenu={(e) => e.preventDefault()}
+                                onCopy={(e) => e.preventDefault()}
+                              >
+                                {supplier.name}
+                              </h4>
+                              {supplier.is_featured && (
+                                <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-yellow-100 text-yellow-700 text-xs font-medium rounded-full">
+                                  <FaStar className="text-xs" />
+                                  Vedette
+                                </span>
+                              )}
+                            </div>
+                            <div className="flex items-center justify-center gap-2">
+                              <button
+                                type="button"
+                                onClick={() => toggleFavorite(supplier.id)}
+                                className={`flex items-center justify-center w-9 h-9 rounded-lg transition-colors ${
+                                  favorites.includes(supplier.id)
+                                    ? 'text-yellow-500 bg-yellow-50'
+                                    : 'text-gray-400 hover:text-yellow-500 hover:bg-yellow-50/50'
+                                }`}
+                                title={favorites.includes(supplier.id) ? 'Retirer des favoris' : 'Ajouter aux favoris'}
+                              >
+                                <FaStar className={`text-base ${favorites.includes(supplier.id) ? 'fill-current' : ''}`} />
+                              </button>
+                              {isAdmin() && (
+                                <button
+                                  type="button"
+                                  onClick={() => handleStartEditSupplier(supplier)}
+                                  className="flex items-center justify-center w-9 h-9 rounded-lg text-blue-600 hover:text-blue-700 hover:bg-blue-50 transition-colors"
+                                  title="Modifier ce fournisseur"
+                                >
+                                  <FaEdit className="text-base" />
+                                </button>
+                              )}
+                              {isAdmin() && (
+                                <button
+                                  type="button"
+                                  onClick={() => handleDeleteSupplier(supplier.id, supplier.name)}
+                                  className="flex items-center justify-center w-9 h-9 rounded-lg text-red-600 hover:text-red-700 hover:bg-red-50 transition-colors"
+                                  title="Supprimer ce fournisseur"
+                                >
+                                  <FaTrash className="text-base" />
+                                </button>
+                              )}
                             </div>
                           </div>
 
