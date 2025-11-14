@@ -760,6 +760,11 @@ useEffect(() => {
               </div>
               <h2 className="text-lg sm:text-xl font-bold text-gray-900">Ressources PDF</h2>
             </div>
+            {selectedPdfCategory && PDF_CATEGORY_DESCRIPTIONS[selectedPdfCategory] && (
+              <p className="text-sm text-gray-600 leading-relaxed mb-4 sm:mb-6">
+                {PDF_CATEGORY_DESCRIPTIONS[selectedPdfCategory]}
+              </p>
+            )}
 
           {loadingPdfSections ? (
             <div className="text-center py-12">
@@ -783,11 +788,6 @@ useEffect(() => {
                   })()}
                 </span>
               </div>
-              {PDF_CATEGORY_DESCRIPTIONS[selectedPdfCategory] && (
-                <p className="text-sm text-gray-600 leading-relaxed mb-6">
-                  {PDF_CATEGORY_DESCRIPTIONS[selectedPdfCategory]}
-                </p>
-              )}
 
               {/* Liste des PDFs de la catégorie */}
               {(() => {
@@ -828,7 +828,7 @@ useEffect(() => {
                                   backgroundRepeat: 'no-repeat'
                                 }}
                               ></div>
-                              <div className="absolute inset-0 backdrop-blur-[12px] bg-black/10"></div>
+                              <div className="absolute inset-0 backdrop-blur-[6px] bg-black/5"></div>
                             </div>
                           )}
                           {/* Pas d'overlay pour laisser l'image visible */}
