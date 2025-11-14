@@ -111,10 +111,10 @@ const Header = () => {
             ))}
 
             <button
-              onClick={() => handleNavigation('products')}
+              onClick={() => navigate('/login')}
               className="bg-gradient-to-r from-primary via-secondary to-accent text-white px-6 py-2.5 rounded-full font-semibold hover:opacity-90 transition-opacity duration-200"
             >
-              Voir les Packs
+              Connexion
             </button>
           </div>
 
@@ -166,10 +166,13 @@ const Header = () => {
                 )
               ))}
               <button
-                onClick={() => handleNavigation('products')}
+                onClick={() => {
+                  setIsMobileMenuOpen(false)
+                  navigate('/login')
+                }}
                 className="bg-gradient-to-r from-primary via-secondary to-accent text-white px-6 py-2.5 rounded-full font-semibold hover:opacity-90 transition-opacity duration-200 flex items-center justify-center gap-2 mt-2"
               >
-                Voir les Packs
+                Connexion
               </button>
             </div>
           </div>
