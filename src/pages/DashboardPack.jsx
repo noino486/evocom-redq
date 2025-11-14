@@ -828,7 +828,7 @@ useEffect(() => {
                                   backgroundRepeat: 'no-repeat'
                                 }}
                               ></div>
-                              <div className="absolute inset-0 backdrop-blur-[6px] bg-black/5"></div>
+                              <div className="absolute inset-0 backdrop-blur-[2px] bg-black/5"></div>
                             </div>
                           )}
                           {/* Pas d'overlay pour laisser l'image visible */}
