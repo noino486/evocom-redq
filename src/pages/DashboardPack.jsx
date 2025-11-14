@@ -801,7 +801,7 @@ useEffect(() => {
                           initial={{ opacity: 0, y: 20 }}
                           animate={{ opacity: 1, y: 0 }}
                           transition={{ delay: index * 0.05 }}
-                          className="relative rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-shadow overflow-hidden"
+                          className="relative rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-shadow overflow-hidden flex flex-col"
                         >
                           {coverImage && (
                             <div
@@ -821,8 +821,8 @@ useEffect(() => {
                             </div>
                           )}
 
-                          <div className="relative p-4 sm:p-6">
-                            <div className="flex items-start gap-4 mb-4">
+                          <div className="relative p-4 sm:p-6 flex flex-col h-full">
+                            <div className="flex items-start gap-4 mb-4 flex-1">
                               <div className="p-3 bg-white/30 rounded-lg text-white flex-shrink-0 backdrop-blur-sm">
                                 <FaFileAlt className="text-xl" />
                               </div>
@@ -833,14 +833,14 @@ useEffect(() => {
                                   </h4>
                                 </div>
                                 {pdf.description && (
-                                  <p className="text-xs text-white/80 leading-relaxed line-clamp-2">
+                                  <p className="text-xs text-white/80 leading-relaxed line-clamp-3">
                                     {pdf.description}
                                   </p>
                                 )}
                               </div>
                             </div>
 
-                            <div className="flex gap-2 mt-4">
+                            <div className="flex gap-2 mt-auto pt-4">
                               <button
                                 onClick={() => {
                                   const currentPath = `${window.location.pathname}${window.location.search ?? ''}`
