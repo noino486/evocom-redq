@@ -1,16 +1,10 @@
-# Guide : Création Automatique d'Utilisateurs après Paiement ThriumCards
+# Guide : Configuration du Webhook ThriumCards
 
-Ce guide explique comment configurer la création automatique de comptes utilisateurs lorsqu'un client effectue un paiement via ThriumCards (ThriveCart).
+Ce guide explique comment configurer le webhook dans ThriumCards (ThriveCart) pour créer automatiquement des comptes utilisateurs après chaque paiement.
 
 ## 📋 Vue d'ensemble
 
-Lorsqu'un client paie sur ThriumCards, un webhook est automatiquement envoyé à l'Edge Function Supabase `provision-user` qui :
-
-1. ✅ Crée automatiquement un compte utilisateur dans Supabase Auth
-2. ✅ Génère un mot de passe temporaire sécurisé
-3. ✅ Crée le profil utilisateur avec le bon niveau d'accès selon le produit acheté
-4. ✅ Envoie un email de bienvenue avec les identifiants de connexion (via SendGrid)
-5. ✅ Active immédiatement le compte (pas besoin de confirmation email)
+Lorsqu'un client paie sur ThriumCards, un webhook est automatiquement envoyé qui crée le compte utilisateur avec les bonnes permissions selon le produit acheté.
 
 ## 🔗 URL de l'Edge Function
 
@@ -18,28 +12,10 @@ Lorsqu'un client paie sur ThriumCards, un webhook est automatiquement envoyé à
 https://sokdytywaipifrjcitcg.supabase.co/functions/v1/provision-user
 ```
 
-## 🔐 Sécurité
+## 🔐 Secret Webhook
 
-### Secret Webhook (Recommandé)
-
-Pour sécuriser le webhook, configurez un secret partagé :
-
-1. **Générer un secret sécurisé :**
-   ```bash
-   # Générer un secret aléatoire (exemple)
-   openssl rand -base64 32
-   ```
-
-2. **Configurer le secret dans Supabase :**
-   ```bash
-   supabase secrets set WEBHOOK_SECRET=votre-secret-securise
-   ```
-
-3. **Envoyer le secret dans le header du webhook :**
-   - Header : `x-webhook-secret: votre-secret-securise`
-   - Ou : `Authorization: Bearer votre-secret-securise`
-
-⚠️ **Important :** Sans secret configuré, le webhook fonctionnera mais sera moins sécurisé.
+Le secret webhook est déjà configuré. Utilisez-le dans les headers du webhook :
+- Header : `x-webhook-secret: bfpY8OPmj/vV9J2+oR/uxMqL0LMazbBxntfd11BF3k4=`
 
 ## 📦 Mapping Produits → Niveaux d'Accès
 
@@ -80,7 +56,7 @@ https://sokdytywaipifrjcitcg.supabase.co/functions/v1/provision-user
 
 **Headers personnalisés (si secret configuré) :**
 ```
-x-webhook-secret: votre-secret-securise
+x-webhook-secret: bfpY8OPmj/vV9J2+oR/uxMqL0LMazbBxntfd11BF3k4=
 ```
 
 **Body JSON :**
@@ -138,28 +114,6 @@ Création compte - Pack Global Business
 
 - Ce webhook donnera accès aux deux packs (STFOUR et GLBNS)
 
-## 📧 Configuration Email (SendGrid)
-
-L'edge function envoie automatiquement un email de bienvenue avec les identifiants de connexion.
-
-### Variables d'environnement requises
-
-Configurez ces secrets dans Supabase :
-
-```bash
-supabase secrets set SENDGRID_API_KEY=votre-cle-api-sendgrid
-supabase secrets set SENDGRID_FROM_EMAIL=noreply@evoecom.com
-supabase secrets set SENDGRID_FROM_NAME="EVO ECOM"
-```
-
-### Contenu de l'email
-
-L'email envoyé contient :
-- ✅ Email de connexion
-- ✅ Mot de passe temporaire (12 caractères, sécurisé)
-- ✅ Lien de connexion direct
-- ⚠️ Recommandation de changer le mot de passe à la première connexion
-
 ## 📝 Format de la Requête
 
 ### Requête JSON
@@ -194,7 +148,7 @@ email=client@example.com&product=STFOUR
 
 ```
 Content-Type: application/json
-x-webhook-secret: votre-secret-securise (optionnel)
+x-webhook-secret: bfpY8OPmj/vV9J2+oR/uxMqL0LMazbBxntfd11BF3k4=
 ```
 
 ## ✅ Format de la Réponse
@@ -249,7 +203,7 @@ Si l'utilisateur existe déjà, son profil sera mis à jour :
 ```bash
 curl -X POST "https://sokdytywaipifrjcitcg.supabase.co/functions/v1/provision-user" \
   -H "Content-Type: application/json" \
-  -H "x-webhook-secret: votre-secret-securise" \
+  -H "x-webhook-secret: bfpY8OPmj/vV9J2+oR/uxMqL0LMazbBxntfd11BF3k4=" \
   -d '{
     "email": "test@example.com",
     "product": "STFOUR",
@@ -264,7 +218,7 @@ curl -X POST "https://sokdytywaipifrjcitcg.supabase.co/functions/v1/provision-us
 ```bash
 curl -X POST "https://sokdytywaipifrjcitcg.supabase.co/functions/v1/provision-user" \
   -H "Content-Type: application/json" \
-  -H "x-webhook-secret: votre-secret-securise" \
+  -H "x-webhook-secret: bfpY8OPmj/vV9J2+oR/uxMqL0LMazbBxntfd11BF3k4=" \
   -d '{
     "email": "test@example.com",
     "product": "GLBNS",
@@ -326,9 +280,10 @@ node evoecom/utils/test-webhook.js --product STFOUR --email votre-email@example.
 
 ### Erreur 401 "Secret webhook invalide"
 
-- ✅ Vérifiez que le secret dans ThriumCards correspond à celui configuré dans Supabase
+- ✅ Vérifiez que le secret dans ThriumCards correspond exactement à : `bfpY8OPmj/vV9J2+oR/uxMqL0LMazbBxntfd11BF3k4=`
 - ✅ Vérifiez que le header `x-webhook-secret` est bien envoyé
 - ✅ Vérifiez l'orthographe du header (sensible à la casse)
+- ✅ Vérifiez qu'il n'y a pas d'espaces avant ou après le secret
 
 ### Erreur 400 "Paramètres manquants"
 
@@ -340,51 +295,26 @@ node evoecom/utils/test-webhook.js --product STFOUR --email votre-email@example.
 - ✅ Vérifiez que le produit est exactement `STFOUR` ou `GLBNS`
 - ✅ Vérifiez que le produit est en majuscules
 
-### L'email n'est pas envoyé
-
-- ✅ Vérifiez que `SENDGRID_API_KEY` est configuré dans Supabase
-- ✅ Vérifiez que l'email expéditeur est vérifié dans SendGrid
-- ✅ Consultez les logs Supabase pour voir les erreurs SendGrid
-- ✅ Vérifiez les logs SendGrid dans votre compte SendGrid
-
 ### L'utilisateur existe déjà
 
 - ✅ C'est normal ! Le webhook mettra à jour le profil existant
 - ✅ L'utilisateur gardera son niveau d'accès actuel s'il est supérieur
 - ✅ Les produits seront mis à jour selon le nouveau produit acheté
 
-## 📚 Documentation Complémentaire
-
-- [README_TEST_WEBHOOK.md](./README_TEST_WEBHOOK.md) - Guide de test du webhook
-- [README_SENDGRID_SUPABASE.md](./README_SENDGRID_SUPABASE.md) - Configuration SendGrid
-- [README_DEPLOY_PROD.md](./README_DEPLOY_PROD.md) - Déploiement en production
-
-## ✅ Checklist de Configuration
-
-### Configuration Supabase
-
-- [ ] L'edge function `provision-user` est déployée
-- [ ] Le secret `WEBHOOK_SECRET` est configuré (optionnel mais recommandé)
-- [ ] Le secret `SENDGRID_API_KEY` est configuré
-- [ ] Le secret `SENDGRID_FROM_EMAIL` est configuré
-- [ ] Le secret `SENDGRID_FROM_NAME` est configuré
-
-### Configuration ThriumCards
+## ✅ Checklist de Configuration ThriumCards
 
 - [ ] Le webhook est créé pour STFOUR
 - [ ] Le webhook est créé pour GLBNS (ou un seul avec condition dynamique)
 - [ ] L'URL du webhook est correcte
-- [ ] Le header `x-webhook-secret` est configuré (si secret utilisé)
+- [ ] Le header `x-webhook-secret` est configuré avec la valeur : `bfpY8OPmj/vV9J2+oR/uxMqL0LMazbBxntfd11BF3k4=`
 - [ ] Le body JSON contient `email` et `product`
 - [ ] Le webhook est configuré pour "Order Completed"
 
 ### Tests
 
 - [ ] Test manuel avec cURL réussi
-- [ ] Test avec le script Node.js réussi
 - [ ] Test avec une transaction réelle dans ThriumCards
-- [ ] Vérification de la création utilisateur dans Supabase
-- [ ] Vérification de l'envoi de l'email de bienvenue
+- [ ] Vérification de la création utilisateur dans Supabase Dashboard
 
 ## 🔄 Processus Complet
 
@@ -393,30 +323,20 @@ node evoecom/utils/test-webhook.js --product STFOUR --email votre-email@example.
    ↓
 2. ThriumCards envoie webhook à provision-user
    ↓
-3. Edge Function vérifie le secret (si configuré)
+3. Edge Function crée le compte utilisateur automatiquement
    ↓
-4. Edge Function crée/met à jour l'utilisateur dans Supabase Auth
-   ↓
-5. Edge Function crée/met à jour le profil dans user_profiles
-   ↓
-6. Edge Function génère un mot de passe temporaire
-   ↓
-7. Edge Function envoie email via SendGrid avec identifiants
-   ↓
-8. Client reçoit l'email et peut se connecter immédiatement
+4. Client reçoit l'email avec ses identifiants
 ```
 
 ## 📞 Support
 
 En cas de problème :
 
-1. Consultez les logs Supabase (Edge Functions → provision-user → Logs)
-2. Consultez l'historique des webhooks dans ThriumCards
-3. Vérifiez la documentation Supabase : https://supabase.com/docs
-4. Vérifiez la documentation ThriveCart : https://support.thrivecart.com/help/webhooks/
+1. Consultez l'historique des webhooks dans ThriumCards (Settings → Integrations → Webhooks)
+2. Consultez les logs Supabase (Edge Functions → provision-user → Logs)
+3. Vérifiez la documentation ThriveCart : https://support.thrivecart.com/help/webhooks/
 
 ---
 
-**Dernière mise à jour :** 2025-01-15  
-**Version Edge Function :** provision-user v1.0
+**Dernière mise à jour :** 2025-01-15
 
