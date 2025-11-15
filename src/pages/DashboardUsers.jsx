@@ -18,9 +18,7 @@ const DashboardUsers = () => {
   const [createForm, setCreateForm] = useState({
     email: '',
     access_level: 1,
-    products: ['STFOUR'],
-    salePackId: 'STFOUR',
-    salePrice: ''
+    products: ['STFOUR']
   })
   const [message, setMessage] = useState({ type: '', text: '' })
 
@@ -262,26 +260,6 @@ const DashboardUsers = () => {
       products = createForm.products.length > 0 ? createForm.products : ['STFOUR', 'GLBNS']
     }
 
-    const shouldRecordSale = createForm.access_level === 1 || createForm.access_level === 2
-    let salePayload = null
-
-    if (shouldRecordSale) {
-      const priceValue = parseFloat((createForm.salePrice || '').replace(',', '.'))
-      if (!createForm.salePackId) {
-        setMessage({ type: 'error', text: 'Veuillez sélectionner le pack vendu.' })
-        return
-      }
-      if (Number.isNaN(priceValue) || priceValue < 0) {
-        setMessage({ type: 'error', text: 'Veuillez saisir un prix de vente valide (>= 0).' })
-        return
-      }
-
-      salePayload = {
-        pack_id: createForm.salePackId,
-        price: priceValue
-      }
-    }
-
     try {
       setActionLoading('create')
 
@@ -300,10 +278,6 @@ const DashboardUsers = () => {
         access_level: createForm.access_level,
         products: products,
         site_url: siteUrl // Passer l'URL du site pour la redirection
-      }
-
-      if (salePayload) {
-        payload.sale = salePayload
       }
 
       const { data, error } = await supabase.functions.invoke('create-user', {
@@ -330,8 +304,6 @@ const DashboardUsers = () => {
           email: '',
           access_level: 1,
           products: ['STFOUR'],
-          salePackId: 'STFOUR',
-          salePrice: ''
         })
         setShowCreateForm(false)
         await loadUsers()
@@ -470,12 +442,10 @@ const DashboardUsers = () => {
                     if (level === 1) products = ['STFOUR']
                     else if (level === 2) products = ['STFOUR', 'GLBNS']
                     else products = ['STFOUR', 'GLBNS']
-                    const salePackId = level === 2 ? 'GLBNS' : 'STFOUR'
                     setCreateForm({ 
                       ...createForm, 
                       access_level: level, 
-                      products,
-                      salePackId
+                      products
                     })
                   }}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
@@ -519,48 +489,6 @@ const DashboardUsers = () => {
                 </div>
               )}
 
-              {(createForm.access_level === 1 || createForm.access_level === 2) && (
-                <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 space-y-3">
-                  <h3 className="text-sm font-semibold text-gray-700 flex items-center gap-2">
-                    <span className="w-1.5 h-1.5 bg-primary rounded-full"></span>
-                    Détails de la vente
-                  </h3>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Pack vendu *
-                      </label>
-                      <select
-                        value={createForm.salePackId}
-                        onChange={(e) => setCreateForm(prev => ({ ...prev, salePackId: e.target.value }))}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-                      >
-                        <option value="STFOUR">STFOUR - Pack Global Sourcing</option>
-                        <option value="GLBNS">GLBNS - Pack Global Business</option>
-                      </select>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Prix de vente (€) *
-                      </label>
-                      <input
-                        type="number"
-                        min="0"
-                        step="0.01"
-                        value={createForm.salePrice}
-                        onChange={(e) => setCreateForm(prev => ({ ...prev, salePrice: e.target.value }))}
-                        placeholder="Ex: 199"
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-                        required
-                      />
-                    </div>
-                  </div>
-                  <p className="text-xs text-gray-500">
-                    Ces informations seront enregistrées dans le tableau des ventes.
-                  </p>
-                </div>
-              )}
-
               <div className="flex gap-3 pt-4">
                 <button
                   type="submit"
@@ -586,9 +514,7 @@ const DashboardUsers = () => {
                     setCreateForm({
                       email: '',
                       access_level: 1,
-                      products: ['STFOUR'],
-                      salePackId: 'STFOUR',
-                      salePrice: ''
+                      products: ['STFOUR']
                     })
                     setMessage({ type: '', text: '' })
                   }}

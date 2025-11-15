@@ -9,17 +9,11 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
-interface SaleInfo {
-  pack_id: string
-  price: number
-}
-
 interface RequestBody {
   email: string
   access_level: number
   products: string[]
   site_url?: string // URL optionnelle passée depuis le frontend
-  sale?: SaleInfo | null
 }
 
 serve(async (req) => {
@@ -121,44 +115,6 @@ serve(async (req) => {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         }
       )
-    }
-
-    // Validation vente si fournie
-    let saleInfo: SaleInfo | null = null
-    if (body.sale) {
-      const packId = body.sale.pack_id?.trim()
-      const priceNumber = Number(body.sale.price)
-
-      if (!packId) {
-        return new Response(
-          JSON.stringify({
-            success: false,
-            error: 'Le champ sale.pack_id est requis lorsque la vente est fournie'
-          }),
-          {
-            status: 400,
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-          }
-        )
-      }
-
-      if (Number.isNaN(priceNumber) || priceNumber < 0) {
-        return new Response(
-          JSON.stringify({
-            success: false,
-            error: 'Le champ sale.price doit être un nombre positif'
-          }),
-          {
-            status: 400,
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-          }
-        )
-      }
-
-      saleInfo = {
-        pack_id: packId,
-        price: priceNumber
-      }
     }
 
     // Vérifier si l'utilisateur existe déjà
@@ -538,30 +494,6 @@ serve(async (req) => {
       console.log('[create-user] Profil créé avec succès')
     }
 
-    // Enregistrer la vente si fournie
-    let saleRecordId: string | null = null
-    if (saleInfo) {
-      console.log('[create-user] Enregistrement de la vente pour le pack', saleInfo.pack_id)
-      const { data: saleData, error: saleError } = await supabaseAdmin
-        .from('sales')
-        .insert({
-          user_id: newUserId,
-          pack_id: saleInfo.pack_id,
-          price: saleInfo.price,
-          created_at: new Date().toISOString()
-        })
-        .select('id')
-        .single()
-
-      if (saleError) {
-        console.error('[create-user] Erreur insertion vente:', saleError)
-        throw new Error(`Erreur lors de l'enregistrement de la vente: ${saleError.message}`)
-      }
-
-      saleRecordId = saleData?.id ?? null
-      console.log('[create-user] Vente enregistrée avec l\'ID', saleRecordId)
-    }
-
     return new Response(
       JSON.stringify({
         success: true,
@@ -574,7 +506,6 @@ serve(async (req) => {
         email: body.email,
         access_level: body.access_level,
         products: body.products,
-        sale_id: saleRecordId,
         invitation_sent: inviteSent,
         warning: inviteError ? `Note: ${inviteError.message}` : null
         // Note: inviteUserByEmail envoie automatiquement l'email d'invitation

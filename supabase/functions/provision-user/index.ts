@@ -9,10 +9,16 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
+interface SaleInfo {
+  pack_id: string
+  price: number
+}
+
 interface RequestBody {
   name?: string
   email: string
   product: string
+  sale?: SaleInfo | null
 }
 
 // Mapping des produits aux niveaux d'accès
@@ -106,6 +112,44 @@ serve(async (req) => {
       )
     }
 
+    // Validation vente si fournie
+    let saleInfo: SaleInfo | null = null
+    if (body.sale) {
+      const packId = body.sale.pack_id?.trim()
+      const priceNumber = Number(body.sale.price)
+
+      if (!packId) {
+        return new Response(
+          JSON.stringify({
+            success: false,
+            error: 'Le champ sale.pack_id est requis lorsque la vente est fournie'
+          }),
+          {
+            status: 400,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          }
+        )
+      }
+
+      if (Number.isNaN(priceNumber) || priceNumber < 0) {
+        return new Response(
+          JSON.stringify({
+            success: false,
+            error: 'Le champ sale.price doit être un nombre positif'
+          }),
+          {
+            status: 400,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          }
+        )
+      }
+
+      saleInfo = {
+        pack_id: packId,
+        price: priceNumber
+      }
+    }
+
     // Vérifier que le produit est valide
     const productConfig = PRODUCT_TO_LEVEL[body.product.toUpperCase()]
     if (!productConfig) {
@@ -150,11 +194,33 @@ serve(async (req) => {
           // Mettre à jour le profil existant
           await updateUserProfile(supabaseAdmin, existingUser.id, productConfig)
           
+          // Enregistrer la vente si fournie (même pour utilisateur existant)
+          let saleRecordId: string | null = null
+          if (saleInfo) {
+            console.log('[provision-user] Enregistrement de la vente pour utilisateur existant')
+            const { data: saleData, error: saleError } = await supabaseAdmin
+              .from('sales')
+              .insert({
+                user_id: existingUser.id,
+                pack_id: saleInfo.pack_id,
+                price: saleInfo.price,
+                created_at: new Date().toISOString()
+              })
+              .select('id')
+              .single()
+
+            if (!saleError) {
+              saleRecordId = saleData?.id ?? null
+              console.log('[provision-user] Vente enregistrée avec l\'ID', saleRecordId)
+            }
+          }
+          
           return new Response(
             JSON.stringify({
               success: true,
               message: 'Utilisateur mis à jour',
               user_id: existingUser.id,
+              sale_id: saleRecordId,
               email_sent: false
             }),
             {
@@ -190,6 +256,32 @@ serve(async (req) => {
       throw profileError
     }
 
+    // Enregistrer la vente si fournie
+    let saleRecordId: string | null = null
+    if (saleInfo) {
+      console.log('[provision-user] Enregistrement de la vente pour le pack', saleInfo.pack_id)
+      const { data: saleData, error: saleError } = await supabaseAdmin
+        .from('sales')
+        .insert({
+          user_id: userId,
+          pack_id: saleInfo.pack_id,
+          price: saleInfo.price,
+          created_at: new Date().toISOString()
+        })
+        .select('id')
+        .single()
+
+      if (saleError) {
+        console.error('[provision-user] Erreur insertion vente:', saleError)
+        // Ne pas faire échouer la création utilisateur si l'enregistrement de la vente échoue
+        // On log l'erreur mais on continue
+        console.warn('[provision-user] ⚠️ Vente non enregistrée mais utilisateur créé')
+      } else {
+        saleRecordId = saleData?.id ?? null
+        console.log('[provision-user] Vente enregistrée avec l\'ID', saleRecordId)
+      }
+    }
+
     // Envoyer un email avec le mot de passe temporaire
     const emailSent = await sendWelcomeEmail(body.email, tempPassword, supabaseAdmin)
 
@@ -201,6 +293,7 @@ serve(async (req) => {
         email: body.email,
         access_level: productConfig.accessLevel,
         products: productConfig.products,
+        sale_id: saleRecordId,
         email_sent: emailSent
         // ⚠️ En production, ne PAS renvoyer le temp_password dans la réponse
       }),
