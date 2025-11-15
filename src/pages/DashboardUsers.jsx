@@ -140,13 +140,27 @@ const DashboardUsers = () => {
   const handleResetPassword = async (userEmail) => {
     try {
       setActionLoading(userEmail)
-      // Utiliser l'API Supabase Auth pour envoyer un email de réinitialisation
-      const { error } = await supabase.auth.admin.resetPasswordForEmail(userEmail, {
-        redirectTo: `${window.location.origin}/reset-password`
+      
+      // Utiliser l'Edge Function pour réinitialiser le mot de passe
+      const siteUrl = window.location.origin
+      
+      const { data, error } = await supabase.functions.invoke('reset-password', {
+        body: {
+          email: userEmail,
+          redirectTo: `${siteUrl}/login?recovery=true`
+        }
       })
 
-      if (error) throw error
-      alert('Email de réinitialisation de mot de passe envoyé')
+      if (error) {
+        console.error('[DashboardUsers] Erreur appel Edge Function:', error)
+        throw new Error(error.message || `Erreur: ${error.name || 'Erreur inconnue'}`)
+      }
+
+      if (data?.success) {
+        alert('Email de réinitialisation de mot de passe envoyé')
+      } else {
+        throw new Error(data?.error || 'Erreur lors de l\'envoi de l\'email de réinitialisation')
+      }
     } catch (error) {
       console.error('Erreur:', error)
 
