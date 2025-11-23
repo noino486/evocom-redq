@@ -689,13 +689,18 @@ const DashboardScraper = () => {
   })
   const [message, setMessage] = useState({ type: '', text: '' })
   const [editingSupplier, setEditingSupplier] = useState(null)
+  const [showEditModal, setShowEditModal] = useState(false)
   const [editForm, setEditForm] = useState({
     name: '',
     website: '',
     phone: '',
     email: '',
     address: '',
-    status: 'active'
+    country: '',
+    main_category: '',
+    sub_category: '',
+    status: 'active',
+    is_featured: false
   })
   const [selectedSuppliers, setSelectedSuppliers] = useState([])
   const [isPushing, setIsPushing] = useState(false)
@@ -922,27 +927,49 @@ useEffect(() => {
       phone: supplier.phone || '',
       email: supplier.email || '',
       address: supplier.address || '',
-      status: supplier.status || 'active'
+      country: supplier.country || '',
+      main_category: supplier.main_category || '',
+      sub_category: supplier.supplier_type || '',
+      status: supplier.status || 'active',
+      is_featured: supplier.is_featured || false
     })
+    setShowEditModal(true)
   }
 
   const handleSaveEdit = async () => {
     if (!editingSupplier) return
 
+    if (!editForm.name.trim()) {
+      setMessage({ type: 'error', text: 'Le nom du fournisseur est requis' })
+      return
+    }
+
     try {
       const { error } = await supabase
         .from('suppliers')
-        .update(editForm)
+        .update({
+          name: editForm.name.trim(),
+          website: editForm.website.trim() || null,
+          phone: editForm.phone.trim() || null,
+          email: editForm.email.trim() || null,
+          address: editForm.address.trim() || null,
+          country: editForm.country || null,
+          main_category: editForm.main_category || null,
+          supplier_type: editForm.sub_category || null,
+          status: editForm.status,
+          is_featured: editForm.is_featured
+        })
         .eq('id', editingSupplier.id)
 
       if (error) throw error
       
       setMessage({ type: 'success', text: 'Fournisseur mis à jour avec succès' })
       setEditingSupplier(null)
+      setShowEditModal(false)
       loadSuppliers()
     } catch (error) {
       console.error('Erreur lors de la mise à jour:', error)
-      setMessage({ type: 'error', text: 'Erreur lors de la mise à jour' })
+      setMessage({ type: 'error', text: error.message || 'Erreur lors de la mise à jour' })
     }
   }
 
@@ -1155,6 +1182,194 @@ useEffect(() => {
               : 'bg-red-50 border border-red-200 text-red-700'
           }`}>
             {message.text}
+          </div>
+        )}
+
+        {/* Modal d'édition de fournisseur */}
+        {showEditModal && editingSupplier && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-lg p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-xl font-semibold text-gray-900">
+                  Modifier le fournisseur
+                </h2>
+                <button
+                  onClick={() => {
+                    setShowEditModal(false)
+                    setEditingSupplier(null)
+                  }}
+                  className="text-gray-400 hover:text-gray-600 transition-colors"
+                >
+                  <FaTimes className="text-xl" />
+                </button>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Nom du fournisseur *
+                  </label>
+                  <input
+                    type="text"
+                    value={editForm.name}
+                    onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                    placeholder="Nom du fournisseur"
+                    required
+                  />
+                </div>
+
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Site web
+                  </label>
+                  <input
+                    type="url"
+                    value={editForm.website}
+                    onChange={(e) => setEditForm({ ...editForm, website: e.target.value })}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                    placeholder="https://example.com"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Téléphone
+                  </label>
+                  <input
+                    type="tel"
+                    value={editForm.phone}
+                    onChange={(e) => setEditForm({ ...editForm, phone: e.target.value })}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                    placeholder="+33 1 23 45 67 89"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Email
+                  </label>
+                  <input
+                    type="email"
+                    value={editForm.email}
+                    onChange={(e) => setEditForm({ ...editForm, email: e.target.value })}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                    placeholder="contact@example.com"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Pays
+                  </label>
+                  <select
+                    value={editForm.country}
+                    onChange={(e) => setEditForm({ ...editForm, country: e.target.value })}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                  >
+                    <option value="">Sélectionner un pays</option>
+                    {COUNTRIES.map(country => (
+                      <option key={country} value={country}>{country}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Statut
+                  </label>
+                  <select
+                    value={editForm.status}
+                    onChange={(e) => setEditForm({ ...editForm, status: e.target.value })}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                  >
+                    <option value="active">Actif</option>
+                    <option value="inactive">Inactif</option>
+                    <option value="verified">Vérifié</option>
+                    <option value="pending">En attente</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Catégorie principale
+                  </label>
+                  <select
+                    value={editForm.main_category}
+                    onChange={(e) => setEditForm({ ...editForm, main_category: e.target.value, sub_category: '' })}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                  >
+                    <option value="">Sélectionner une catégorie</option>
+                    {MAIN_CATEGORIES.map(category => (
+                      <option key={category} value={category}>{category}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Sous-catégorie
+                  </label>
+                  <select
+                    value={editForm.sub_category}
+                    onChange={(e) => setEditForm({ ...editForm, sub_category: e.target.value })}
+                    disabled={!editForm.main_category}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent disabled:bg-gray-100"
+                  >
+                    <option value="">Sélectionner une sous-catégorie</option>
+                    {editForm.main_category && SUPPLIER_CATEGORIES[editForm.main_category]?.map(subCategory => (
+                      <option key={subCategory} value={subCategory}>{subCategory}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Adresse
+                  </label>
+                  <textarea
+                    value={editForm.address}
+                    onChange={(e) => setEditForm({ ...editForm, address: e.target.value })}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                    rows="3"
+                    placeholder="Adresse complète"
+                  />
+                </div>
+
+                <div className="md:col-span-2">
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={editForm.is_featured}
+                      onChange={(e) => setEditForm({ ...editForm, is_featured: e.target.checked })}
+                      className="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary"
+                    />
+                    <span className="text-sm font-medium text-gray-700">
+                      Mettre en vedette
+                    </span>
+                  </label>
+                </div>
+              </div>
+
+              <div className="flex gap-3 mt-6">
+                <button
+                  onClick={handleSaveEdit}
+                  className="px-6 py-3 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors font-medium flex items-center gap-2 shadow-sm"
+                >
+                  <FaSave />
+                  Enregistrer les modifications
+                </button>
+                <button
+                  onClick={() => {
+                    setShowEditModal(false)
+                    setEditingSupplier(null)
+                  }}
+                  className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium"
+                >
+                  Annuler
+                </button>
+              </div>
+            </div>
           </div>
         )}
 
@@ -1601,26 +1816,10 @@ useEffect(() => {
                         </button>
                       </td>
                       <td className="px-3 sm:px-6 py-4 whitespace-nowrap">
-                        {editingSupplier?.id === supplier.id ? (
-                          <input
-                            type="text"
-                            value={editForm.name}
-                            onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
-                            className="w-full px-2 py-1 border border-gray-300 rounded"
-                          />
-                        ) : (
-                          <div className="text-sm font-medium text-gray-900">{supplier.name}</div>
-                        )}
+                        <div className="text-sm font-medium text-gray-900">{supplier.name}</div>
                       </td>
                       <td className="px-3 sm:px-6 py-4 hidden md:table-cell">
-                        {editingSupplier?.id === supplier.id ? (
-                          <input
-                            type="url"
-                            value={editForm.website}
-                            onChange={(e) => setEditForm({ ...editForm, website: e.target.value })}
-                            className="w-full px-2 py-1 border border-gray-300 rounded"
-                          />
-                        ) : supplier.website ? (
+                        {supplier.website ? (
                           <a
                             href={supplier.website}
                             target="_blank"
@@ -1636,74 +1835,46 @@ useEffect(() => {
                         )}
                       </td>
                       <td className="px-3 sm:px-6 py-4 whitespace-nowrap hidden lg:table-cell">
-                        {editingSupplier?.id === supplier.id ? (
-                          <input
-                            type="tel"
-                            value={editForm.phone}
-                            onChange={(e) => setEditForm({ ...editForm, phone: e.target.value })}
-                            className="w-full px-2 py-1 border border-gray-300 rounded"
-                          />
-                        ) : (
-                          <div className="text-xs sm:text-sm text-gray-900">{supplier.phone || '-'}</div>
-                        )}
+                        <div className="text-xs sm:text-sm text-gray-900">{supplier.phone || '-'}</div>
                       </td>
                       <td className="px-3 sm:px-6 py-4 whitespace-nowrap hidden lg:table-cell">
-                        {editingSupplier?.id === supplier.id ? (
-                          <input
-                            type="email"
-                            value={editForm.email}
-                            onChange={(e) => setEditForm({ ...editForm, email: e.target.value })}
-                            className="w-full px-2 py-1 border border-gray-300 rounded"
-                          />
-                        ) : (
-                          <div className="text-xs sm:text-sm text-gray-900">{supplier.email || '-'}</div>
-                        )}
+                        <div className="text-xs sm:text-sm text-gray-900">{supplier.email || '-'}</div>
                       </td>
                       <td className="px-3 sm:px-6 py-4 whitespace-nowrap text-xs sm:text-sm text-gray-500 hidden sm:table-cell">
                         {supplier.country || '-'}
                       </td>
                       <td className="px-3 sm:px-6 py-4 whitespace-nowrap text-xs sm:text-sm text-gray-500 hidden md:table-cell">
-                        {supplier.supplier_type || '-'}
+                        <div>
+                          {supplier.main_category && (
+                            <div className="text-xs text-gray-400">{supplier.main_category}</div>
+                          )}
+                          <div className="text-sm">{supplier.supplier_type || '-'}</div>
+                        </div>
                       </td>
                       <td className="px-3 sm:px-6 py-4 whitespace-nowrap text-xs sm:text-sm font-medium">
-                        {editingSupplier?.id === supplier.id ? (
-                          <div className="flex gap-2">
-                            <button
-                              onClick={handleSaveEdit}
-                              className="text-green-600 hover:text-green-900"
-                            >
-                              <FaSave />
-                            </button>
-                            <button
-                              onClick={() => setEditingSupplier(null)}
-                              className="text-gray-600 hover:text-gray-900"
-                            >
-                              <FaTimes />
-                            </button>
-                          </div>
-                        ) : (
-                          <div className="flex gap-2">
-                            <button
-                              onClick={() => toggleFeatured(supplier)}
-                              className={`${supplier.is_featured ? 'text-yellow-500' : 'text-gray-400'} hover:text-yellow-500`}
-                              title={supplier.is_featured ? 'Retirer des vedettes' : 'Mettre en vedette'}
-                            >
-                              <FaStar />
-                            </button>
-                            <button
-                              onClick={() => handleEdit(supplier)}
-                              className="text-primary hover:text-primary/80"
-                            >
-                              <FaEdit />
-                            </button>
-                            <button
-                              onClick={() => handleDelete(supplier.id)}
-                              className="text-red-600 hover:text-red-900"
-                            >
-                              <FaTrash />
-                            </button>
-                          </div>
-                        )}
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => toggleFeatured(supplier)}
+                            className={`${supplier.is_featured ? 'text-yellow-500' : 'text-gray-400'} hover:text-yellow-500`}
+                            title={supplier.is_featured ? 'Retirer des vedettes' : 'Mettre en vedette'}
+                          >
+                            <FaStar />
+                          </button>
+                          <button
+                            onClick={() => handleEdit(supplier)}
+                            className="text-primary hover:text-primary/80"
+                            title="Modifier le fournisseur"
+                          >
+                            <FaEdit />
+                          </button>
+                          <button
+                            onClick={() => handleDelete(supplier.id)}
+                            className="text-red-600 hover:text-red-900"
+                            title="Supprimer le fournisseur"
+                          >
+                            <FaTrash />
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ))}
