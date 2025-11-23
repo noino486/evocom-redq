@@ -789,6 +789,128 @@ useEffect(() => {
     return () => clearInterval(interval)
   }
 
+  // Fonction pour normaliser une URL
+  const normalizeUrl = (url) => {
+    if (!url) return ''
+    return url
+      .replace(/^https?:\/\//, '')
+      .replace(/^www\./, '')
+      .replace(/\/$/, '')
+      .toLowerCase()
+      .trim()
+  }
+
+  // Fonction pour vérifier si un fournisseur est un doublon
+  const checkDuplicate = async (website, name, excludeId = null) => {
+    if (!website && !name) return { isDuplicate: false, existing: null }
+
+    try {
+      const normalizedUrl = normalizeUrl(website)
+      
+      // Vérifier par URL normalisée
+      if (normalizedUrl) {
+        const { data: urlMatches, error: urlError } = await supabase
+          .from('suppliers')
+          .select('id, name, website')
+          .or(`website.ilike.%${normalizedUrl}%,website.ilike.%www.${normalizedUrl}%`)
+          .neq('status', 'deleted')
+
+        if (urlError && urlError.code !== 'PGRST116') {
+          console.error('Erreur vérification doublon URL:', urlError)
+        }
+
+        if (urlMatches && urlMatches.length > 0) {
+          // Vérifier si c'est le même fournisseur (exclure l'ID en cours d'édition)
+          const duplicate = urlMatches.find(s => {
+            if (excludeId && s.id === excludeId) return false
+            const existingUrl = normalizeUrl(s.website)
+            return existingUrl === normalizedUrl || 
+                   existingUrl.includes(normalizedUrl) || 
+                   normalizedUrl.includes(existingUrl)
+          })
+          
+          if (duplicate) {
+            return { isDuplicate: true, existing: duplicate }
+          }
+        }
+      }
+
+      // Vérifier par nom similaire (si le nom est fourni)
+      if (name && name.trim().length > 3) {
+        const normalizedName = name.trim().toLowerCase()
+        const { data: nameMatches, error: nameError } = await supabase
+          .from('suppliers')
+          .select('id, name, website')
+          .ilike('name', `%${normalizedName}%`)
+          .neq('status', 'deleted')
+
+        if (nameError && nameError.code !== 'PGRST116') {
+          console.error('Erreur vérification doublon nom:', nameError)
+        }
+
+        if (nameMatches && nameMatches.length > 0) {
+          // Vérifier si c'est vraiment un doublon (nom très similaire)
+          const duplicate = nameMatches.find(s => {
+            if (excludeId && s.id === excludeId) return false
+            const existingName = s.name?.toLowerCase().trim()
+            // Vérifier si les noms sont très similaires (au moins 80% de similarité)
+            if (existingName) {
+              const similarity = calculateSimilarity(normalizedName, existingName)
+              if (similarity > 0.8) {
+                return true
+              }
+            }
+            return false
+          })
+          
+          if (duplicate) {
+            return { isDuplicate: true, existing: duplicate }
+          }
+        }
+      }
+
+      return { isDuplicate: false, existing: null }
+    } catch (error) {
+      console.error('Erreur lors de la vérification des doublons:', error)
+      return { isDuplicate: false, existing: null }
+    }
+  }
+
+  // Fonction pour calculer la similarité entre deux chaînes (algorithme simple)
+  const calculateSimilarity = (str1, str2) => {
+    const longer = str1.length > str2.length ? str1 : str2
+    const shorter = str1.length > str2.length ? str2 : str1
+    if (longer.length === 0) return 1.0
+    
+    const distance = levenshteinDistance(longer, shorter)
+    return (longer.length - distance) / longer.length
+  }
+
+  // Algorithme de distance de Levenshtein
+  const levenshteinDistance = (str1, str2) => {
+    const matrix = []
+    for (let i = 0; i <= str2.length; i++) {
+      matrix[i] = [i]
+    }
+    for (let j = 0; j <= str1.length; j++) {
+      matrix[0][j] = j
+    }
+    for (let i = 1; i <= str2.length; i++) {
+      for (let j = 1; j <= str1.length; j++) {
+        if (str2.charAt(i - 1) === str1.charAt(j - 1)) {
+          matrix[i][j] = matrix[i - 1][j - 1]
+        } else {
+          matrix[i][j] = Math.min(
+            matrix[i - 1][j - 1] + 1,
+            matrix[i][j - 1] + 1,
+            matrix[i - 1][j] + 1
+          )
+        }
+      }
+    }
+    return matrix[str2.length][str1.length]
+  }
+
   const loadSuppliers = async () => {
     try {
       setLoading(true)
@@ -942,6 +1064,30 @@ useEffect(() => {
     if (!editForm.name.trim()) {
       setMessage({ type: 'error', text: 'Le nom du fournisseur est requis' })
       return
+    }
+
+    // Vérifier les doublons avant de sauvegarder
+    const website = editForm.website.trim() || null
+    const name = editForm.name.trim()
+    
+    // Vérifier si le site web ou le nom a changé
+    const websiteChanged = website !== (editingSupplier.website || '')
+    const nameChanged = name !== (editingSupplier.name || '')
+    
+    if (websiteChanged || nameChanged) {
+      const duplicateCheck = await checkDuplicate(website, name, editingSupplier.id)
+      
+      if (duplicateCheck.isDuplicate) {
+        const existing = duplicateCheck.existing
+        const duplicateInfo = existing.website 
+          ? `Un fournisseur avec le site web "${existing.website}" existe déjà`
+          : `Un fournisseur avec un nom similaire "${existing.name}" existe déjà`
+        setMessage({ 
+          type: 'error', 
+          text: `Doublon détecté ! ${duplicateInfo}. Veuillez vérifier avant de continuer.` 
+        })
+        return
+      }
     }
 
     try {
@@ -1539,6 +1685,24 @@ useEffect(() => {
                     return
                   }
 
+                  // Vérifier les doublons avant d'ajouter
+                  const website = manualSupplierForm.website.trim() || null
+                  const name = manualSupplierForm.name.trim()
+                  
+                  const duplicateCheck = await checkDuplicate(website, name)
+                  
+                  if (duplicateCheck.isDuplicate) {
+                    const existing = duplicateCheck.existing
+                    const duplicateInfo = existing.website 
+                      ? `Un fournisseur avec le site web "${existing.website}" existe déjà`
+                      : `Un fournisseur avec un nom similaire "${existing.name}" existe déjà`
+                    setMessage({ 
+                      type: 'error', 
+                      text: `Doublon détecté ! ${duplicateInfo}. Veuillez vérifier avant d'ajouter.` 
+                    })
+                    return
+                  }
+
                   try {
                     const { error } = await supabase
                       .from('suppliers')
@@ -1816,7 +1980,7 @@ useEffect(() => {
                         </button>
                       </td>
                       <td className="px-3 sm:px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm font-medium text-gray-900">{supplier.name}</div>
+                          <div className="text-sm font-medium text-gray-900">{supplier.name}</div>
                       </td>
                       <td className="px-3 sm:px-6 py-4 hidden md:table-cell">
                         {supplier.website ? (
@@ -1835,10 +1999,10 @@ useEffect(() => {
                         )}
                       </td>
                       <td className="px-3 sm:px-6 py-4 whitespace-nowrap hidden lg:table-cell">
-                        <div className="text-xs sm:text-sm text-gray-900">{supplier.phone || '-'}</div>
+                          <div className="text-xs sm:text-sm text-gray-900">{supplier.phone || '-'}</div>
                       </td>
                       <td className="px-3 sm:px-6 py-4 whitespace-nowrap hidden lg:table-cell">
-                        <div className="text-xs sm:text-sm text-gray-900">{supplier.email || '-'}</div>
+                          <div className="text-xs sm:text-sm text-gray-900">{supplier.email || '-'}</div>
                       </td>
                       <td className="px-3 sm:px-6 py-4 whitespace-nowrap text-xs sm:text-sm text-gray-500 hidden sm:table-cell">
                         {supplier.country || '-'}
@@ -1852,29 +2016,29 @@ useEffect(() => {
                         </div>
                       </td>
                       <td className="px-3 sm:px-6 py-4 whitespace-nowrap text-xs sm:text-sm font-medium">
-                        <div className="flex gap-2">
-                          <button
-                            onClick={() => toggleFeatured(supplier)}
-                            className={`${supplier.is_featured ? 'text-yellow-500' : 'text-gray-400'} hover:text-yellow-500`}
-                            title={supplier.is_featured ? 'Retirer des vedettes' : 'Mettre en vedette'}
-                          >
-                            <FaStar />
-                          </button>
-                          <button
-                            onClick={() => handleEdit(supplier)}
-                            className="text-primary hover:text-primary/80"
+                          <div className="flex gap-2">
+                            <button
+                              onClick={() => toggleFeatured(supplier)}
+                              className={`${supplier.is_featured ? 'text-yellow-500' : 'text-gray-400'} hover:text-yellow-500`}
+                              title={supplier.is_featured ? 'Retirer des vedettes' : 'Mettre en vedette'}
+                            >
+                              <FaStar />
+                            </button>
+                            <button
+                              onClick={() => handleEdit(supplier)}
+                              className="text-primary hover:text-primary/80"
                             title="Modifier le fournisseur"
-                          >
-                            <FaEdit />
-                          </button>
-                          <button
-                            onClick={() => handleDelete(supplier.id)}
-                            className="text-red-600 hover:text-red-900"
+                            >
+                              <FaEdit />
+                            </button>
+                            <button
+                              onClick={() => handleDelete(supplier.id)}
+                              className="text-red-600 hover:text-red-900"
                             title="Supprimer le fournisseur"
-                          >
-                            <FaTrash />
-                          </button>
-                        </div>
+                            >
+                              <FaTrash />
+                            </button>
+                          </div>
                       </td>
                     </tr>
                   ))}

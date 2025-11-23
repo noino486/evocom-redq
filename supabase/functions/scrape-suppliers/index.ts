@@ -385,7 +385,7 @@ serve(async (req) => {
         // Vérifier si le fournisseur existe déjà dans la base (par URL normalisée)
         const { data: existingSuppliers, error: checkError } = await supabase
           .from('suppliers')
-          .select('id, website')
+          .select('id, website, name')
           .or(`website.ilike.%${normalizedUrl}%,website.ilike.%www.${normalizedUrl}%`)
 
         if (checkError && checkError.code !== 'PGRST116') {
@@ -393,18 +393,41 @@ serve(async (req) => {
         }
 
         // Vérifier si un doublon existe (même domaine)
-        const isDuplicate = existingSuppliers?.some(existing => {
-          const existingUrl = existing.website
-            .replace(/^https?:\/\//, '')
-            .replace(/^www\./, '')
-            .replace(/\/$/, '')
-            .toLowerCase()
-          return existingUrl === normalizedUrl || 
-                 existingUrl.includes(normalizedUrl) || 
-                 normalizedUrl.includes(existingUrl)
-        })
+        let isDuplicate = false
+        if (existingSuppliers && existingSuppliers.length > 0) {
+          isDuplicate = existingSuppliers.some(existing => {
+            if (!existing.website) return false
+            const existingUrl = existing.website
+              .replace(/^https?:\/\//, '')
+              .replace(/^www\./, '')
+              .replace(/\/$/, '')
+              .toLowerCase()
+            
+            // Vérification stricte : même domaine exact
+            if (existingUrl === normalizedUrl) {
+              return true
+            }
+            
+            // Vérification par sous-domaine ou domaine parent
+            const existingParts = existingUrl.split('.')
+            const normalizedParts = normalizedUrl.split('.')
+            
+            // Si les deux ont au moins 2 parties (ex: example.com)
+            if (existingParts.length >= 2 && normalizedParts.length >= 2) {
+              // Comparer les domaines principaux (les 2 dernières parties)
+              const existingDomain = existingParts.slice(-2).join('.')
+              const normalizedDomain = normalizedParts.slice(-2).join('.')
+              if (existingDomain === normalizedDomain) {
+                return true
+              }
+            }
+            
+            return false
+          })
+        }
 
         if (isDuplicate) {
+          console.log(`Doublon détecté et ignoré: ${url}`)
           continue // Skip si déjà existant
         }
 
