@@ -9,49 +9,670 @@ import { useAuth } from '../context/AuthContext'
 import { supabase } from '../config/supabase'
 import DashboardLayout from '../components/DashboardLayout'
 
-// Types de fournisseurs disponibles
-const SUPPLIER_TYPES = [
-  'Textile',
-  'Lunettes Et Lunettes de soleil',
-  'Cosmétique',
-  'Parfum',
-  'Soins Capillaires',
-  'Miel',
-  'Pièces auto',
-  'Automobile',
-  'Tech',
-  'Drones',
-  'Caméras',
-  'Chaussures',
-  'Animaux Produits',
-  'Bijoux',
-  'Montre',
-  'Sac à main',
-  'Électronique',
-  'Mobilier',
-  'Alimentaire',
-  'Médical',
-  'BTP',
-  'Informatique',
-  'Sport',
-  'Jouets',
-  '3D',
-  'Impression 3D',
-  'Autre'
+// Structure hiérarchique des fournisseurs : Catégories principales et sous-catégories
+const SUPPLIER_CATEGORIES = {
+  'Transport et logistique': [
+    'Société d\'import-export',
+    'Exportateur',
+    'Établissement vinicole',
+    'Service de transport',
+    'Importateur',
+    'Administration',
+    'Administration gouvernementale',
+    'Agence de voyages',
+    'Autorité portuaire',
+    'Casier à colis',
+    'Consultant en commerce international',
+    'Coursier',
+    'Courtier en douane',
+    'Déménageur',
+    'Industrie d\'équipements de livraison',
+    'Installation de stockage',
+    'Service d\'e-commerce',
+    'Service de conteneurs',
+    'Service de gestion des déchets',
+    'Service de livraison',
+    'Service establishment',
+    'Service logistique',
+    'Services d\'expédition et de livraison',
+    'Société d\'administration portuaire',
+    'Société de livraison',
+    'Société de transport international de marchandises',
+    'Société de transport routier',
+    'Transporteur de véhicules',
+    'Service de taxi',
+    'Service de taxi minibus',
+    'Service de chauffeur privé',
+    'Service de transport et d\'accompagnement',
+    'Station de taxis',
+    'Service ambulancier',
+    'Service de navette aéroport',
+    'Service de chauffeur particulier'
+  ],
+  'Textile pour Homme': [
+    'Producteur local',
+    'Marché fermier',
+    'Magasin alimentaire',
+    'Grossiste en produits naturels',
+    'Vente directe producteur',
+    'Boutique artisanale',
+    'Mécanicien automobile',
+    'Concession automobile',
+    'Magasin d\'accessoires auto',
+    'Grossiste pièces auto'
+  ],
+  'Textile pour Femme': [
+    'Magasin de produits naturels',
+    'Grossiste en parfums',
+    'Salon de coiffure',
+    'Barbershop',
+    'Salon de coiffure afro',
+    'Grossiste coiffure',
+    'Magasin professionnel coiffure',
+    'Magasin de perruques',
+    'Apiculteur',
+    'Épicerie fine'
+  ],
+  'Textile': [
+    'Magasin d\'articles en cuir',
+    'Magasin de bagagerie',
+    'Vente d\'articles pour femmes',
+    'Magasin de cadeaux',
+    'Boutique indépendante',
+    'Magasin de lingerie',
+    'Magasin de robes',
+    'Magasin de vêtements de sport',
+    'Magasin de vêtements grandes tailles',
+    'Magasin de chaussures pour enfants'
+  ],
+  'Sac à Main': [
+    'Institut de beauté',
+    'Spa',
+    'Boutique de maquillage',
+    'Magasin de soins de la peau',
+    'Magasin de produits capillaires',
+    'Magasin bio',
+    'Pharmacie',
+    'Grossiste en cosmétiques',
+    'Magasin de beauté',
+    'Magasin de soins personnels'
+  ],
+  'Production audiovisuelle & cinéma': [
+    'Société de production vidéo',
+    'Société de production cinématographique',
+    'Studio cinématographique',
+    'Studio d\'animation'
+  ],
+  'Parfum': [
+    'Location de drones',
+    'Vente de matériel vidéo',
+    'Boutique high-tech',
+    'Fournisseur de drones professionnels',
+    'Magasin de matériel photographique',
+    'Studio photo',
+    'Location de matériel photo',
+    'Magasin d\'impression photo',
+    'Vidéaste',
+    'Service de vidéosurveillance'
+  ],
+  'Montre': [
+    'Magasin d\'articles bébé',
+    'Magasin de jouets',
+    'Grossiste en vêtements pour enfants',
+    'Opticien',
+    'Lunetterie',
+    'Ophtalmologiste',
+    'Magasin d\'optique',
+    'Clinique de la vision',
+    'Optométriste',
+    'Magasin de sport (lunettes sport)'
+  ],
+  'Marketing & Communication': [
+    'Agence de marketing',
+    'Agence de publicité',
+    'Service de marketing Internet',
+    'Agence de branding',
+    'Régie publicitaire',
+    'Consultant média',
+    'Agence de relations publiques',
+    'Service de rédaction',
+    'Média'
+  ],
+  'Lunettes & Lunettes de soleil': [
+    'Carrosserie',
+    'Casse automobile',
+    'Service de tuning',
+    'Location de voitures',
+    'Vente de voitures d\'occasion',
+    'Service de dépannage auto',
+    'Magasin d\'électronique',
+    'Magasin d\'informatique',
+    'Réparateur d\'ordinateurs',
+    'Magasin de téléphonie'
+  ],
+  'Impression': [
+    'Impression 3D'
+  ],
+  'Gem': [
+    'Joaillier',
+    'Diamantaire',
+    'Bijoutier',
+    'Expert en bijoux',
+    'Acheteur de diamants',
+    'Bijouterie',
+    'Service de réparation de bijoux',
+    'Service de rachat de bijoux',
+    'Fournisseur de pierres',
+    'Exportateur de bijoux',
+    'Vendeur de bijoux en gros',
+    'Exploitation minière',
+    'Gemmologie',
+    'Fabrication de bijoux',
+    'Mine'
+  ],
+  'Événementiel': [
+    'Agence artistique',
+    'Agence événementielle',
+    'Centre de formation (selon contexte)'
+  ],
+  'Digital & Web': [
+    'Concepteur de sites Web',
+    'Service d\'hébergement de site Web',
+    'Agence e-commerce',
+    'Service d\'e-commerce',
+    'Entreprise de logiciels'
+  ],
+  'Création & Design': [
+    'Agence de design',
+    'Graphiste',
+    'Designer d\'intérieur',
+    'Design graphique',
+    'Ingénieur design',
+    'Entreprise de design industriel',
+    'Société de production vidéo (créatif)'
+  ],
+  'Cosmétique': [
+    'Fabricant de produits cosmétiques',
+    'Fournisseur de produits de beauté',
+    'Industrie cosmétique',
+    'Laboratoire pharmaceutique',
+    'Grossiste de produits de beauté'
+  ],
+  'Cosmetique': [
+    'Service informatique',
+    'Fournisseur de matériel informatique',
+    'Magasin high-tech',
+    'Boutique de gadgets',
+    'Magasin de consoles',
+    'Magasin de drones',
+    'Magasin de modélisme',
+    'Service de prise de vue aérienne',
+    'Photographe aérien',
+    'Magasin d\'informatique'
+  ],
+  'Conseil & Services Professionnels': [
+    'Consultant',
+    'Conseiller',
+    'Consultant en marketing',
+    'Coaching professionnel',
+    'Consultant en ingénierie',
+    'Prestataire spécialisé en études de marché'
+  ],
+  'Chaussure': [
+    'Magasin d\'articles de mode',
+    'Boutique d\'articles en cuir',
+    'Magasin d\'outdoor',
+    'Magasin d\'articles de danse',
+    'Magasin de vêtements pour enfants',
+    'Magasin de vêtements pour femmes',
+    'Grossiste en chaussures',
+    'Animalerie',
+    'Magasin d\'alimentation animale',
+    'Magasin d\'articles pour animaux'
+  ],
+  'Bijoux': [
+    'Boutique de luxe',
+    'Magasin de montres',
+    'Grossiste en bijoux',
+    'Rachat d\'or',
+    'Magasin d\'accessoires de mode',
+    'Réparation de montres',
+    'Grossiste en montres',
+    'Magasin d\'articles cadeaux',
+    'Magasin de seconde main',
+    'Maroquinerie'
+  ],
+  'Auto': [
+    'Agence de location de voitures',
+    'Association ou organisation',
+    'Atelier de carrosserie automobile',
+    'Atelier de mécanique automobile',
+    'Atelier de réparation automobile',
+    'Boutique d\'objets à collectionner',
+    'Centre de contrôle technique',
+    'Centre de formation',
+    'Centre de loisirs',
+    'Club automobile',
+    'Concessionnaire automobile',
+    'Concessionnaire de motos',
+    'Concessionnaire de quads',
+    'Concessionnaire de véhicules à moteur',
+    'Concessionnaire de voitures de course',
+    'Concessionnaire Dodge',
+    'Concessionnaire Ford',
+    'Concessionnaire Ram',
+    'Consultant en douane',
+    'Courtier automobile',
+    'Dépôt-vente',
+    'Entrepôt',
+    'Fabricant de pièces automobiles',
+    'Garage automobile',
+    'Magasin de batteries pour voitures',
+    'Magasin de pièces pour voitures de course',
+    'Marché automobile',
+    'Mécanicien',
+    'Mécanicien.ne de précision',
+    'Prestataire de tuning automobile',
+    'Service d\'esthétique automobile',
+    'Vendeur de voitures d\'occasion',
+    'Magasin de pièces de rechange automobiles',
+    'Magasin de pièces automobiles',
+    'Magasin d\'outillage',
+    'Fournisseur de pièces de carrosserie',
+    'Magasin d\'amortisseurs pour automobiles',
+    'Magasin d\'accessoires automobiles',
+    'Magasin de silencieux d\'échappement',
+    'Fournisseur d\'outils pneumatiques',
+    'Magasin d\'accessoires pour poids lourds',
+    'Service de débosselage automobile',
+    'Service de réparation de pare-brise',
+    'Peinture automobile',
+    'Magasin de pneus',
+    'Centre culturel',
+    'Atelier d\'artiste'
+  ],
+  'Arts & culture': [
+    'Boutique d\'articles de mariage',
+    'Fournisseur de manèges',
+    'Fabricant'
+  ],
+  'Animaux Produit': [
+    'Boutique pour animaux',
+    'Toilettage pour animaux',
+    'Clinique vétérinaire',
+    'Pension pour animaux',
+    'Dresseur d\'animaux',
+    'Service de promenade de chiens',
+    'Grossiste en produits pour animaux',
+    'Bijoux fantaisie',
+    'Créateur de bijoux',
+    'Orfèvre'
+  ],
+  'Autre': [
+    'Magasin',
+    'Fournisseur de produits promotionnels',
+    'Boutique de t-shirts personnalisés',
+    'Service de broderie',
+    'Service d\'impression de cartons d\'invitation',
+    'Montagnes russes',
+    'Magasin de jeux vidéo',
+    'Fournisseur de machines de divertissement',
+    'Fournisseur de plantes artificielles',
+    'Distributeur de boissons',
+    'Grossiste en vins',
+    'Grossiste',
+    'Siège social',
+    'Grossiste en boissons alcoolisées',
+    'Fournisseur de bières',
+    'Service de distribution',
+    'Fournisseur de boissons gazeuses',
+    'Carrière',
+    'Fournisseur de matériaux de construction',
+    'Magasin de materiaux de construction',
+    'Fournisseur de granulats',
+    'Société de travaux publics',
+    'Entreprise de terrassement',
+    'Fournisseur de terre végétale',
+    'Sablerie',
+    'Carrière de gravier',
+    'Fournisseur de sable et de gravier',
+    'Arboriste',
+    'Constructeur de terrasses',
+    'Agence de location de matériel',
+    'Paysagiste',
+    'Entrepreneur spécialisé en aménagement aquatique',
+    'Société de construction de piscine',
+    'Karaoké vidéo',
+    'Fournisseur de matériel audiovisuel',
+    'Disc-jockey',
+    'Prestataire de mariage',
+    'Service de location de karaoké',
+    'Fournisseur de matériel d\'éclairage scénique',
+    'Service de location de tentes',
+    'Fournisseur d\'appareils pour centres d\'amusement',
+    'Fournisseur d\'équipements industriels',
+    'Magasin de matériel pour DJ',
+    'Animateur de soirées et d\'événements',
+    'Photographe',
+    'Magasin de location de chaînes hi-fi',
+    'Service de location de matériel de soirée',
+    'Service de photographie',
+    'Service de location de matériel audiovisuel',
+    'Service technologique pour l\'organisation d\'événements',
+    'Bijouterie fantaisie',
+    'Graveur sur bijoux',
+    'Fournisseur d\'équipement de bijouterie',
+    'Service de réparation de montres',
+    'Manège',
+    'Fournisseur de flippers',
+    'Magasin de jeux d\'occasion',
+    'Service de réparation',
+    'Fabricant de jouets',
+    'Magasin d\'articles de billard',
+    'Magasin de fléchettes',
+    'Location d\'installations et de machines',
+    'Borne de location de jeux vidéo',
+    'Atelier de machines et outils',
+    'Service de réparation de matériel électronique',
+    'Atelier de couture',
+    'Couturier',
+    'Service de retouche de vêtements',
+    'Entreprise de couture',
+    'Tailleur sur mesure',
+    'Maison de couture',
+    'Magasin de couture',
+    'Artisanat',
+    'Magasin de broderie',
+    'Magasin d\'ameublement et de décoration',
+    'Tapissier décorateur',
+    'Cours de couture',
+    'Fabricant de maroquinerie',
+    'Styliste',
+    'Boutique de cadeaux',
+    'Boutique de lingerie',
+    'Atelier de réparation de meubles',
+    'Boutique de mariage',
+    'Mercerie',
+    'Conseil',
+    'Maquettiste',
+    'Fabricant de vêtements de sport',
+    'Maison de haute couture',
+    'Atelier de sérigraphie',
+    'Magasin de meubles',
+    'Fabricant de meubles',
+    'Magasin de meubles de chambre à coucher',
+    'Magasin de canapés',
+    'Magasin de meubles de bureau',
+    'Magasin de literie',
+    'Magasin de meubles de cuisine',
+    'Magasin de mobilier de jardin',
+    'Boutique de mobilier en pin',
+    'Magasin de tapis',
+    'Accessoires mobiliers',
+    'Vendeur de meubles en gros',
+    'Galerie d\'art',
+    'Fournisseur de meubles encastrables',
+    'Magasin de meubles pour enfants',
+    'Centre de marques',
+    'Magasin de moquettes',
+    'Magasin de revêtements de sol',
+    'Fournisseur d\'accessoires de meubles',
+    'Bar stool supplier',
+    'Magasin de bricolage',
+    'Magasin de luminaires',
+    'Magasin d\'usine',
+    'Décoration intérieure',
+    'Designer d\'intérieur',
+    'Prestataire de réaménagement de cuisine',
+    'Parfumerie',
+    'Magasin de cosmétiques',
+    'Exportateur de parfums',
+    'Magasin de produits de beauté',
+    'Fournisseur d\'arômes et de parfums',
+    'Boutique de santé et beauté',
+    'Entreprise',
+    'Magasin de bougies',
+    'Magasin d\'aromathérapie',
+    'Grossiste en articles d\'hygiène',
+    'Distillerie',
+    'Entreprise de packaging',
+    'Imprimerie',
+    'Imprimerie spécialisée en sérigraphie',
+    'Magasin d\'enseignes',
+    'Service d\'impression 3D',
+    'Service d\'impression numérique',
+    'Imprimeur',
+    'Imprimeur numérique',
+    'Magasin de reprographie',
+    'Imprimeur d\'étiquettes personnalisées',
+    'Imprimerie commerciale',
+    'Magasin d\'articles d\'emballage',
+    'Miellerie',
+    'Horlogerie',
+    'Service de réparation de montres et d\'horloges',
+    'Horloger',
+    'Boutique d\'accessoires de mode',
+    'Magasin de maroquinerie',
+    'Magasin de stylos',
+    'Service de polissage des métaux',
+    'Société d\'horlogerie',
+    'Service de restauration d\'œuvres d\'art',
+    'Magasin de bracelets',
+    'Service de perçage d\'oreilles',
+    'Magasin de lunettes de soleil',
+    'Magasin de vêtements',
+    'Magasin de tissus',
+    'Grossiste en textiles',
+    'Fabricant de textiles',
+    'Magasin de décoration intérieure',
+    'Magasin de vêtements professionnels',
+    'Magasin de linge de maison',
+    'Magasin de mode',
+    'Magasin de chaussures',
+    'Magasin de sport'
 ]
+}
+
+// Liste des catégories principales pour le sélecteur
+const MAIN_CATEGORIES = Object.keys(SUPPLIER_CATEGORIES)
 
 // Pays disponibles
 const COUNTRIES = [
-  'Chine',
-  'Inde',
-  'Vietnam',
-  'Thaïlande',
-  'Indonésie',
-  'Turquie',
-  'Pakistan',
+  'Afrique du Sud',
+  'Albanie',
+  'Algérie',
+  'Allemagne',
+  'Andorre',
+  'Angola',
+  'Antigua-et-Barbuda',
+  'Arabie saoudite',
+  'Argentine',
+  'Arménie',
+  'Australie',
+  'Autriche',
+  'Azerbaïdjan',
+  'Bahamas',
+  'Bahreïn',
   'Bangladesh',
-  'Philippines',
+  'Barbade',
+  'Bélarus (Biélorussie)',
+  'Belgique',
+  'Belize',
+  'Bénin',
+  'Bhoutan',
+  'Birmanie (Myanmar)',
+  'Bolivie',
+  'Bosnie-Herzégovine',
+  'Botswana',
+  'Brésil',
+  'Brunei',
+  'Bulgarie',
+  'Burkina Faso',
+  'Burundi',
+  'Cambodge',
+  'Cameroun',
+  'Canada',
+  'Cap-Vert',
+  'Chili',
+  'Chine',
+  'Chypre',
+  'Colombie',
+  'Comores',
+  'Congo',
+  'Corée du Nord',
+  'Corée du Sud',
+  'Costa Rica',
+  'Côte d\'Ivoire',
+  'Croatie',
+  'Cuba',
+  'Danemark',
+  'Djibouti',
+  'Dominique',
+  'Égypte',
+  'Émirats arabes unis',
+  'Équateur',
+  'Érythrée',
+  'Espagne',
+  'Estonie',
+  'États-Unis',
+  'Éthiopie',
+  'Eswatini (ex-Swaziland)',
+  'Fidji',
+  'Finlande',
+  'France',
+  'Gabon',
+  'Gambie',
+  'Géorgie',
+  'Ghana',
+  'Grèce',
+  'Grenade',
+  'Guatemala',
+  'Guinée',
+  'Guinée équatoriale',
+  'Guinée-Bissau',
+  'Guyana',
+  'Haïti',
+  'Honduras',
+  'Hongrie',
+  'Îles Salomon',
+  'Inde',
+  'Indonésie',
+  'Irak',
+  'Iran',
+  'Irlande',
+  'Islande',
+  'Israël',
+  'Italie',
+  'Jamaïque',
+  'Japon',
+  'Jordanie',
+  'Kazakhstan',
+  'Kenya',
+  'Kirghizistan',
+  'Kiribati',
+  'Koweït',
+  'Laos',
+  'Lesotho',
+  'Lettonie',
+  'Liban',
+  'Liberia',
+  'Libye',
+  'Liechtenstein',
+  'Lituanie',
+  'Luxembourg',
+  'Macédoine du Nord',
+  'Madagascar',
   'Malaisie',
+  'Malawi',
+  'Maldives',
+  'Mali',
+  'Malte',
+  'Maroc',
+  'Marshall (République des Îles Marshall)',
+  'Maurice',
+  'Mauritanie',
+  'Mexique',
+  'Micronésie (États fédérés de Micronésie)',
+  'Moldavie',
+  'Monaco',
+  'Mongolie',
+  'Monténégro',
+  'Mozambique',
+  'Namibie',
+  'Nauru',
+  'Népal',
+  'Nicaragua',
+  'Niger',
+  'Nigeria',
+  'Norvège',
+  'Nouvelle-Zélande',
+  'Oman',
+  'Ouganda',
+  'Ouzbékistan',
+  'Pakistan',
+  'Palaos',
+  'Palestine',
+  'Panama',
+  'Papouasie-Nouvelle-Guinée',
+  'Paraguay',
+  'Pays-Bas',
+  'Pérou',
+  'Philippines',
+  'Pologne',
+  'Portugal',
+  'Qatar',
+  'République centrafricaine',
+  'République démocratique du Congo',
+  'République dominicaine',
+  'Roumanie',
+  'Royaume-Uni',
+  'Russie',
+  'Rwanda',
+  'Saint-Christophe-et-Niévès',
+  'Saint-Marin',
+  'Saint-Vincent-et-les-Grenadines',
+  'Sainte-Lucie',
+  'Salvador',
+  'Samoa',
+  'Sao Tomé-et-Principe',
+  'Sénégal',
+  'Serbie',
+  'Seychelles',
+  'Sierra Leone',
+  'Singapour',
+  'Slovaquie',
+  'Slovénie',
+  'Somalie',
+  'Soudan',
+  'Soudan du Sud',
+  'Sri Lanka',
+  'Suède',
+  'Suisse',
+  'Suriname',
+  'Syrie',
+  'Tadjikistan',
+  'Taïwan',
+  'Tanzanie',
+  'Tchad',
+  'Tchéquie (République tchèque)',
+  'Thaïlande',
+  'Timor oriental',
+  'Togo',
+  'Tonga',
+  'Trinité-et-Tobago',
+  'Tunisie',
+  'Turkménistan',
+  'Turquie',
+  'Tuvalu',
+  'Ukraine',
+  'Uruguay',
+  'Vanuatu',
+  'Vatican',
+  'Venezuela',
+  'Viêt Nam',
+  'Yémen',
+  'Zambie',
+  'Zimbabwe',
   'Autre'
 ]
 
@@ -63,7 +684,8 @@ const DashboardScraper = () => {
   const [loading, setLoading] = useState(true)
   const [formData, setFormData] = useState({
     country: 'Chine',
-    supplier_type: 'Électronique'
+    main_category: '',
+    sub_category: ''
   })
   const [message, setMessage] = useState({ type: '', text: '' })
   const [editingSupplier, setEditingSupplier] = useState(null)
@@ -86,7 +708,8 @@ const DashboardScraper = () => {
     email: '',
     address: '',
     country: 'Chine',
-    supplier_type: 'Électronique',
+    main_category: '',
+    sub_category: '',
     is_featured: false
   })
 
@@ -182,8 +805,8 @@ useEffect(() => {
   }
 
   const startScraping = async () => {
-    if (!formData.country || !formData.supplier_type) {
-      setMessage({ type: 'error', text: 'Veuillez sélectionner un pays et un type de fournisseur' })
+    if (!formData.country || !formData.main_category || !formData.sub_category) {
+      setMessage({ type: 'error', text: 'Veuillez sélectionner un pays, une catégorie principale et une sous-catégorie' })
       return
     }
 
@@ -195,7 +818,8 @@ useEffect(() => {
         .from('scraping_jobs')
         .insert([{
           country: formData.country,
-          supplier_type: formData.supplier_type,
+          supplier_type: formData.sub_category,
+          main_category: formData.main_category,
           status: 'pending',
           created_by: user?.id
         }])
@@ -219,7 +843,8 @@ useEffect(() => {
         body: JSON.stringify({
           job_id: job.id,
           country: formData.country,
-          supplier_type: formData.supplier_type
+          supplier_type: formData.sub_category,
+          main_category: formData.main_category
         })
       })
 
@@ -550,7 +1175,8 @@ useEffect(() => {
                     email: '',
                     address: '',
                     country: 'Chine',
-                    supplier_type: 'Électronique',
+                    main_category: '',
+                    sub_category: '',
                     is_featured: false
                   })
                 }}
@@ -631,15 +1257,33 @@ useEffect(() => {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Type de fournisseur
+                  Catégorie principale
                 </label>
                 <select
-                  value={manualSupplierForm.supplier_type}
-                  onChange={(e) => setManualSupplierForm({ ...manualSupplierForm, supplier_type: e.target.value })}
+                  value={manualSupplierForm.main_category}
+                  onChange={(e) => setManualSupplierForm({ ...manualSupplierForm, main_category: e.target.value, sub_category: '' })}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
                 >
-                  {SUPPLIER_TYPES.map(type => (
-                    <option key={type} value={type}>{type}</option>
+                  <option value="">Sélectionner une catégorie</option>
+                  {MAIN_CATEGORIES.map(category => (
+                    <option key={category} value={category}>{category}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Sous-catégorie
+                </label>
+                <select
+                  value={manualSupplierForm.sub_category}
+                  onChange={(e) => setManualSupplierForm({ ...manualSupplierForm, sub_category: e.target.value })}
+                  disabled={!manualSupplierForm.main_category}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent disabled:bg-gray-100"
+                >
+                  <option value="">Sélectionner une sous-catégorie</option>
+                  {manualSupplierForm.main_category && SUPPLIER_CATEGORIES[manualSupplierForm.main_category]?.map(subCategory => (
+                    <option key={subCategory} value={subCategory}>{subCategory}</option>
                   ))}
                 </select>
               </div>
@@ -690,7 +1334,8 @@ useEffect(() => {
                         email: manualSupplierForm.email.trim() || null,
                         address: manualSupplierForm.address.trim() || null,
                         country: manualSupplierForm.country,
-                        supplier_type: manualSupplierForm.supplier_type,
+                        supplier_type: manualSupplierForm.sub_category,
+                        main_category: manualSupplierForm.main_category,
                         is_featured: manualSupplierForm.is_featured,
                         status: 'active',
                         created_by: user?.id
@@ -707,7 +1352,8 @@ useEffect(() => {
                       email: '',
                       address: '',
                       country: 'Chine',
-                      supplier_type: 'Électronique',
+                      main_category: '',
+                      sub_category: '',
                       is_featured: false
                     })
                     loadSuppliers()
@@ -731,7 +1377,8 @@ useEffect(() => {
                     email: '',
                     address: '',
                     country: 'Chine',
-                    supplier_type: 'Électronique',
+                    main_category: '',
+                    sub_category: '',
                     is_featured: false
                   })
                 }}
@@ -762,14 +1409,14 @@ useEffect(() => {
             Configuration du Scraping
           </h2>
           
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Pays
               </label>
               <select
                 value={formData.country}
-                onChange={(e) => setFormData({ ...formData, country: e.target.value })}
+                onChange={(e) => setFormData({ ...formData, country: e.target.value, sub_category: '' })}
                 disabled={isScraping}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent disabled:bg-gray-100"
               >
@@ -781,16 +1428,34 @@ useEffect(() => {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Type de fournisseur
+                Catégorie principale
               </label>
               <select
-                value={formData.supplier_type}
-                onChange={(e) => setFormData({ ...formData, supplier_type: e.target.value })}
+                value={formData.main_category}
+                onChange={(e) => setFormData({ ...formData, main_category: e.target.value, sub_category: '' })}
                 disabled={isScraping}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent disabled:bg-gray-100"
               >
-                {SUPPLIER_TYPES.map(type => (
-                  <option key={type} value={type}>{type}</option>
+                <option value="">Sélectionner une catégorie</option>
+                {MAIN_CATEGORIES.map(category => (
+                  <option key={category} value={category}>{category}</option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Sous-catégorie
+              </label>
+              <select
+                value={formData.sub_category}
+                onChange={(e) => setFormData({ ...formData, sub_category: e.target.value })}
+                disabled={isScraping || !formData.main_category}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent disabled:bg-gray-100"
+              >
+                <option value="">Sélectionner une sous-catégorie</option>
+                {formData.main_category && SUPPLIER_CATEGORIES[formData.main_category]?.map(subCategory => (
+                  <option key={subCategory} value={subCategory}>{subCategory}</option>
                 ))}
               </select>
             </div>
