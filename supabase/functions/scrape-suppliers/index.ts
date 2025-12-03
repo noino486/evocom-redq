@@ -417,6 +417,30 @@ serve(async (req) => {
     const seenUrls = new Set<string>() // Pour éviter les doublons dans la même session
     
     for (const url of supplierUrls) {
+      // Vérifier si le job a été arrêté avant de continuer (avec force refresh)
+      const { data: jobStatus, error: statusError } = await supabase
+        .from('scraping_jobs')
+        .select('status')
+        .eq('id', job_id)
+        .maybeSingle()
+      
+      if (statusError) {
+        console.error('Erreur lors de la vérification du statut:', statusError)
+      }
+      
+      if (jobStatus && jobStatus.status === 'stopped') {
+        console.log('🛑 Job arrêté par l\'utilisateur - arrêt de la boucle')
+        await supabase
+          .from('scraping_jobs')
+          .update({ 
+            completed_at: new Date().toISOString(),
+            total_found: supplierUrls.length,
+            total_saved: totalSaved
+          })
+          .eq('id', job_id)
+        break
+      }
+      
       try {
         // Fonction de normalisation améliorée
         const normalizeUrl = (urlToNormalize: string): string => {
@@ -548,8 +572,56 @@ serve(async (req) => {
           }
         }
 
+        // Vérifier à nouveau le statut avant de scraper (opération longue)
+        const { data: jobStatusBeforeScrape, error: beforeScrapeError } = await supabase
+          .from('scraping_jobs')
+          .select('status')
+          .eq('id', job_id)
+          .maybeSingle()
+        
+        if (beforeScrapeError) {
+          console.error('Erreur lors de la vérification du statut avant scraping:', beforeScrapeError)
+        }
+        
+        if (jobStatusBeforeScrape && jobStatusBeforeScrape.status === 'stopped') {
+          console.log('🛑 Job arrêté avant le scraping - arrêt de la boucle')
+          await supabase
+            .from('scraping_jobs')
+            .update({ 
+              completed_at: new Date().toISOString(),
+              total_found: supplierUrls.length,
+              total_saved: totalSaved
+            })
+            .eq('id', job_id)
+          break
+        }
+
         // Scraper les informations
         const scrapedData = await scrapeWebsite(url)
+        
+        // Vérifier à nouveau après le scraping
+        const { data: jobStatusAfterScrape, error: afterScrapeError } = await supabase
+          .from('scraping_jobs')
+          .select('status')
+          .eq('id', job_id)
+          .maybeSingle()
+        
+        if (afterScrapeError) {
+          console.error('Erreur lors de la vérification du statut après scraping:', afterScrapeError)
+        }
+        
+        if (jobStatusAfterScrape && jobStatusAfterScrape.status === 'stopped') {
+          console.log('🛑 Job arrêté après le scraping - arrêt de la boucle')
+          await supabase
+            .from('scraping_jobs')
+            .update({ 
+              completed_at: new Date().toISOString(),
+              total_found: supplierUrls.length,
+              total_saved: totalSaved
+            })
+            .eq('id', job_id)
+          break
+        }
 
         // Extraire le nom du domaine si pas de nom trouvé
         const name = scrapedData.name || url.replace(/^https?:\/\//, '').replace(/\/$/, '')
@@ -613,6 +685,30 @@ serve(async (req) => {
           })
           .eq('id', job_id)
 
+        // Vérifier à nouveau si le job a été arrêté après la pause
+        const { data: jobStatusAfterPause, error: pauseStatusError } = await supabase
+          .from('scraping_jobs')
+          .select('status')
+          .eq('id', job_id)
+          .maybeSingle()
+        
+        if (pauseStatusError) {
+          console.error('Erreur lors de la vérification du statut après pause:', pauseStatusError)
+        }
+        
+        if (jobStatusAfterPause && jobStatusAfterPause.status === 'stopped') {
+          console.log('🛑 Job arrêté par l\'utilisateur après pause - arrêt de la boucle')
+          await supabase
+            .from('scraping_jobs')
+            .update({ 
+              completed_at: new Date().toISOString(),
+              total_found: supplierUrls.length,
+              total_saved: totalSaved
+            })
+            .eq('id', job_id)
+          break
+        }
+
         // Petite pause pour éviter de surcharger
         await new Promise(resolve => setTimeout(resolve, 1000))
       } catch (error) {
@@ -621,16 +717,25 @@ serve(async (req) => {
       }
     }
 
-    // Marquer le job comme terminé
-    await supabase
+    // Vérifier le statut final avant de marquer comme terminé
+    const { data: finalJobStatus } = await supabase
       .from('scraping_jobs')
-      .update({ 
-        status: 'completed',
-        completed_at: new Date().toISOString(),
-        total_found: supplierUrls.length,
-        total_saved: totalSaved
-      })
+      .select('status')
       .eq('id', job_id)
+      .single()
+    
+    // Ne marquer comme terminé que si le job n'a pas été arrêté
+    if (finalJobStatus && finalJobStatus.status !== 'stopped') {
+      await supabase
+        .from('scraping_jobs')
+        .update({ 
+          status: 'completed',
+          completed_at: new Date().toISOString(),
+          total_found: supplierUrls.length,
+          total_saved: totalSaved
+        })
+        .eq('id', job_id)
+    }
 
     return new Response(
       JSON.stringify({ 

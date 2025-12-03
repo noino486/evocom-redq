@@ -771,7 +771,7 @@ useEffect(() => {
         clearInterval(interval)
         setIsScraping(false)
       }
-    }, 3000) // Poll toutes les 3 secondes
+    }, 1000) // Poll toutes les 1 seconde pour détecter l'arrêt plus rapidement
 
     return () => clearInterval(interval)
   }
@@ -1041,24 +1041,42 @@ useEffect(() => {
     if (!currentJob) return
 
     try {
-      // Mettre à jour le job
-      const { error } = await supabase
+      console.log('🛑 Arrêt du scraping demandé pour le job:', currentJob.id)
+      
+      // Mettre à jour le job avec force
+      const { data, error } = await supabase
         .from('scraping_jobs')
         .update({ 
           status: 'stopped',
           completed_at: new Date().toISOString()
         })
         .eq('id', currentJob.id)
+        .select()
+        .single()
 
-      if (error) throw error
+      if (error) {
+        console.error('❌ Erreur lors de la mise à jour du statut:', error)
+        throw error
+      }
 
+      console.log('✅ Statut mis à jour:', data)
+
+      // Mettre à jour l'état local immédiatement
       setIsScraping(false)
-      setCurrentJob(null)
-      setMessage({ type: 'success', text: 'Scraping arrêté' })
-      loadSuppliers()
+      if (data) {
+        setCurrentJob(data)
+      } else {
+        setCurrentJob(null)
+      }
+      setMessage({ type: 'success', text: 'Scraping arrêté. L\'arrêt peut prendre quelques secondes...' })
+      
+      // Recharger les fournisseurs après un court délai
+      setTimeout(() => {
+        loadSuppliers()
+      }, 2000)
     } catch (error) {
       console.error('Erreur lors de l\'arrêt du scraping:', error)
-      setMessage({ type: 'error', text: 'Erreur lors de l\'arrêt du scraping' })
+      setMessage({ type: 'error', text: `Erreur lors de l'arrêt du scraping: ${error.message || 'Erreur inconnue'}` })
     }
   }
 
