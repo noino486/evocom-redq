@@ -19,16 +19,47 @@ import {
   FaList,
   FaGavel,
   FaFileAlt,
-  FaDiscord
+  FaDiscord,
+  FaCalendar,
+  FaPhone
 } from 'react-icons/fa'
 import { useAuth } from '../context/AuthContext'
+import { supabase } from '../config/supabase'
 
 const DashboardLayout = ({ children }) => {
-  const { profile, signOut, isAdmin, isSupportOrAdmin } = useAuth()
+  const { profile, signOut, isAdmin, isSupportOrAdmin, user } = useAuth()
   const location = useLocation()
   const navigate = useNavigate()
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [expandedSections, setExpandedSections] = useState({})
+  const [hasWorkspace, setHasWorkspace] = useState(false)
+
+  // Vérifier si l'utilisateur a un workspace actif
+  useEffect(() => {
+    const checkWorkspace = async () => {
+      if (user?.id) {
+        try {
+          const { data, error } = await supabase
+            .from('influencer_workspaces')
+            .select('id')
+            .eq('influencer_id', user.id)
+            .eq('is_active', true)
+            .single()
+
+          if (error && error.code !== 'PGRST116') {
+            console.error('Erreur vérification workspace:', error)
+          }
+          
+          setHasWorkspace(!!data)
+        } catch (error) {
+          console.error('Erreur lors de la vérification du workspace:', error)
+          setHasWorkspace(false)
+        }
+      }
+    }
+
+    checkWorkspace()
+  }, [user])
 
   const menuItems = useMemo(() => {
     // S'assurer que isAdmin retourne bien false pour les niveaux 1, 2 et 3
@@ -102,6 +133,18 @@ const DashboardLayout = ({ children }) => {
         title: 'Influenceurs',
         path: '/dashboard/affiliates',
         visible: adminCheck // Seulement niveau 4 (Admin)
+      },
+      {
+        icon: FaCalendar,
+        title: 'Organisation Influenceurs',
+        path: '/dashboard/influencer-organization',
+        visible: adminCheck // Seulement niveau 4 (Admin)
+      },
+      {
+        icon: FaPhone,
+        title: 'Mon Organisation',
+        path: '/dashboard/my-organization',
+        visible: profile?.is_active && hasWorkspace // Visible uniquement si l'utilisateur a un workspace actif
       },
       {
         icon: FaList,

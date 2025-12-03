@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react'
 import { motion } from 'framer-motion'
-import { FaSearch, FaUserTimes, FaUserCheck, FaKey, FaSpinner, FaEdit, FaSave, FaTimes, FaPlus, FaEnvelope } from 'react-icons/fa'
+import { FaSearch, FaUserTimes, FaUserCheck, FaKey, FaSpinner, FaEdit, FaSave, FaTimes, FaPlus, FaEnvelope, FaBriefcase, FaBriefcaseMedical } from 'react-icons/fa'
 import { useAuth } from '../context/AuthContext'
 import { supabase } from '../config/supabase'
 import DashboardLayout from '../components/DashboardLayout'
@@ -21,6 +21,7 @@ const DashboardUsers = () => {
     products: ['STFOUR']
   })
   const [message, setMessage] = useState({ type: '', text: '' })
+  const [workspaces, setWorkspaces] = useState({}) // Map userId -> workspace status
 
   useEffect(() => {
     const checkAndLoad = async () => {
@@ -78,6 +79,9 @@ const DashboardUsers = () => {
       }
       
       setUsers(data || [])
+      
+      // Charger les workspaces pour tous les utilisateurs
+      await loadWorkspaces(data || [])
     } catch (error) {
       console.error('[DashboardUsers] Erreur lors du chargement des utilisateurs:', error)
       // Afficher un message d'erreur plus détaillé
@@ -86,6 +90,90 @@ const DashboardUsers = () => {
       }
     } finally {
       setLoading(false)
+    }
+  }
+
+  const loadWorkspaces = async (usersList) => {
+    try {
+      if (!usersList || usersList.length === 0) return
+      
+      const userIds = usersList.map(u => u.id)
+      const { data, error } = await supabase
+        .from('influencer_workspaces')
+        .select('influencer_id, is_active')
+        .in('influencer_id', userIds)
+
+      if (error) {
+        console.error('Erreur lors du chargement des workspaces:', error)
+        return
+      }
+
+      const workspaceMap = {}
+      data?.forEach(ws => {
+        workspaceMap[ws.influencer_id] = ws.is_active
+      })
+      setWorkspaces(workspaceMap)
+    } catch (error) {
+      console.error('Erreur lors du chargement des workspaces:', error)
+    }
+  }
+
+  const handleToggleWorkspaceAccess = async (userId) => {
+    try {
+      setActionLoading(`workspace-${userId}`)
+      
+      const hasActiveWorkspace = workspaces[userId] === true
+      
+      if (hasActiveWorkspace) {
+        // Désactiver le workspace
+        const { error } = await supabase
+          .from('influencer_workspaces')
+          .update({ is_active: false })
+          .eq('influencer_id', userId)
+
+        if (error) throw error
+        setMessage({ type: 'success', text: 'Accès organisation retiré avec succès' })
+      } else {
+        // Créer ou activer le workspace
+        const { data: existing, error: checkError } = await supabase
+          .from('influencer_workspaces')
+          .select('id')
+          .eq('influencer_id', userId)
+          .single()
+
+        if (checkError && checkError.code === 'PGRST116') {
+          // Créer
+          const { error: createError } = await supabase
+            .from('influencer_workspaces')
+            .insert({
+              influencer_id: userId,
+              created_by: currentUser?.id,
+              is_active: true
+            })
+
+          if (createError) throw createError
+        } else if (!checkError) {
+          // Activer
+          const { error: updateError } = await supabase
+            .from('influencer_workspaces')
+            .update({ is_active: true })
+            .eq('id', existing.id)
+
+          if (updateError) throw updateError
+        } else {
+          throw checkError
+        }
+
+        setMessage({ type: 'success', text: 'Accès organisation accordé avec succès' })
+      }
+
+      // Recharger les workspaces
+      await loadWorkspaces(users)
+    } catch (error) {
+      console.error('Erreur lors de la modification de l\'accès:', error)
+      setMessage({ type: 'error', text: error.message || 'Erreur lors de la modification' })
+    } finally {
+      setActionLoading(null)
     }
   }
 
@@ -577,6 +665,9 @@ const DashboardUsers = () => {
                       Statut
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Organisation
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Dernière connexion
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -632,6 +723,28 @@ const DashboardUsers = () => {
                         }`}>
                           {user.is_active ? 'Actif' : 'Inactif'}
                         </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        {actionLoading === `workspace-${user.id}` ? (
+                          <FaSpinner className="animate-spin text-primary" />
+                        ) : (
+                          <button
+                            onClick={() => handleToggleWorkspaceAccess(user.id)}
+                            disabled={actionLoading === `workspace-${user.id}`}
+                            className={`px-2 py-1 text-xs font-semibold rounded-full transition-colors ${
+                              workspaces[user.id] === true
+                                ? 'bg-blue-100 text-blue-800 hover:bg-blue-200'
+                                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                            } disabled:opacity-50 disabled:cursor-not-allowed`}
+                            title={
+                              workspaces[user.id] === true
+                                ? 'Cliquer pour retirer l\'accès organisation'
+                                : 'Cliquer pour accorder l\'accès organisation'
+                            }
+                          >
+                            {workspaces[user.id] === true ? 'Activé' : 'Non activé'}
+                          </button>
+                        )}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                         {user.last_login 

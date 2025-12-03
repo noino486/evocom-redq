@@ -5,7 +5,7 @@ import {
   FaDownload, FaExternalLinkAlt, FaFileAlt, FaSpinner,
   FaEye, FaTimes, FaChevronDown, FaChevronUp,
   FaBuilding, FaPhone, FaEnvelope, FaMapMarkerAlt, FaGlobe, FaFilter, FaStar,
-  FaTrash, FaExpand, FaCompress, FaEdit
+  FaTrash, FaExpand, FaCompress, FaEdit, FaImage, FaUpload, FaSearch, FaCheck
 } from 'react-icons/fa'
 import { useAuth } from '../context/AuthContext'
 import { supabase } from '../config/supabase'
@@ -72,6 +72,13 @@ const DashboardPack = ({ initialSection, initialPdfCategory }) => {
     website: ''
   })
   const [isSavingSupplier, setIsSavingSupplier] = useState(false)
+  const [imageUploadModal, setImageUploadModal] = useState(null) // { category }
+  const [imageUrl, setImageUrl] = useState('')
+  const [uploadedFile, setUploadedFile] = useState(null)
+  const [previewImage, setPreviewImage] = useState(null)
+  const [categoryImages, setCategoryImages] = useState({}) // Stockage local des images de catégories
+  const [imageDimensions, setImageDimensions] = useState({ width: 800, height: 600 }) // Dimensions pour le redimensionnement
+  const [showResizeTool, setShowResizeTool] = useState(false)
 
   const handleSelectCategory = (category) => {
     setSelectedCategory(category)
@@ -229,6 +236,8 @@ const DashboardPack = ({ initialSection, initialPdfCategory }) => {
       loadSuppliers()
       // Charger les favoris de l'utilisateur
       loadFavorites()
+      // Charger les images de catégories
+      loadCategoryImages()
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [productId])
@@ -241,6 +250,36 @@ const DashboardPack = ({ initialSection, initialPdfCategory }) => {
   }, [supplierActionMessage])
 
   // Charger les favoris de l'utilisateur
+  // Fonction pour charger les images de catégories depuis la base de données
+  const loadCategoryImages = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('supplier_category_images')
+        .select('category_name, image_url')
+
+      if (error) {
+        console.error('Erreur lors du chargement des images de catégories:', error)
+        // Si la table n'existe pas encore, on continue sans erreur
+        if (error.code === '42P01' || error.message?.includes('does not exist') || error.message?.includes('relation') || error.code === 'PGRST116') {
+          console.warn('⚠️ La table supplier_category_images n\'existe pas encore. Veuillez exécuter le script SQL fourni.')
+          return
+        }
+        return
+      }
+
+      if (data && data.length > 0) {
+        const imagesMap = {}
+        data.forEach(item => {
+          imagesMap[item.category_name] = item.image_url
+        })
+        setCategoryImages(imagesMap)
+        console.log('✅ Images de catégories chargées:', imagesMap)
+      }
+    } catch (error) {
+      console.error('Erreur lors du chargement des images de catégories:', error)
+    }
+  }
+
   const loadFavorites = async () => {
     if (!profile?.id) return
     
@@ -584,6 +623,201 @@ const DashboardPack = ({ initialSection, initialPdfCategory }) => {
   const handleCancelEditSupplier = () => {
     setEditingSupplier(null)
     setIsSavingSupplier(false)
+  }
+
+  // Fonction pour charger une image et obtenir ses dimensions
+  const loadImageDimensions = (imageSrc, callback) => {
+    const img = new Image()
+    img.onload = () => {
+      callback({ width: img.width, height: img.height })
+    }
+    img.src = imageSrc
+  }
+
+  // Fonction pour redimensionner une image
+  const resizeImage = (imageSrc, targetWidth, targetHeight) => {
+    return new Promise((resolve) => {
+      const img = new Image()
+      img.onload = () => {
+        const canvas = document.createElement('canvas')
+        // Utiliser les dimensions exactes spécifiées
+        canvas.width = targetWidth
+        canvas.height = targetHeight
+        const ctx = canvas.getContext('2d')
+        
+        // Dessiner l'image redimensionnée (peut déformer si le ratio est différent)
+        ctx.drawImage(img, 0, 0, targetWidth, targetHeight)
+
+        canvas.toBlob((blob) => {
+          const reader = new FileReader()
+          reader.onloadend = () => {
+            resolve(reader.result)
+          }
+          reader.readAsDataURL(blob)
+        }, 'image/png', 0.9)
+      }
+      img.onerror = () => {
+        resolve(imageSrc) // Retourner l'image originale en cas d'erreur
+      }
+      img.src = imageSrc
+    })
+  }
+
+  // Fonction pour gérer le changement de fichier uploadé
+  const handleFileChange = (e) => {
+    const file = e.target.files[0]
+    if (file) {
+      if (file.type.startsWith('image/')) {
+        setUploadedFile(file)
+        setImageUrl('') // Réinitialiser l'URL si un fichier est sélectionné
+        // Créer une preview
+        const reader = new FileReader()
+        reader.onloadend = () => {
+          const imageSrc = reader.result
+          setPreviewImage(imageSrc)
+          // Charger les dimensions de l'image
+          loadImageDimensions(imageSrc, (dimensions) => {
+            setImageDimensions(dimensions)
+          })
+        }
+        reader.readAsDataURL(file)
+      } else {
+        alert('Veuillez sélectionner un fichier image (PNG, JPG, etc.)')
+      }
+    }
+  }
+
+  // Fonction pour gérer le changement d'URL
+  const handleUrlChange = (url) => {
+    setImageUrl(url)
+    setUploadedFile(null) // Réinitialiser le fichier si une URL est entrée
+    if (url) {
+      setPreviewImage(url)
+      // Charger les dimensions de l'image
+      loadImageDimensions(url, (dimensions) => {
+        setImageDimensions(dimensions)
+      })
+    } else {
+      setPreviewImage(null)
+    }
+  }
+
+  // Fonction pour appliquer le redimensionnement
+  const handleApplyResize = async () => {
+    if (!previewImage) return
+
+    try {
+      const resizedImage = await resizeImage(previewImage, imageDimensions.width, imageDimensions.height)
+      setPreviewImage(resizedImage)
+      setShowResizeTool(false)
+    } catch (error) {
+      console.error('Erreur lors du redimensionnement:', error)
+      alert('Erreur lors du redimensionnement de l\'image')
+    }
+  }
+
+  // Fonction pour sauvegarder l'image de la catégorie
+  const handleSaveCategoryImage = async () => {
+    if (!imageUploadModal) return
+
+    if (!previewImage) {
+      alert('Veuillez soit déposer un fichier, soit entrer une URL d\'image')
+      return
+    }
+
+    try {
+      let finalImageUrl = previewImage
+
+      // Si c'est une image uploadée (data URL), l'uploader vers Supabase Storage
+      if (previewImage.startsWith('data:image/')) {
+        // Convertir data URL en blob
+        const response = await fetch(previewImage)
+        const blob = await response.blob()
+        
+        // Générer un nom de fichier unique
+        const fileName = `category-images/${imageUploadModal.category.replace(/[^a-zA-Z0-9]/g, '_')}_${Date.now()}.png`
+        
+        // Uploader vers Supabase Storage
+        const { data: uploadData, error: uploadError } = await supabase.storage
+          .from('supplier-category-images')
+          .upload(fileName, blob, {
+            contentType: 'image/png',
+            upsert: true
+          })
+
+        if (uploadError) {
+          console.error('Erreur lors de l\'upload:', uploadError)
+          // Si le bucket n'existe pas, on sauvegarde quand même l'URL data (temporaire)
+          if (uploadError.message?.includes('Bucket not found') || uploadError.message?.includes('The resource was not found')) {
+            console.warn('⚠️ Le bucket supplier-category-images n\'existe pas. Créez-le dans Supabase Storage.')
+            alert('⚠️ Le bucket Storage n\'existe pas encore. L\'image est sauvegardée localement. Créez le bucket "supplier-category-images" dans Supabase Storage pour activer la sauvegarde permanente.')
+            // On continue avec l'URL data pour l'instant
+          } else if (uploadError.message?.includes('row-level security policy') || uploadError.message?.includes('RLS') || uploadError.message?.includes('violates row-level security')) {
+            // Erreur de policy RLS
+            console.error('❌ Erreur de permissions Storage. Veuillez exécuter le script CREATE_STORAGE_POLICIES_CATEGORY_IMAGES.sql dans Supabase SQL Editor.')
+            alert('❌ Erreur de permissions Storage.\n\nVeuillez exécuter le script SQL suivant dans Supabase Dashboard > SQL Editor:\n\nCREATE_STORAGE_POLICIES_CATEGORY_IMAGES.sql\n\nCe script configure les permissions pour permettre aux admins d\'uploader des images.')
+            throw uploadError
+          } else {
+            console.error('Erreur d\'upload inconnue:', uploadError)
+            alert(`Erreur lors de l'upload de l'image: ${uploadError.message || 'Erreur inconnue'}`)
+            throw uploadError
+          }
+        } else {
+          // Obtenir l'URL publique de l'image
+          const { data: urlData } = supabase.storage
+            .from('supplier-category-images')
+            .getPublicUrl(fileName)
+          
+          if (urlData?.publicUrl) {
+            finalImageUrl = urlData.publicUrl
+          }
+        }
+      }
+
+      // Sauvegarder dans la base de données
+      const { error: dbError } = await supabase
+        .from('supplier_category_images')
+        .upsert({
+          category_name: imageUploadModal.category,
+          image_url: finalImageUrl,
+          updated_at: new Date().toISOString()
+        }, {
+          onConflict: 'category_name'
+        })
+
+      if (dbError) {
+        console.error('Erreur lors de la sauvegarde en base de données:', dbError)
+        // Si la table n'existe pas encore, on sauvegarde quand même localement
+        if (dbError.code === '42P01' || dbError.message?.includes('does not exist') || dbError.message?.includes('relation') || dbError.code === 'PGRST116') {
+          console.warn('⚠️ La table supplier_category_images n\'existe pas encore. Sauvegarde locale uniquement.')
+          setCategoryImages(prev => ({
+            ...prev,
+            [imageUploadModal.category]: finalImageUrl
+          }))
+          alert('Image sauvegardée localement. Veuillez exécuter le script SQL pour activer la sauvegarde permanente.')
+        } else {
+          throw dbError
+        }
+      } else {
+        // Mettre à jour l'état local
+        setCategoryImages(prev => ({
+          ...prev,
+          [imageUploadModal.category]: finalImageUrl
+        }))
+        console.log('✅ Image sauvegardée avec succès:', imageUploadModal.category)
+      }
+
+      // Fermer le modal et réinitialiser
+      setImageUploadModal(null)
+      setImageUrl('')
+      setUploadedFile(null)
+      setPreviewImage(null)
+      setShowResizeTool(false)
+      setImageDimensions({ width: 800, height: 600 })
+    } catch (error) {
+      console.error('Erreur lors de la sauvegarde de l\'image:', error)
+      alert('Erreur lors de la sauvegarde de l\'image. Veuillez réessayer.')
+    }
   }
 
   const handleSaveSupplier = async () => {
@@ -1084,13 +1318,16 @@ useEffect(() => {
             {!selectedCategory ? (
               /* Affichage des cards de catégories */
               <div>
-                <p className="text-gray-600 mb-6">
-                  Sélectionnez une catégorie pour voir les fournisseurs disponibles
-                </p>
+                <div className="flex items-center justify-between mb-6">
+                  <p className="text-gray-600">
+                    Sélectionnez une catégorie pour voir les fournisseurs disponibles
+                  </p>
+                </div>
                 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
                   {supplierCategories.map((category, index) => {
                     const categorySuppliers = getSuppliersByCategory(category)
                     const count = categorySuppliers.length
+                    const categoryImage = categoryImages[category] || getCategoryImage(category)
                     
                     return (
                       <motion.div
@@ -1101,8 +1338,8 @@ useEffect(() => {
                         onClick={() => handleSelectCategory(category)}
                         className="relative rounded-lg border-2 border-gray-200 hover:border-primary shadow-sm hover:shadow-md transition-all cursor-pointer overflow-hidden group h-32 sm:h-40"
                         style={{
-                          backgroundImage: getCategoryImage(category) 
-                            ? `url(${getCategoryImage(category)})` 
+                          backgroundImage: categoryImage 
+                            ? `url(${categoryImage})` 
                             : 'none',
                           backgroundSize: 'cover',
                           backgroundPosition: 'center',
@@ -1113,10 +1350,27 @@ useEffect(() => {
                         <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/40 to-black/20 group-hover:from-black/80 group-hover:via-black/50 group-hover:to-black/30 transition-all"></div>
                         
                         {/* Fallback si pas d'image */}
-                        {!getCategoryImage(category) && (
+                        {!categoryImage && (
                           <div className="absolute inset-0 bg-primary/10 flex items-center justify-center">
                             <FaBuilding className="text-4xl sm:text-5xl text-primary opacity-50" />
                           </div>
+                        )}
+                        
+                        {/* Bouton pour changer l'image (admin seulement) */}
+                        {isAdmin() && (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              setImageUploadModal({ category })
+                              setImageUrl('')
+                              setUploadedFile(null)
+                              setPreviewImage(null)
+                            }}
+                            className="absolute top-2 right-2 z-10 p-2 bg-white/90 hover:bg-white rounded-lg shadow-md opacity-0 group-hover:opacity-100 transition-opacity"
+                            title="Changer l'image de cette catégorie"
+                          >
+                            <FaImage className="text-primary text-sm" />
+                          </button>
                         )}
                         
                         {/* Contenu texte */}
@@ -1594,6 +1848,211 @@ useEffect(() => {
             </motion.div>
           )
         })()}
+      </AnimatePresence>
+
+      {/* Modal pour uploader ou entrer une URL d'image */}
+      <AnimatePresence>
+        {imageUploadModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4 py-6"
+            onClick={() => {
+              setImageUploadModal(null)
+              setImageUrl('')
+              setUploadedFile(null)
+              setPreviewImage(null)
+            }}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              onClick={(e) => e.stopPropagation()}
+              className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden flex flex-col"
+            >
+              <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900">
+                    Changer l'image de la catégorie
+                  </h3>
+                  <p className="text-sm text-gray-500">
+                    {imageUploadModal.category}
+                  </p>
+                </div>
+                <button
+                  onClick={() => {
+                    setImageUploadModal(null)
+                    setImageUrl('')
+                    setUploadedFile(null)
+                    setPreviewImage(null)
+                  }}
+                  className="text-gray-400 hover:text-gray-600 transition-colors"
+                >
+                  <FaTimes />
+                </button>
+              </div>
+
+              <div className="p-6 space-y-6">
+                {/* Option 1: Upload de fichier */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Déposer un fichier image (PNG, JPG, etc.)
+                  </label>
+                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-primary transition-colors">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleFileChange}
+                      className="hidden"
+                      id="image-upload"
+                    />
+                    <label
+                      htmlFor="image-upload"
+                      className="cursor-pointer flex flex-col items-center gap-2"
+                    >
+                      <FaUpload className="text-3xl text-gray-400" />
+                      <span className="text-sm text-gray-600">
+                        Cliquez pour sélectionner ou glissez-déposez un fichier
+                      </span>
+                      {uploadedFile && (
+                        <span className="text-xs text-primary font-medium">
+                          {uploadedFile.name}
+                        </span>
+                      )}
+                    </label>
+                  </div>
+                </div>
+
+                {/* Séparateur */}
+                <div className="relative">
+                  <div className="absolute inset-0 flex items-center">
+                    <div className="w-full border-t border-gray-300"></div>
+                  </div>
+                  <div className="relative flex justify-center text-sm">
+                    <span className="px-2 bg-white text-gray-500">OU</span>
+                  </div>
+                </div>
+
+                {/* Option 2: URL d'image */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Entrer une URL d'image
+                  </label>
+                  <input
+                    type="url"
+                    value={imageUrl}
+                    onChange={(e) => handleUrlChange(e.target.value)}
+                    placeholder="https://example.com/image.png"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                  />
+                </div>
+
+                {/* Prévisualisation */}
+                {previewImage && (
+                  <div>
+                    <div className="flex items-center justify-between mb-2">
+                      <label className="block text-sm font-medium text-gray-700">
+                        Aperçu
+                      </label>
+                      <button
+                        type="button"
+                        onClick={() => setShowResizeTool(!showResizeTool)}
+                        className="px-3 py-1 text-xs bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors flex items-center gap-1"
+                      >
+                        <FaImage className="text-xs" />
+                        {showResizeTool ? 'Masquer' : 'Redimensionner'}
+                      </button>
+                    </div>
+                    
+                    {/* Outil de redimensionnement */}
+                    {showResizeTool && (
+                      <div className="mb-4 p-4 bg-gray-50 rounded-lg border border-gray-200 space-y-3">
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <label className="block text-xs font-medium text-gray-700 mb-1">
+                              Largeur (px)
+                            </label>
+                            <input
+                              type="number"
+                              value={imageDimensions.width}
+                              onChange={(e) => {
+                                const width = parseInt(e.target.value) || 100
+                                setImageDimensions(prev => ({ ...prev, width }))
+                              }}
+                              min="100"
+                              max="2000"
+                              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary focus:border-transparent"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-xs font-medium text-gray-700 mb-1">
+                              Hauteur (px)
+                            </label>
+                            <input
+                              type="number"
+                              value={imageDimensions.height}
+                              onChange={(e) => {
+                                const height = parseInt(e.target.value) || 100
+                                setImageDimensions(prev => ({ ...prev, height }))
+                              }}
+                              min="100"
+                              max="2000"
+                              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary focus:border-transparent"
+                            />
+                          </div>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={handleApplyResize}
+                          className="w-full px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors text-sm font-medium flex items-center justify-center gap-2"
+                        >
+                          <FaCheck />
+                          Appliquer le redimensionnement
+                        </button>
+                      </div>
+                    )}
+                    
+                    <div className="border border-gray-300 rounded-lg overflow-hidden">
+                      <img
+                        src={previewImage}
+                        alt="Preview"
+                        className="w-full h-64 object-contain bg-gray-50"
+                        onError={() => {
+                          setPreviewImage(null)
+                          alert('Impossible de charger l\'image. Vérifiez l\'URL ou le fichier.')
+                        }}
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <div className="px-6 py-4 border-t border-gray-200 flex items-center justify-end gap-3">
+                <button
+                  onClick={() => {
+                    setImageUploadModal(null)
+                    setImageUrl('')
+                    setUploadedFile(null)
+                    setPreviewImage(null)
+                  }}
+                  className="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors"
+                >
+                  Annuler
+                </button>
+                <button
+                  onClick={handleSaveCategoryImage}
+                  disabled={!previewImage}
+                  className="px-4 py-2 rounded-lg bg-primary text-white font-medium hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                >
+                  <FaCheck />
+                  Enregistrer
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
       </AnimatePresence>
     </DashboardLayout>
   )

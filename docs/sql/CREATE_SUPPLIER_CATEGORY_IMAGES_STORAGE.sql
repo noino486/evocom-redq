@@ -1,0 +1,68 @@
+-- ============================================
+-- CONFIGURATION SUPABASE STORAGE
+-- Pour stocker les images de catégories de fournisseurs
+-- ============================================
+-- 
+-- NOTE: Ce script doit être exécuté dans Supabase Dashboard > Storage
+-- ou via l'API Supabase. Il ne peut pas être exécuté directement via SQL.
+--
+-- Pour créer le bucket manuellement:
+-- 1. Allez dans Supabase Dashboard > Storage
+-- 2. Cliquez sur "New bucket"
+-- 3. Nom: supplier-category-images
+-- 4. Public: Oui (pour permettre l'accès public aux images)
+-- 5. File size limit: Aucune limite (ou selon vos besoins)
+-- 6. Allowed MIME types: image/png, image/jpeg, image/jpg, image/webp
+--
+-- OU utilisez l'API Supabase Storage pour créer le bucket programmatiquement.
+
+-- ============================================
+-- POLICIES POUR LE BUCKET (à exécuter après création du bucket)
+-- ============================================
+
+-- Policy: Tous les utilisateurs authentifiés peuvent lire les images
+-- (À exécuter dans Supabase Dashboard > Storage > supplier-category-images > Policies)
+-- 
+-- CREATE POLICY "Public read access for category images"
+-- ON storage.objects FOR SELECT
+-- USING (bucket_id = 'supplier-category-images');
+
+-- Policy: Seuls les admins peuvent uploader/modifier les images
+-- (À exécuter dans Supabase Dashboard > Storage > supplier-category-images > Policies)
+--
+-- CREATE POLICY "Admins can upload category images"
+-- ON storage.objects FOR INSERT
+-- WITH CHECK (
+--   bucket_id = 'supplier-category-images' AND
+--   EXISTS (
+--     SELECT 1 FROM user_profiles
+--     WHERE user_profiles.id = auth.uid()
+--     AND user_profiles.access_level = 4
+--     AND user_profiles.is_active = TRUE
+--   )
+-- );
+--
+-- CREATE POLICY "Admins can update category images"
+-- ON storage.objects FOR UPDATE
+-- USING (
+--   bucket_id = 'supplier-category-images' AND
+--   EXISTS (
+--     SELECT 1 FROM user_profiles
+--     WHERE user_profiles.id = auth.uid()
+--     AND user_profiles.access_level = 4
+--     AND user_profiles.is_active = TRUE
+--   )
+-- );
+--
+-- CREATE POLICY "Admins can delete category images"
+-- ON storage.objects FOR DELETE
+-- USING (
+--   bucket_id = 'supplier-category-images' AND
+--   EXISTS (
+--     SELECT 1 FROM user_profiles
+--     WHERE user_profiles.id = auth.uid()
+--     AND user_profiles.access_level = 4
+--     AND user_profiles.is_active = TRUE
+--   )
+-- );
+

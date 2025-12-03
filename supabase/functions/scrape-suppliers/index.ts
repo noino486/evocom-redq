@@ -13,6 +13,7 @@ interface RequestBody {
   job_id: string
   country: string
   supplier_type: string
+  main_category?: string
 }
 
 // Fonction pour extraire les informations d'un site web
@@ -207,20 +208,77 @@ function isValidSupplierUrl(url: string): boolean {
   }
 }
 
+// Fonction pour construire une requête de recherche optimisée
+function buildSearchQuery(mainCategory: string | undefined, subCategory: string, country: string): string {
+  // Si on a une catégorie principale, l'utiliser en priorité
+  if (mainCategory) {
+    // Construire une requête plus précise avec la catégorie principale
+    const categoryTerms = mainCategory.toLowerCase()
+    
+    // Traductions et termes de recherche optimisés
+    const searchTerms: string[] = []
+    
+    // Mapper les catégories principales vers des termes de recherche optimisés
+    if (categoryTerms.includes('textile pour femme')) {
+      searchTerms.push('women clothing', 'vêtement femme', 'ladies wear', 'women fashion')
+    } else if (categoryTerms.includes('textile pour homme')) {
+      searchTerms.push('men clothing', 'vêtement homme', 'mens wear', 'men fashion')
+    } else if (categoryTerms.includes('textile')) {
+      searchTerms.push('clothing', 'vêtement', 'textile', 'apparel')
+    } else if (categoryTerms.includes('chaussure')) {
+      searchTerms.push('shoes', 'chaussures', 'footwear')
+    } else if (categoryTerms.includes('bijoux')) {
+      searchTerms.push('jewelry', 'bijoux', 'jewellery')
+    } else if (categoryTerms.includes('cosmétique') || categoryTerms.includes('cosmetique')) {
+      searchTerms.push('cosmetics', 'cosmétiques', 'beauty products')
+    } else if (categoryTerms.includes('parfum')) {
+      searchTerms.push('perfume', 'parfum', 'fragrance')
+    } else if (categoryTerms.includes('auto')) {
+      searchTerms.push('automotive', 'auto parts', 'pièces auto')
+    } else if (categoryTerms.includes('transport et logistique')) {
+      searchTerms.push('logistics', 'transport', 'shipping', 'freight')
+    } else {
+      // Utiliser la catégorie principale telle quelle
+      searchTerms.push(mainCategory)
+    }
+    
+    // Ajouter la sous-catégorie seulement si elle apporte de la valeur
+    // Ignorer les sous-catégories trop génériques comme "Magasin", "Boutique", etc.
+    const subCategoryLower = subCategory.toLowerCase()
+    const genericTerms = ['magasin', 'boutique', 'service', 'fournisseur', 'grossiste']
+    const isGeneric = genericTerms.some(term => subCategoryLower.includes(term))
+    
+    if (!isGeneric && subCategory && subCategory.length > 3) {
+      // Utiliser la sous-catégorie mais de manière secondaire
+      searchTerms.push(subCategory)
+    }
+    
+    // Construire la requête finale avec les termes les plus pertinents en premier
+    const primaryTerms = searchTerms.slice(0, 2).join(' ')
+    const query = `${primaryTerms} supplier ${country} manufacturer B2B wholesale`
+    return query
+  }
+  
+  // Fallback : utiliser seulement la sous-catégorie
+  if (subCategory === '3D' || subCategory === 'Impression 3D') {
+    return `3D printing supplier ${country} manufacturer B2B`
+  }
+  
+  return `${subCategory} supplier ${country} manufacturer B2B`
+}
+
 // Fonction pour rechercher des fournisseurs
-async function searchSuppliers(country: string, supplierType: string): Promise<string[]> {
+async function searchSuppliers(country: string, supplierType: string, mainCategory?: string): Promise<string[]> {
   try {
+    const searchQuery = buildSearchQuery(mainCategory, supplierType, country)
+    console.log(`Recherche avec la requête: "${searchQuery}"`)
+    
     // Option 1: Utiliser Google Custom Search API (recommandé)
     const GOOGLE_API_KEY = Deno.env.get('GOOGLE_API_KEY')
     const GOOGLE_SEARCH_ENGINE_ID = Deno.env.get('GOOGLE_SEARCH_ENGINE_ID')
     
     if (GOOGLE_API_KEY && GOOGLE_SEARCH_ENGINE_ID) {
-      // Adapter la requête pour le type 3D
-      const searchTerm = supplierType === '3D' || supplierType === 'Impression 3D' 
-        ? `3D printing supplier ${country} manufacturer B2B`
-        : `${supplierType} supplier ${country} manufacturer B2B`
-      const query = searchTerm
-      const searchUrl = `https://www.googleapis.com/customsearch/v1?key=${GOOGLE_API_KEY}&cx=${GOOGLE_SEARCH_ENGINE_ID}&q=${encodeURIComponent(query)}&num=10`
+      const searchUrl = `https://www.googleapis.com/customsearch/v1?key=${GOOGLE_API_KEY}&cx=${GOOGLE_SEARCH_ENGINE_ID}&q=${encodeURIComponent(searchQuery)}&num=10`
       
       const response = await fetch(searchUrl)
       if (response.ok) {
@@ -234,12 +292,7 @@ async function searchSuppliers(country: string, supplierType: string): Promise<s
     // Option 2: Utiliser ScraperAPI avec Google Search
     const SCRAPER_API_KEY = Deno.env.get('SCRAPER_API_KEY')
     if (SCRAPER_API_KEY) {
-      // Adapter la requête pour le type 3D
-      const searchTerm = supplierType === '3D' || supplierType === 'Impression 3D' 
-        ? `3D printing supplier ${country} manufacturer B2B`
-        : `${supplierType} supplier ${country} manufacturer B2B`
-      const query = searchTerm
-      const searchUrl = `https://api.scraperapi.com/?api_key=${SCRAPER_API_KEY}&url=https://www.google.com/search?q=${encodeURIComponent(query)}&num=10`
+      const searchUrl = `https://api.scraperapi.com/?api_key=${SCRAPER_API_KEY}&url=https://www.google.com/search?q=${encodeURIComponent(searchQuery)}&num=10`
       
       const response = await fetch(searchUrl)
       if (response.ok) {
@@ -270,11 +323,7 @@ async function searchSuppliers(country: string, supplierType: string): Promise<s
     }
     
     // Option 3: Recherche avec DuckDuckGo
-    const searchTerm = supplierType === '3D' || supplierType === 'Impression 3D' 
-      ? `3D printing supplier ${country} manufacturer B2B`
-      : `${supplierType} supplier ${country} manufacturer B2B`
-    const query = searchTerm
-    const duckDuckGoUrl = `https://html.duckduckgo.com/html/?q=${encodeURIComponent(query)}`
+    const duckDuckGoUrl = `https://html.duckduckgo.com/html/?q=${encodeURIComponent(searchQuery)}`
     
     try {
       const response = await fetch(duckDuckGoUrl, {
@@ -348,7 +397,7 @@ serve(async (req) => {
     }
 
     const body: RequestBody = await req.json()
-    const { job_id, country, supplier_type } = body
+    const { job_id, country, supplier_type, main_category } = body
 
     if (!job_id || !country || !supplier_type) {
       throw new Error('Paramètres manquants')
@@ -360,8 +409,8 @@ serve(async (req) => {
       .update({ status: 'running', started_at: new Date().toISOString() })
       .eq('id', job_id)
 
-    // Rechercher les fournisseurs
-    const supplierUrls = await searchSuppliers(country, supplier_type)
+    // Rechercher les fournisseurs avec la catégorie principale
+    const supplierUrls = await searchSuppliers(country, supplier_type, main_category)
     let totalSaved = 0
 
     // Scraper chaque site
@@ -369,66 +418,134 @@ serve(async (req) => {
     
     for (const url of supplierUrls) {
       try {
-        // Normaliser l'URL (enlever www, trailing slash, etc.)
-        const normalizedUrl = url
-          .replace(/^https?:\/\//, '')
-          .replace(/^www\./, '')
-          .replace(/\/$/, '')
-          .toLowerCase()
+        // Fonction de normalisation améliorée
+        const normalizeUrl = (urlToNormalize: string): string => {
+          try {
+            let normalized = urlToNormalize.trim()
+            // Enlever le protocole
+            normalized = normalized.replace(/^https?:\/\//i, '')
+            // Enlever www.
+            normalized = normalized.replace(/^www\./i, '')
+            // Enlever le trailing slash et les chemins
+            normalized = normalized.split('/')[0]
+            // Enlever le port si présent
+            normalized = normalized.split(':')[0]
+            // Enlever les fragments et query strings
+            normalized = normalized.split('#')[0].split('?')[0]
+            // Convertir en minuscules
+            normalized = normalized.toLowerCase()
+            // Enlever les espaces
+            normalized = normalized.trim()
+            return normalized
+          } catch {
+            return urlToNormalize.toLowerCase().trim()
+          }
+        }
+        
+        // Normaliser l'URL
+        const normalizedUrl = normalizeUrl(url)
         
         // Vérifier si déjà vu dans cette session
         if (seenUrls.has(normalizedUrl)) {
+          console.log(`Doublon session détecté: ${url} -> ${normalizedUrl}`)
           continue
         }
         seenUrls.add(normalizedUrl)
         
-        // Vérifier si le fournisseur existe déjà dans la base (par URL normalisée)
-        const { data: existingSuppliers, error: checkError } = await supabase
+        // Vérifier si le fournisseur existe déjà dans la base
+        // D'abord par website_normalized (le plus fiable)
+        const { data: existingByNormalized, error: checkNormalizedError } = await supabase
           .from('suppliers')
-          .select('id, website, name')
-          .or(`website.ilike.%${normalizedUrl}%,website.ilike.%www.${normalizedUrl}%`)
+          .select('id, website, name, website_normalized')
+          .eq('website_normalized', normalizedUrl)
+          .neq('status', 'deleted')
 
-        if (checkError && checkError.code !== 'PGRST116') {
-          console.error('Erreur vérification doublon:', checkError)
+        if (checkNormalizedError && checkNormalizedError.code !== 'PGRST116') {
+          console.error('Erreur vérification doublon (normalized):', checkNormalizedError)
         }
 
-        // Vérifier si un doublon existe (même domaine)
-        let isDuplicate = false
-        if (existingSuppliers && existingSuppliers.length > 0) {
-          isDuplicate = existingSuppliers.some(existing => {
-            if (!existing.website) return false
-            const existingUrl = existing.website
-              .replace(/^https?:\/\//, '')
-              .replace(/^www\./, '')
-              .replace(/\/$/, '')
-              .toLowerCase()
-            
-            // Vérification stricte : même domaine exact
-            if (existingUrl === normalizedUrl) {
-              return true
-            }
-            
-            // Vérification par sous-domaine ou domaine parent
-            const existingParts = existingUrl.split('.')
-            const normalizedParts = normalizedUrl.split('.')
-            
-            // Si les deux ont au moins 2 parties (ex: example.com)
-            if (existingParts.length >= 2 && normalizedParts.length >= 2) {
-              // Comparer les domaines principaux (les 2 dernières parties)
-              const existingDomain = existingParts.slice(-2).join('.')
-              const normalizedDomain = normalizedParts.slice(-2).join('.')
-              if (existingDomain === normalizedDomain) {
-                return true
+        // Si trouvé par website_normalized, c'est un doublon
+        if (existingByNormalized && existingByNormalized.length > 0) {
+          console.log(`Doublon détecté (website_normalized): ${url} -> ${normalizedUrl} (existant: ${existingByNormalized[0].website})`)
+          continue
+        }
+
+        // Vérifier aussi par domaine (les 2 dernières parties) - recherche plus ciblée
+        const urlParts = normalizedUrl.split('.')
+        if (urlParts.length >= 2) {
+          const domain = urlParts.slice(-2).join('.')
+          
+          // Rechercher par website_normalized se terminant par le domaine
+          const { data: existingByDomain, error: checkDomainError } = await supabase
+            .from('suppliers')
+            .select('id, website, name, website_normalized')
+            .or(`website_normalized.ilike.%${domain},website.ilike.%${domain}`)
+            .neq('status', 'deleted')
+            .limit(20) // Limiter pour éviter de charger trop de données
+
+          if (checkDomainError && checkDomainError.code !== 'PGRST116') {
+            console.error('Erreur vérification doublon (domain):', checkDomainError)
+          }
+
+          // Vérifier si un fournisseur avec le même domaine exact existe
+          if (existingByDomain && existingByDomain.length > 0) {
+            const isDuplicate = existingByDomain.some(existing => {
+              if (!existing.website && !existing.website_normalized) return false
+              
+              const existingNormalized = existing.website_normalized || normalizeUrl(existing.website || '')
+              const existingDomain = existingNormalized.split('.').slice(-2).join('.')
+              
+              // Vérifier que c'est exactement le même domaine
+              if (existingDomain === domain) {
+                // Vérifier aussi que ce n'est pas juste un sous-domaine différent
+                // Ex: shop.example.com vs example.com ne sont pas des doublons
+                // Mais example.com vs www.example.com sont des doublons
+                const existingHost = existingNormalized.split('.')[0]
+                const currentHost = normalizedUrl.split('.')[0]
+                
+                // Si les deux ont le même domaine de base, c'est un doublon
+                // Sauf si l'un est un sous-domaine spécifique (shop, blog, etc.)
+                const commonSubdomains = ['www', 'shop', 'store', 'blog', 'mail', 'ftp', 'admin', 'api', 'cdn']
+                if (existingHost === currentHost || 
+                    (commonSubdomains.includes(existingHost) && commonSubdomains.includes(currentHost))) {
+                  return true
+                }
               }
+              
+              return false
+            })
+
+            if (isDuplicate) {
+              console.log(`Doublon détecté (domaine): ${url} -> ${normalizedUrl} (domaine: ${domain})`)
+              continue
             }
-            
-            return false
-          })
+          }
         }
 
-        if (isDuplicate) {
-          console.log(`Doublon détecté et ignoré: ${url}`)
-          continue // Skip si déjà existant
+        // Vérification supplémentaire par website (fallback)
+        const { data: existingByWebsite, error: checkWebsiteError } = await supabase
+          .from('suppliers')
+          .select('id, website, name, website_normalized')
+          .or(`website.ilike.%${normalizedUrl}%,website.ilike.%www.${normalizedUrl}%`)
+          .neq('status', 'deleted')
+
+        if (checkWebsiteError && checkWebsiteError.code !== 'PGRST116') {
+          console.error('Erreur vérification doublon (website):', checkWebsiteError)
+        }
+
+        if (existingByWebsite && existingByWebsite.length > 0) {
+          // Vérifier si c'est vraiment le même domaine
+          const isDuplicate = existingByWebsite.some(existing => {
+            if (!existing.website) return false
+            
+            const existingNormalized = existing.website_normalized || normalizeUrl(existing.website)
+            return existingNormalized === normalizedUrl
+          })
+
+          if (isDuplicate) {
+            console.log(`Doublon détecté (website): ${url} -> ${normalizedUrl}`)
+            continue
+          }
         }
 
         // Scraper les informations
@@ -437,22 +554,53 @@ serve(async (req) => {
         // Extraire le nom du domaine si pas de nom trouvé
         const name = scrapedData.name || url.replace(/^https?:\/\//, '').replace(/\/$/, '')
 
-        // Insérer le fournisseur
+        // Utiliser la même fonction de normalisation pour website_normalized
+        const normalizeUrlForDb = (urlToNormalize: string): string => {
+          try {
+            let normalized = urlToNormalize.trim()
+            normalized = normalized.replace(/^https?:\/\//i, '')
+            normalized = normalized.replace(/^www\./i, '')
+            normalized = normalized.split('/')[0]
+            normalized = normalized.split(':')[0]
+            normalized = normalized.split('#')[0].split('?')[0]
+            normalized = normalized.toLowerCase().trim()
+            return normalized
+          } catch {
+            return urlToNormalize.toLowerCase().trim()
+          }
+        }
+        
+        const normalizedUrlForDb = normalizeUrlForDb(url)
+        
+        // Insérer le fournisseur avec la catégorie principale et website_normalized
         const { error: insertError } = await supabase
           .from('suppliers')
           .insert([{
             name,
             website: url,
+            website_normalized: normalizedUrlForDb,
             phone: scrapedData.phone,
             email: scrapedData.email,
             address: scrapedData.address,
             country,
-            supplier_type,
+            supplier_type: supplier_type,
+            main_category: main_category || null,
             created_by: user.id,
             status: 'pending'
           }])
 
-        if (!insertError) {
+        if (insertError) {
+          // Si erreur de contrainte unique ou de doublon, c'est normal
+          if (insertError.code === '23505' || 
+              insertError.code === 'PGRST116' ||
+              insertError.message?.toLowerCase().includes('duplicate') || 
+              insertError.message?.toLowerCase().includes('unique') ||
+              insertError.message?.toLowerCase().includes('existe déjà')) {
+            console.log(`Doublon détecté (contrainte DB): ${url} -> ${normalizedUrlForDb}`)
+            continue
+          }
+          console.error(`Erreur insertion ${url}:`, insertError)
+        } else {
           totalSaved++
         }
 

@@ -671,8 +671,8 @@ const DashboardScraper = () => {
   const [loading, setLoading] = useState(true)
   const [formData, setFormData] = useState({
     country: 'Chine',
-    main_category: '',
-    sub_category: ''
+    main_categories: [], // Tableau pour plusieurs catégories principales
+    sub_categories: [] // Tableau pour plusieurs sous-catégories
   })
   const [message, setMessage] = useState({ type: '', text: '' })
   const [editingSupplier, setEditingSupplier] = useState(null)
@@ -794,12 +794,12 @@ useEffect(() => {
     try {
       const normalizedUrl = normalizeUrl(website)
       
-      // Vérifier par URL normalisée
+      // Vérifier par URL normalisée et website_normalized
       if (normalizedUrl) {
         const { data: urlMatches, error: urlError } = await supabase
           .from('suppliers')
-          .select('id, name, website')
-          .or(`website.ilike.%${normalizedUrl}%,website.ilike.%www.${normalizedUrl}%`)
+          .select('id, name, website, website_normalized')
+          .or(`website.ilike.%${normalizedUrl}%,website.ilike.%www.${normalizedUrl}%,website_normalized.eq.${normalizedUrl}`)
           .neq('status', 'deleted')
 
         if (urlError && urlError.code !== 'PGRST116') {
@@ -807,17 +807,46 @@ useEffect(() => {
         }
 
         if (urlMatches && urlMatches.length > 0) {
-          // Vérifier si c'est le même fournisseur (exclure l'ID en cours d'édition)
-          const duplicate = urlMatches.find(s => {
-            if (excludeId && s.id === excludeId) return false
-            const existingUrl = normalizeUrl(s.website)
-            return existingUrl === normalizedUrl || 
-                   existingUrl.includes(normalizedUrl) || 
-                   normalizedUrl.includes(existingUrl)
-          })
+          // Filtrer pour exclure l'ID en cours d'édition
+          const filtered = excludeId 
+            ? urlMatches.filter(s => s.id !== excludeId)
+            : urlMatches
           
-          if (duplicate) {
-            return { isDuplicate: true, existing: duplicate }
+          if (filtered.length > 0) {
+            // Vérification plus stricte de l'URL normalisée
+            const duplicate = filtered.find(s => {
+              if (!s.website) return false
+              
+              // Vérifier avec website_normalized si disponible
+              if (s.website_normalized && s.website_normalized === normalizedUrl) {
+                return true
+              }
+              
+              const existingUrl = normalizeUrl(s.website)
+              
+              // Vérification exacte
+              if (existingUrl === normalizedUrl) {
+                return true
+              }
+              
+              // Vérification par domaine (les 2 dernières parties)
+              const existingParts = existingUrl.split('.')
+              const normalizedParts = normalizedUrl.split('.')
+              
+              if (existingParts.length >= 2 && normalizedParts.length >= 2) {
+                const existingDomain = existingParts.slice(-2).join('.')
+                const normalizedDomain = normalizedParts.slice(-2).join('.')
+                if (existingDomain === normalizedDomain) {
+                  return true
+                }
+              }
+              
+              return false
+            })
+            
+            if (duplicate) {
+              return { isDuplicate: true, existing: duplicate }
+            }
           }
         }
       }
@@ -919,65 +948,88 @@ useEffect(() => {
   }
 
   const startScraping = async () => {
-    if (!formData.country || !formData.main_category || !formData.sub_category) {
-      setMessage({ type: 'error', text: 'Veuillez sélectionner un pays, une catégorie principale et une sous-catégorie' })
+    if (!formData.country || formData.main_categories.length === 0 || formData.sub_categories.length === 0) {
+      setMessage({ type: 'error', text: 'Veuillez sélectionner un pays, au moins une catégorie principale et au moins une sous-catégorie' })
       return
     }
 
     try {
       setIsScraping(true)
       
-      // Créer un job de scraping
-      const { data: job, error: jobError } = await supabase
-        .from('scraping_jobs')
-        .insert([{
-          country: formData.country,
-          supplier_type: formData.sub_category,
-          main_category: formData.main_category,
-          status: 'pending',
-          created_by: user?.id
-        }])
-        .select()
-        .single()
-
-      if (jobError) throw jobError
-
-      setCurrentJob(job)
-
-      // Appeler l'edge function
+      // Créer un job de scraping pour chaque combinaison catégorie principale + sous-catégorie
       const { data: { session } } = await supabase.auth.getSession()
+      let firstJob = null
+      let totalJobs = 0
       
-      const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/scrape-suppliers`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${session?.access_token}`,
-          'apikey': import.meta.env.VITE_SUPABASE_ANON_KEY
-        },
-        body: JSON.stringify({
-          job_id: job.id,
-          country: formData.country,
-          supplier_type: formData.sub_category,
-          main_category: formData.main_category
-        })
-      })
+      // Pour chaque catégorie principale sélectionnée
+      for (const mainCategory of formData.main_categories) {
+        // Pour chaque sous-catégorie sélectionnée qui appartient à cette catégorie principale
+        const validSubCategories = formData.sub_categories.filter(subCat => 
+          SUPPLIER_CATEGORIES[mainCategory]?.includes(subCat)
+        )
+        
+        for (const subCategory of validSubCategories) {
+          // Créer un job de scraping pour chaque combinaison
+          const { data: job, error: jobError } = await supabase
+            .from('scraping_jobs')
+            .insert([{
+              country: formData.country,
+              supplier_type: subCategory,
+              main_category: mainCategory,
+              status: 'pending',
+              created_by: user?.id
+            }])
+            .select()
+            .single()
 
-      if (!response.ok) {
-        throw new Error('Erreur lors du démarrage du scraping')
+          if (jobError) {
+            console.error('Erreur création job:', jobError)
+            continue
+          }
+
+          if (!firstJob) {
+            firstJob = job
+            setCurrentJob(job)
+          }
+
+          // Appeler l'edge function pour chaque catégorie
+          const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/scrape-suppliers`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${session?.access_token}`,
+              'apikey': import.meta.env.VITE_SUPABASE_ANON_KEY
+            },
+            body: JSON.stringify({
+              job_id: job.id,
+              country: formData.country,
+              supplier_type: subCategory,
+              main_category: mainCategory
+            })
+          })
+
+          if (!response.ok) {
+            console.error(`Erreur pour ${mainCategory} - ${subCategory}:`, response.statusText)
+            continue
+          }
+
+          // Mettre à jour le job
+          await supabase
+            .from('scraping_jobs')
+            .update({ status: 'running', started_at: new Date().toISOString() })
+            .eq('id', job.id)
+          
+          totalJobs++
+        }
       }
 
-      const result = await response.json()
-      
-      // Mettre à jour le job
-      await supabase
-        .from('scraping_jobs')
-        .update({ status: 'running', started_at: new Date().toISOString() })
-        .eq('id', job.id)
-
-      setCurrentJob({ ...job, status: 'running', started_at: new Date().toISOString() })
-      startPolling(job.id)
-      
-      setMessage({ type: 'success', text: 'Scraping démarré avec succès' })
+      if (firstJob) {
+        setCurrentJob({ ...firstJob, status: 'running', started_at: new Date().toISOString() })
+        startPolling(firstJob.id)
+        setMessage({ type: 'success', text: `Scraping démarré pour ${totalJobs} combinaison(s) catégorie/sous-catégorie` })
+      } else {
+        throw new Error('Aucun job n\'a pu être créé')
+      }
     } catch (error) {
       console.error('Erreur lors du démarrage du scraping:', error)
       setMessage({ type: 'error', text: error.message || 'Erreur lors du démarrage du scraping' })
@@ -1078,11 +1130,15 @@ useEffect(() => {
     }
 
     try {
+      // Normaliser l'URL pour website_normalized
+      const normalizedUrl = normalizeUrl(editForm.website)
+      
       const { error } = await supabase
         .from('suppliers')
         .update({
           name: editForm.name.trim(),
           website: editForm.website.trim() || null,
+          website_normalized: normalizedUrl,
           phone: editForm.phone.trim() || null,
           email: editForm.email.trim() || null,
           address: editForm.address.trim() || null,
@@ -1691,11 +1747,15 @@ useEffect(() => {
                   }
 
                   try {
+                    // Normaliser l'URL pour website_normalized
+                    const normalizedUrl = normalizeUrl(manualSupplierForm.website)
+                    
                     const { error } = await supabase
                       .from('suppliers')
                       .insert({
                         name: manualSupplierForm.name.trim(),
                         website: manualSupplierForm.website.trim() || null,
+                        website_normalized: normalizedUrl,
                         phone: manualSupplierForm.phone.trim() || null,
                         email: manualSupplierForm.email.trim() || null,
                         address: manualSupplierForm.address.trim() || null,
@@ -1782,7 +1842,7 @@ useEffect(() => {
               </label>
               <select
                 value={formData.country}
-                onChange={(e) => setFormData({ ...formData, country: e.target.value, sub_category: '' })}
+                onChange={(e) => setFormData({ ...formData, country: e.target.value, main_categories: [], sub_categories: [] })}
                 disabled={isScraping}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent disabled:bg-gray-100"
               >
@@ -1794,36 +1854,106 @@ useEffect(() => {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Catégorie principale
+                Catégories principales (plusieurs sélections possibles)
               </label>
-              <select
-                value={formData.main_category}
-                onChange={(e) => setFormData({ ...formData, main_category: e.target.value, sub_category: '' })}
-                disabled={isScraping}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent disabled:bg-gray-100"
-              >
-                <option value="">Sélectionner une catégorie</option>
+              <div className="max-h-60 overflow-y-auto border border-gray-300 rounded-lg p-2 space-y-2">
                 {MAIN_CATEGORIES.map(category => (
-                  <option key={category} value={category}>{category}</option>
+                  <label key={category} className="flex items-center gap-2 p-2 hover:bg-gray-50 rounded cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={formData.main_categories.includes(category)}
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          // Ajouter la catégorie principale
+                          const newMainCategories = [...formData.main_categories, category]
+                          // Filtrer les sous-catégories pour ne garder que celles qui appartiennent aux catégories principales sélectionnées
+                          const validSubCategories = formData.sub_categories.filter(subCat => {
+                            return newMainCategories.some(mainCat => 
+                              SUPPLIER_CATEGORIES[mainCat]?.includes(subCat)
+                            )
+                          })
+                          setFormData({ 
+                            ...formData, 
+                            main_categories: newMainCategories,
+                            sub_categories: validSubCategories
+                          })
+                        } else {
+                          // Retirer la catégorie principale
+                          const newMainCategories = formData.main_categories.filter(cat => cat !== category)
+                          // Filtrer les sous-catégories pour ne garder que celles qui appartiennent aux catégories principales restantes
+                          const validSubCategories = formData.sub_categories.filter(subCat => {
+                            return newMainCategories.some(mainCat => 
+                              SUPPLIER_CATEGORIES[mainCat]?.includes(subCat)
+                            )
+                          })
+                          setFormData({ 
+                            ...formData, 
+                            main_categories: newMainCategories,
+                            sub_categories: validSubCategories
+                          })
+                        }
+                      }}
+                      disabled={isScraping}
+                      className="rounded border-gray-300 text-primary focus:ring-primary"
+                    />
+                    <span className="text-sm text-gray-700">{category}</span>
+                  </label>
                 ))}
-              </select>
+              </div>
+              {formData.main_categories.length > 0 && (
+                <p className="text-xs text-gray-500 mt-2">
+                  {formData.main_categories.length} catégorie(s) principale(s) sélectionnée(s)
+                </p>
+              )}
             </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Sous-catégorie
+                Sous-catégories (plusieurs sélections possibles)
               </label>
-              <select
-                value={formData.sub_category}
-                onChange={(e) => setFormData({ ...formData, sub_category: e.target.value })}
-                disabled={isScraping || !formData.main_category}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent disabled:bg-gray-100"
-              >
-                <option value="">Sélectionner une sous-catégorie</option>
-                {formData.main_category && SUPPLIER_CATEGORIES[formData.main_category]?.map(subCategory => (
-                  <option key={subCategory} value={subCategory}>{subCategory}</option>
-                ))}
-              </select>
+              <div className="max-h-96 overflow-y-auto border border-gray-300 rounded-lg p-2 space-y-4">
+                {formData.main_categories.length > 0 ? (
+                  formData.main_categories.map(mainCategory => {
+                    const subCategories = SUPPLIER_CATEGORIES[mainCategory] || []
+                    if (subCategories.length === 0) return null
+                    
+                    return (
+                      <div key={mainCategory} className="space-y-2">
+                        <div className="sticky top-0 bg-gray-100 px-3 py-2 rounded-md -mx-2 -mt-2 mb-2 z-10">
+                          <h4 className="text-sm font-semibold text-gray-800">{mainCategory}</h4>
+                        </div>
+                        <div className="space-y-1 pl-2">
+                          {subCategories.map(subCategory => (
+                            <label key={subCategory} className="flex items-center gap-2 p-2 hover:bg-gray-50 rounded cursor-pointer">
+                              <input
+                                type="checkbox"
+                                checked={formData.sub_categories.includes(subCategory)}
+                                onChange={(e) => {
+                                  if (e.target.checked) {
+                                    setFormData({ ...formData, sub_categories: [...formData.sub_categories, subCategory] })
+                                  } else {
+                                    setFormData({ ...formData, sub_categories: formData.sub_categories.filter(cat => cat !== subCategory) })
+                                  }
+                                }}
+                                disabled={isScraping}
+                                className="rounded border-gray-300 text-primary focus:ring-primary"
+                              />
+                              <span className="text-sm text-gray-700">{subCategory}</span>
+                            </label>
+                          ))}
+                        </div>
+                      </div>
+                    )
+                  })
+                ) : (
+                  <p className="text-sm text-gray-500 p-2">Sélectionnez d'abord au moins une catégorie principale</p>
+                )}
+              </div>
+              {formData.sub_categories.length > 0 && (
+                <p className="text-xs text-gray-500 mt-2">
+                  {formData.sub_categories.length} sous-catégorie(s) sélectionnée(s)
+                </p>
+              )}
             </div>
           </div>
 

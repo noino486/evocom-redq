@@ -26,6 +26,8 @@ import DashboardScraper from './pages/DashboardScraper'
 import DashboardSuppliers from './pages/DashboardSuppliers'
 import DashboardRedirect from './components/DashboardRedirect'
 import DashboardCommunity from './pages/DashboardCommunity'
+import DashboardInfluencerOrganization from './pages/DashboardInfluencerOrganization'
+import DashboardInfluencerMyOrganization from './pages/DashboardInfluencerMyOrganization'
 import PdfViewer from './pages/PdfViewer'
 
 function AppContent() {
@@ -184,6 +186,22 @@ function AppContent() {
                         <PdfViewer />
                       </ProtectedRoute>
                     }
+                  />
+                  <Route 
+                    path="/dashboard/influencer-organization" 
+                    element={
+                      <ProtectedRoute requireAuth={true} minAccessLevel={4}>
+                        <DashboardInfluencerOrganization />
+                      </ProtectedRoute>
+                    } 
+                  />
+                  <Route 
+                    path="/dashboard/my-organization" 
+                    element={
+                      <ProtectedRoute requireAuth={true}>
+                        <DashboardInfluencerMyOrganization />
+                      </ProtectedRoute>
+                    } 
                   />
                   <Route
                     path="/dashboard/pack-global-business/community"
