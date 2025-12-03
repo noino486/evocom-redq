@@ -728,11 +728,36 @@ useEffect(() => {
         .eq('status', 'running')
         .order('created_at', { ascending: false })
         .limit(1)
-        .single()
+        .maybeSingle()
 
       if (error && error.code !== 'PGRST116') throw error
       
       if (data) {
+        // Vérifier si le job n'est pas bloqué (plus de 10 minutes sans mise à jour)
+        const now = new Date()
+        const lastUpdate = data.updated_at ? new Date(data.updated_at) : new Date(data.started_at || data.created_at)
+        const minutesSinceUpdate = (now - lastUpdate) / (1000 * 60)
+        
+        // Si le job n'a pas été mis à jour depuis plus de 10 minutes, le considérer comme bloqué
+        if (minutesSinceUpdate > 10) {
+          console.warn('⚠️ Job bloqué détecté, marquage comme arrêté:', data.id)
+          // Marquer le job comme arrêté
+          await supabase
+            .from('scraping_jobs')
+            .update({ 
+              status: 'stopped',
+              completed_at: new Date().toISOString(),
+              error_message: 'Job bloqué détecté lors du rechargement de la page'
+            })
+            .eq('id', data.id)
+          
+          setMessage({ 
+            type: 'warning', 
+            text: 'Un job de scraping bloqué a été détecté et arrêté automatiquement.' 
+          })
+          return
+        }
+        
         setCurrentJob(data)
         setIsScraping(true)
         // Poller pour mettre à jour le statut
@@ -745,26 +770,72 @@ useEffect(() => {
 
   // Poller le statut du job
   const startPolling = (jobId) => {
+    let lastUpdateTime = null
+    let consecutiveNoUpdateCount = 0
+    
     const interval = setInterval(async () => {
       try {
         const { data, error } = await supabase
           .from('scraping_jobs')
           .select('*')
           .eq('id', jobId)
-          .single()
+          .maybeSingle()
 
         if (error && error.code !== 'PGRST116') throw error
 
-        if (data) {
-          setCurrentJob(data)
+        if (!data) {
+          // Job n'existe plus
+          console.log('Job n\'existe plus, arrêt du polling')
+          setIsScraping(false)
+          setCurrentJob(null)
+          clearInterval(interval)
+          return
+        }
+
+        // Vérifier si le job est bloqué (pas de mise à jour depuis plus de 2 minutes)
+        const now = new Date()
+        const updatedAt = data.updated_at ? new Date(data.updated_at) : new Date(data.started_at || data.created_at)
+        const minutesSinceUpdate = (now - updatedAt) / (1000 * 60)
+        
+        // Si le job est en "running" mais n'a pas été mis à jour depuis plus de 2 minutes, le considérer comme bloqué
+        if (data.status === 'running' && minutesSinceUpdate > 2) {
+          consecutiveNoUpdateCount++
           
-          if (data.status === 'completed' || data.status === 'stopped' || data.status === 'error') {
+          // Si ça fait 3 vérifications consécutives (3 secondes) sans mise à jour, marquer comme arrêté
+          if (consecutiveNoUpdateCount >= 3) {
+            console.warn('⚠️ Job bloqué détecté pendant le polling, marquage comme arrêté:', data.id)
+            await supabase
+              .from('scraping_jobs')
+              .update({ 
+                status: 'stopped',
+                completed_at: new Date().toISOString(),
+                error_message: 'Job bloqué détecté - aucune mise à jour depuis plus de 2 minutes'
+              })
+              .eq('id', jobId)
+            
             setIsScraping(false)
+            setCurrentJob(null)
             clearInterval(interval)
+            setMessage({ 
+              type: 'warning', 
+              text: 'Le scraping a été arrêté automatiquement car il était bloqué.' 
+            })
             loadSuppliers()
-            const statusText = data.status === 'completed' ? 'terminé' : data.status === 'stopped' ? 'arrêté' : 'en erreur'
-            setMessage({ type: 'success', text: `Scraping ${statusText} - ${data.total_saved} fournisseurs trouvés` })
+            return
           }
+        } else {
+          // Réinitialiser le compteur si le job est actif
+          consecutiveNoUpdateCount = 0
+        }
+        
+        setCurrentJob(data)
+        
+        if (data.status === 'completed' || data.status === 'stopped' || data.status === 'error') {
+          setIsScraping(false)
+          clearInterval(interval)
+          loadSuppliers()
+          const statusText = data.status === 'completed' ? 'terminé' : data.status === 'stopped' ? 'arrêté' : 'en erreur'
+          setMessage({ type: 'success', text: `Scraping ${statusText} - ${data.total_saved || 0} fournisseurs trouvés` })
         }
       } catch (error) {
         console.error('Erreur lors du polling:', error)
